@@ -1,0 +1,588 @@
+/* Color palette
+  Navy:  #0B2D72
+  Blue:  #0992C2
+  Cyan:  #0AC4E0
+  Beige: #F6E7BC
+*/
+
+/* ── Page wrapper (beige bg + centering) ─────────────── */
+.page {
+  min-height: 100vh;
+  background: #F6E7BC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  box-sizing: border-box;
+}
+
+/* ── Card container ──────────────────────────────────── */
+.container {
+  display: flex;
+  width: 100%;
+  max-width: 900px;
+  min-height: 600px;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 12px 48px rgba(11, 45, 114, 0.15);
+}
+
+/* ── Left Panel ──────────────────────────────────────── */
+.leftPanel {
+  flex: 0 0 48%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.8rem 2.6rem;
+  box-sizing: border-box;
+}
+
+.formWrapper {
+  width: 100%;
+  max-width: 360px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0B2D72;
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  font-size: 0.88rem;
+  color: #6B7280;
+  line-height: 1.55;
+  margin: 0 0 1.8rem;
+}
+
+/* ── Form Fields ─────────────────────────────────────── */
+.fieldGroup {
+  margin-bottom: 1.1rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0992C2;
+  margin-bottom: 0.45rem;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  padding: 0.72rem 2.6rem 0.72rem 0.95rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #374151;
+  background: white;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.input::placeholder {
+  color: #C4C9D4;
+}
+
+.input:focus {
+  border-color: #0AC4E0;
+}
+
+.inputIconRight {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Remember / Forgot ───────────────────────────────── */
+.rememberRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #6B7280;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 15px;
+  height: 15px;
+  accent-color: #0AC4E0;
+  background-color: white;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid #D1D5DB;
+  border-radius: 4px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.checkbox:checked {
+  background-color: #0AC4E0;
+  border-color: #0AC4E0;
+}
+
+.checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.forgotLink {
+  font-size: 0.85rem;
+  color: #0AC4E0;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgotLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Submit Button ───────────────────────────────────── */
+.submitBtn {
+  width: 100%;
+  padding: 0.88rem;
+  background: #0B2D72;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 1.2rem;
+}
+
+.submitBtn:hover {
+  background: #0a2460;
+}
+
+/* ── Divider ─────────────────────────────────────────── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: #E5E7EB;
+}
+
+.dividerText {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+  white-space: nowrap;
+}
+
+/* ── OAuth Buttons ───────────────────────────────────── */
+.oauthRow {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.4rem;
+}
+
+.oauthBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.68rem 0.5rem;
+  background: white;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.oauthBtn:hover {
+  border-color: #0AC4E0;
+}
+
+
+/* ── Sign-up link ────────────────────────────────────── */
+.signupPrompt {
+  text-align: center;
+  font-size: 0.83rem;
+  color: #9CA3AF;
+  margin: 0;
+}
+
+.signupLink {
+  color: #0992C2;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.signupLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Right Panel ─────────────────────────────────────── */
+.rightPanel {
+  flex: 1;
+  background: linear-gradient(155deg, #0992C2 0%, #0B2D72 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 2rem 2.4rem;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ── Logo ────────────────────────────────────────────── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.logoIcon {
+  width: 34px;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* ── Illustration ────────────────────────────────────── */
+.illustrationArea {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Central robot */
+.centralAvatar {
+  width: 90px;
+  height: 90px;
+  background: #0AC4E0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 16px rgba(10, 196, 224, 0.15), 0 0 0 30px rgba(10, 196, 224, 0.07);
+  z-index: 2;
+  position: relative;
+}
+
+/* Sparkle decorations */
+.sparkle {
+  position: absolute;
+  z-index: 1;
+}
+
+/* ── Job Cards ───────────────────────────────────────── */
+.jobCard {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  min-width: 130px;
+  z-index: 3;
+}
+
+/* Faded cards */
+.cardTopLeft {
+  top: 8%;
+  left: 2%;
+  opacity: 0.55;
+}
+
+.cardBottomRight {
+  bottom: 20%;
+  right: 2%;
+  opacity: 0.5;
+}
+
+/* Active cards */
+.cardTopRight {
+  top: 5%;
+  right: 2%;
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.cardBottomLeft {
+  bottom: 12%;
+  left: 0%;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(180, 100, 255, 0.45);
+  border-left: 2px solid #a855f7;
+}
+
+/* Card internals – faded version */
+.cardAvatarGray {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  margin-bottom: 0.4rem;
+}
+
+.cardLines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 0.35rem;
+}
+
+.cardLineShort {
+  height: 5px;
+  width: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+}
+
+.cardLineLong {
+  height: 5px;
+  width: 80%;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.cardTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* Card internals – active version */
+.cardHeader2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.cardTag {
+  background: rgba(10, 196, 224, 0.3);
+  color: #0AC4E0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+
+.cardCheckSmall {
+  width: 18px;
+  height: 18px;
+  background: rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+  font-size: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.cardLines2 {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.cardLineShort2 {
+  height: 4px;
+  width: 60%;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+}
+
+.cardLineMed {
+  height: 4px;
+  width: 85%;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.cardTitle2 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 0.55rem;
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.cardBtnX {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  font-size: 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardBtnCheck {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardBtnHeart {
+  background: rgba(236, 72, 153, 0.2);
+  color: #f472b6;
+}
+
+/* ── Bottom Text ─────────────────────────────────────── */
+.bottomText {
+  text-align: center;
+  color: white;
+}
+
+.activeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.7rem;
+}
+
+.activeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #0AC4E0;
+  box-shadow: 0 0 6px #0AC4E0;
+  flex-shrink: 0;
+}
+
+.engineTitle {
+  font-size: 1.45rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+}
+
+.engineSubtitle {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+  margin: 0 auto;
+  max-width: 280px;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .container {
+    flex-direction: column;
+    border-radius: 0;
+    min-height: 100vh;
+    box-shadow: none;
+  }
+
+  .leftPanel {
+    flex: none;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .rightPanel {
+    flex: none;
+    min-height: 340px;
+    padding: 1.5rem;
+  }
+
+  .engineTitle {
+    font-size: 1.2rem;
+  }
+
+  .cardTopLeft,
+  .cardBottomRight {
+    display: none;
+  }
+
+  .cardTopRight {
+    top: 10%;
+    right: 4%;
+  }
+
+  .cardBottomLeft {
+    bottom: 20%;
+    left: 4%;
+  }
+}
