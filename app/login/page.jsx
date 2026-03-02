@@ -1,78 +1,108 @@
 'use client';
 import { useState } from 'react';
 import styles from './login.module.css';
+import { useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const loadCredentials = {
+    email: email,
+    password: password
+  };
+
+  const safeNext = (next) => {
+    return next && next.startsWith("/") ? next : "/dashboard";
+  };
+
+  const params = useSearchParams();
+  const next = safeNext(params.get("next"));
+
+  async function handleSubmit(e){
+    e.preventDefault();
+    await signIn("credentials", {
+      loadCredentials,
+      callbackUrl: next
+    });
+  };
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
 
         {/* ── Left Panel ── */}
-        <div className={styles.leftPanel}>
-          <div className={styles.formWrapper}>
+        <div onSubmit={handleSubmit} className={styles.leftPanel}>
+          <div onSubmit={handleSubmit} className={styles.formWrapper}>
             <h1 className={styles.title}>Welcome back</h1>
             <p className={styles.subtitle}>
               Enter your credentials to access your personalized job dashboard.
             </p>
-
-            {/* Email */}
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Email Address</label>
-              <div className={styles.inputWrapper}>
-                <input
-                  type="email"
-                  placeholder="name@company.com"
-                  className={styles.input}
-                />
-                <svg className={styles.inputIconRight} width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M3 8L10.89 13.26C11.2187 13.4793 11.6049 13.5963 12 13.5963C12.3951 13.5963 12.7813 13.4793 13.11 13.26L21 8M5 19H19C19.5304 19 20.0391 18.7893 20.4142 18.4142C20.7893 18.0391 21 17.5304 21 17V7C21 6.46957 20.7893 5.96086 20.4142 5.58579C20.0391 5.21071 19.5304 5 19 5H5C4.46957 5 3.96086 5.21071 3.58579 5.58579C3.21071 5.96086 3 6.46957 3 7V17C3 17.5304 3.21071 18.0391 3.58579 18.4142C3.96086 18.7893 4.46957 19 5 19Z" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+            <form onSubmit={handleSubmit}>
+              {/* Email */}
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Email Address</label>
+                <div className={styles.inputWrapper}>
+                  <input
+                    type="email"
+                    placeholder="name@company.com"
+                    className={styles.input}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <svg className={styles.inputIconRight} width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 8L10.89 13.26C11.2187 13.4793 11.6049 13.5963 12 13.5963C12.3951 13.5963 12.7813 13.4793 13.11 13.26L21 8M5 19H19C19.5304 19 20.0391 18.7893 20.4142 18.4142C20.7893 18.0391 21 17.5304 21 17V7C21 6.46957 20.7893 5.96086 20.4142 5.58579C20.0391 5.21071 19.5304 5 19 5H5C4.46957 5 3.96086 5.21071 3.58579 5.58579C3.21071 5.96086 3 6.46957 3 7V17C3 17.5304 3.21071 18.0391 3.58579 18.4142C3.96086 18.7893 4.46957 19 5 19Z" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               </div>
-            </div>
 
-            {/* Password */}
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Password</label>
-              <div className={styles.inputWrapper}>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  className={styles.input}
-                />
-                <button
-                  type="button"
-                  className={styles.eyeBtn}
-                  onClick={() => setShowPassword(v => !v)}
-                  aria-label="Toggle password visibility"
-                >
-                  {showPassword ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="12" cy="12" r="3" stroke="#9CA3AF" strokeWidth="1.8"/>
-                    </svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                      <line x1="1" y1="1" x2="23" y2="23" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round"/>
-                    </svg>
-                  )}
-                </button>
+              {/* Password */}
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Password</label>
+                <div className={styles.inputWrapper}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    className={styles.input}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className={styles.eyeBtn}
+                    onClick={() => setShowPassword(v => !v)}
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        <circle cx="12" cy="12" r="3" stroke="#9CA3AF" strokeWidth="1.8"/>
+                      </svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        <line x1="1" y1="1" x2="23" y2="23" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Remember + Forgot */}
-            <div className={styles.rememberRow}>
-              <label className={styles.checkboxLabel}>
-                <input type="checkbox" className={styles.checkbox} />
-                <span>Remember me</span>
-              </label>
-              <a href="#" className={styles.forgotLink}>Forgot password?</a>
-            </div>
+              {/* Remember + Forgot */}
+              <div className={styles.rememberRow}>
+                <label className={styles.checkboxLabel}>
+                  <input type="checkbox" className={styles.checkbox} />
+                  <span>Remember me</span>
+                </label>
+                <a href="#" className={styles.forgotLink}>Forgot password?</a>
+              </div>
 
-            {/* Submit */}
-            <button className={styles.submitBtn}>Continue to Dashboard</button>
+              {/* Submit */}
+              <button type='submit' className={styles.submitBtn}>Continue to Dashboard</button>
+            </form>
 
             {/* Divider */}
             <div className={styles.divider}>

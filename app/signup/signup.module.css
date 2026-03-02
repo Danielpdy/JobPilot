@@ -241,7 +241,7 @@
 
 .input {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.6rem;
+  padding: 0.75rem 2.6rem 0.75rem 2.6rem;
   border: 1.5px solid #E5E7EB;
   border-radius: 10px;
   font-size: 0.92rem;
@@ -384,6 +384,259 @@
 
 .loginLink:hover {
   text-decoration: underline;
+}
+
+/* ── Dynamic stepper connectors ─────────────────────── */
+.stepConnectorDone {
+  background: #0AC4E0;
+}
+
+.stepConnectorActive {
+  background: linear-gradient(to right, #0AC4E0 40%, #E5E7EB 40%);
+}
+
+/* ── Select ──────────────────────────────────────────── */
+.selectWrapper {
+  position: relative;
+}
+
+.select {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: #374151;
+  background: white;
+  outline: none;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.select:focus {
+  border-color: #0AC4E0;
+}
+
+.selectChevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* ── Input without left icon ─────────────────────────── */
+.inputNoIcon {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: #374151;
+  background: white;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.inputNoIcon::placeholder {
+  color: #9CA3AF;
+}
+
+.inputNoIcon:focus {
+  border-color: #0AC4E0;
+}
+
+/* ── Pills ───────────────────────────────────────────── */
+.pillGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pill {
+  padding: 0.45rem 1rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #374151;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pill:hover {
+  border-color: #0AC4E0;
+  color: #0992C2;
+}
+
+.pillActive {
+  background: #0B2D72;
+  border-color: #0B2D72;
+  color: white;
+}
+
+.pillActive:hover {
+  background: #0a2460;
+  border-color: #0a2460;
+  color: white;
+}
+
+/* ── Skill Tags ──────────────────────────────────────── */
+.tagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  min-height: 48px;
+  align-items: center;
+  cursor: text;
+  transition: border-color 0.2s;
+}
+
+.tagContainer:focus-within {
+  border-color: #0AC4E0;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #EFF6FF;
+  color: #0B2D72;
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.tagRemove {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #6B7280;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.tagRemove:hover {
+  color: #EF4444;
+}
+
+.tagInput {
+  border: none;
+  outline: none;
+  font-size: 0.88rem;
+  color: #374151;
+  flex: 1;
+  min-width: 80px;
+  background: transparent;
+  padding: 0.15rem;
+}
+
+.tagInput::placeholder {
+  color: #9CA3AF;
+}
+
+/* ── Field hint text ─────────────────────────────────── */
+.fieldHint {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+  margin: -0.3rem 0 0.5rem;
+}
+
+.fieldHintInline {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+/* ── Checkbox ────────────────────────────────────────── */
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #0B2D72;
+  cursor: pointer;
+}
+
+/* ── Name row ────────────────────────────────────────── */
+.nameRow {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.nameRow .inputNoIcon {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Eye button ──────────────────────────────────────── */
+.eyeBtn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #9CA3AF;
+  line-height: 0;
+}
+
+.eyeBtn:hover svg path,
+.eyeBtn:hover svg circle,
+.eyeBtn:hover svg line {
+  stroke: #6B7280;
+}
+
+/* ── Continue button disabled state ─────────────────── */
+.continueBtn:disabled {
+  background: #9CA3AF;
+  cursor: not-allowed;
+}
+
+/* ── Step 4 Success ──────────────────────────────────── */
+.successPanel {
+  text-align: center;
+  padding: 0.5rem 0 1rem;
+}
+
+.successIcon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.successTitle {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.6rem;
+}
+
+.successText {
+  font-size: 0.9rem;
+  color: #6B7280;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
 }
 
 /* ── Responsive ──────────────────────────────────────── */
