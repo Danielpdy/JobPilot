@@ -3,6 +3,8 @@ import { useState } from 'react';
 import styles from './login.module.css';
 import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import LiquidChrome from '@/app/components/ui/LiquidChrome';
+import AnimatedContent from '@/app/components/ui/AnimatedContent';
 
 
 export default function LoginPage() {
@@ -32,6 +34,28 @@ export default function LoginPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.bgContainer}>
+        <LiquidChrome
+          baseColor={[0.55, 0.68, 0.96]}
+          speed={0.15}
+          amplitude={0.28}
+          frequencyX={2.0}
+          frequencyY={1.5}
+          interactive={true}
+        />
+      </div>
+      <AnimatedContent
+        distance={100}
+        direction="horizontal"
+        reverse
+        duration={0.8}
+        ease="power3.out"
+        initialOpacity={0}
+        animateOpacity
+        scale={1}
+        threshold={0.1}
+        delay={0}
+      >
       <div className={styles.container}>
 
         {/* ── Left Panel ── */}
@@ -249,6 +273,7 @@ export default function LoginPage() {
         </div>
 
       </div>
+      </AnimatedContent>
     </div>
   );
 }

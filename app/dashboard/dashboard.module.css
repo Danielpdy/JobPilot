@@ -1,0 +1,121 @@
+/* ── Layout ────────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  background: #EBF0FA;
+  display: flex;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Sidebar ───────────────────────────────────────────── */
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 2px 0 24px rgba(11, 45, 114, 0.06);
+  flex-shrink: 0;
+}
+
+.sidebarLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  text-decoration: none;
+}
+
+.logoIcon {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, #0992C2, #0B2D72);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0B2D72;
+  letter-spacing: -0.02em;
+}
+
+.sidebarSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sectionLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(11, 45, 114, 0.35);
+  text-transform: uppercase;
+  padding: 0 10px;
+  margin-bottom: 4px;
+}
+
+.sidebarBottom {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(11, 45, 114, 0.08);
+}
+
+/* ── Main Content ──────────────────────────────────────── */
+.main {
+  flex: 1;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  overflow-y: auto;
+}
+
+/* ── Top Bar ───────────────────────────────────────────── */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pageTitle {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0B2D72;
+  letter-spacing: -0.02em;
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0992C2, #0B2D72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+/* ── Horizontal Tab Bar (demo) ─────────────────────────── */
+.tabBarWrapper {
+  display: flex;
+  align-items: center;
+}

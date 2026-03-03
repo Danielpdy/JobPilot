@@ -1,0 +1,103 @@
+/* ── Container ─────────────────────────────────────────── */
+.nav {
+  position: relative;
+  display: flex;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  box-shadow:
+    0 4px 24px rgba(11, 45, 114, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.vertical {
+  flex-direction: column;
+  gap: 2px;
+  width: 220px;
+}
+
+.horizontal {
+  flex-direction: row;
+  gap: 2px;
+}
+
+/* ── Liquid Glass Bubble ───────────────────────────────── */
+.bubble {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 2px 12px rgba(11, 45, 114, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 -1px 0 rgba(11, 45, 114, 0.06) inset;
+  pointer-events: none;
+  z-index: 0;
+  /* Initial size will be set by JS */
+  width: 0;
+  height: 0;
+}
+
+/* ── Nav Buttons ───────────────────────────────────────── */
+.navBtn {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 14px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(11, 45, 114, 0.55);
+  transition: color 0.2s;
+  white-space: nowrap;
+  width: 100%;
+  text-align: left;
+}
+
+.navBtn:hover {
+  color: #0B2D72;
+}
+
+.navBtn.active {
+  color: #0B2D72;
+  font-weight: 600;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.label {
+  flex: 1;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #0AC4E0;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 50px;
+}

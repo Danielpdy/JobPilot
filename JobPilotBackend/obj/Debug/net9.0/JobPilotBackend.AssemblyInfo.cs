@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("efb905c0-38a9-4972-a6c3-bc888ff61fa2")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("JobPilotBackend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9af28fe1edbf5e4113922cabbbc695d958c502ff")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f5249ecb87aea9586abcd6521887b0da1c271b49")]
 [assembly: System.Reflection.AssemblyProductAttribute("JobPilotBackend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("JobPilotBackend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
