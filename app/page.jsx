@@ -26,9 +26,9 @@ export default function HomePage() {
           {/* Logo */}
           <a href="/" className={styles.navLogo}>
             <img
-              src="/icons/JobPilot (1).png"
+              src="/icons/JobPilot (2).png"
               alt="JobPilot"
-              style={{ height: '160px', width: 'auto', mixBlendMode: 'multiply' }}
+              style={{ height: '120px', width: 'auto', mixBlendMode: 'multiply' }}
             />
           </a>
 
