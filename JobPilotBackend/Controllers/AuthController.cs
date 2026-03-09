@@ -1,4 +1,5 @@
 //using Microsoft.AspNetCore.Components;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<TokenResponseDto>> Login(LoginDto request)
     {
-        var token = _authService.LoginAsync(request);
+        var token = await _authService.LoginAsync(request);
 
         if (token is null)
         {
@@ -47,10 +48,32 @@ public class AuthController : ControllerBase
         });
     }
 
+    [HttpPost("oauth")]
+    public async Task<ActionResult<TokenResponseDto>> Oauth(OauthDto request)
+    {
+        try{
+            var token = await _authService.OauthAsync(request);
+
+            if (token is null)
+            {
+                return BadRequest("OAuth authentication failed");
+            }
+            return Ok(new
+            {
+                message = "OAuth login succesful",
+                token
+            });
+        }
+        catch (InvalidJwtException)
+        {
+            return Unauthorized("Invalid Google token");
+        }
+    }
+
     [HttpPost("refresh")]
     public async Task<ActionResult<TokenResponseDto>> GetRefreshToken(RefreshTokenRequestDto request)
     {
-        var token = _authService.RefreshTokenAsync(request);
+        var token = await _authService.RefreshTokenAsync(request);
 
         if (token is null)
         {

@@ -3,8 +3,8 @@ import { useState } from 'react';
 import styles from './login.module.css';
 import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import LiquidChrome from '@/app/components/ui/LiquidChrome';
-import AnimatedContent from '@/app/components/ui/AnimatedContent';
+import LiquidChrome from '@/app/components/ui/LiquidChrome/LiquidChrome';
+import AnimatedContent from '@/app/components/ui/AnimatedContent/AnimatedContent';
 
 
 export default function LoginPage() {

@@ -7,10 +7,10 @@ export const LoginCredentials = (credentials) => {
     });
 };
 
-export const LoginProvider = ({ provider, idToken, accessToken }) => {
-    return apiRequest("/auth/login", {
+export const LoginProvider = (provider) => {
+    return apiRequest("/auth/oauth", {
         method: "POST",
-        body: JSON.stringify(credentials)
+        body: JSON.stringify(provider)
     })
 }
 

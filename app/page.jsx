@@ -1,10 +1,17 @@
 'use client';
+import { useState } from 'react';
 import styles from './home.module.css';
-import LiquidChrome from '@/app/components/ui/LiquidChrome';
-import GlassNavIndicator from '@/app/components/ui/GlassNavIndicator';
-import AnimatedContent from '@/app/components/ui/AnimatedContent';
+import LiquidChrome from '@/app/components/ui/LiquidChrome/LiquidChrome';
+import GlassNavIndicator from '@/app/components/ui/GlassNavIndicator/GlassNavIndicator';
+import TopAnimatedContent from '@/app/components/ui/TopAnimatedContent/TopAnimatedContent';
+import LogoLoop from '@/app/components/ui/LogoLoop/LogoLoop';
+import Link from 'next/link';
+import { placeholderLogos } from './components/ui/LogoLoop/PlaceholderLogos';
+
 
 export default function HomePage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className={styles.page}>
 
@@ -28,48 +35,41 @@ export default function HomePage() {
             <img
               src="/icons/JobPilot (2).png"
               alt="JobPilot"
-              style={{ height: '120px', width: 'auto', mixBlendMode: 'multiply' }}
+              className={styles.navLogoImg}
             />
           </a>
 
-          {/* Links — sliding GlassSurface pill follows active/hovered item */}
-          <GlassNavIndicator
-            pillHeight={64}
-            defaultIndex={3}
-            items={[
-              { label: 'Features',     href: '#features' },
-              { label: 'How It Works', href: '#how-it-works' },
-              { label: 'Pricing',      href: '#pricing' },
-              { label: 'Blog',         href: '#blog' },
-            ]}
-          />
-
-          {/* Actions */}
+          {/* Desktop actions */}
           <div className={styles.navActions}>
             <a href="/login" className={styles.navSignIn}>Sign In</a>
             <a href="/signup" className={styles.navGetStarted}>Get Started</a>
           </div>
+
+          {/* Hamburger button — mobile only */}
+          <button
+            className={styles.hamburger}
+            onClick={() => setMenuOpen(o => !o)}
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+          >
+            <span className={`${styles.hamburgerLine} ${menuOpen ? styles.hamburgerLine1Open : ''}`} />
+            <span className={`${styles.hamburgerLine} ${menuOpen ? styles.hamburgerLine2Open : ''}`} />
+            <span className={`${styles.hamburgerLine} ${menuOpen ? styles.hamburgerLine3Open : ''}`} />
+          </button>
         </div>
       </nav>
 
+      {/* ── Mobile dropdown ── */}
+      {menuOpen && (
+        <div className={styles.mobileDropdown}>
+          <a href="/login" className={styles.mobileMenuLink} onClick={() => setMenuOpen(false)}>Sign In</a>
+          <a href="/signup" className={styles.mobileMenuGetStarted} onClick={() => setMenuOpen(false)}>Get Started</a>
+        </div>
+      )}
+
       {/* ── Hero ── */}
       <section className={styles.hero}>
-        <AnimatedContent
-          direction="vertical"
-          distance={40}
-          duration={0.7}
-          ease="power3.out"
-          initialOpacity={0}
-          animateOpacity
-          delay={0.1}
-        >
-          <div className={styles.badge}>
-            <span className={styles.badgeStar}>✦</span>
-            AI-Powered Job Matching
-          </div>
-        </AnimatedContent>
-
-        <AnimatedContent
+        <TopAnimatedContent
           direction="vertical"
           distance={50}
           duration={0.8}
@@ -82,9 +82,9 @@ export default function HomePage() {
             Find Your Dream Job.
             <span className={styles.headlineAccent}>Powered by AI.</span>
           </h1>
-        </AnimatedContent>
+        </TopAnimatedContent>
 
-        <AnimatedContent
+        <TopAnimatedContent
           direction="vertical"
           distance={40}
           duration={0.8}
@@ -98,9 +98,9 @@ export default function HomePage() {
             to your skills, experience, and ambitions — so you spend less time
             searching and more time landing.
           </p>
-        </AnimatedContent>
+        </TopAnimatedContent>
 
-        <AnimatedContent
+        <TopAnimatedContent
           direction="vertical"
           distance={30}
           duration={0.7}
@@ -110,10 +110,34 @@ export default function HomePage() {
           delay={0.5}
         >
           <div className={styles.ctaRow}>
-            <a href="/signup" className={styles.ctaPrimary}>Get Started Free</a>
-            <a href="#how-it-works" className={styles.ctaSecondary}>See How It Works</a>
+            <Link href="/dashboard" className={styles.ctaPrimary}>Go to Dashboard</Link>
+            <Link href="#how-it-works" className={styles.ctaSecondary}>See How It Works</Link>
           </div>
-        </AnimatedContent>
+        </TopAnimatedContent>
+
+        <TopAnimatedContent
+          direction="vertical"
+          distance={20}
+          duration={0.7}
+          ease="power3.out"
+          initialOpacity={0}
+          animateOpacity
+          delay={0.65}
+        >
+          <p className={styles.logoLoopLabel}>Get hired by top companies worldwide</p>
+          <div className={styles.logoLoopWrapper}>
+            <LogoLoop
+              logos={placeholderLogos}
+              speed={25}
+              direction="left"
+              logoHeight={36}
+              gap={52}
+              pauseOnHover
+              scaleOnHover
+              ariaLabel="Technologies"
+            />
+          </div>
+        </TopAnimatedContent>
       </section>
 
     </div>

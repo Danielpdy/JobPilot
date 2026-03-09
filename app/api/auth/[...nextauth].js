@@ -1,7 +1,9 @@
 import { LoginCredentials, LoginProvider } from "@/app/Services/UserService";
 import NextAuth from "next-auth"
-import { refresh } from "next/cache";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"
+import CredentialsProvider from "next-auth/providers/*";
+import { RefreshToken } from "@/app/Services/UserService";
+import GitHubProvider from "next-auth/providers/github";
 
 export const authOptions = {
     session: {
@@ -10,7 +12,7 @@ export const authOptions = {
     secret: process.env.AUTH_SECRET,
 
     providers: [
-        CredentialProviders({
+        CredentialsProvider({
             name: "Credentials",
             credentials: {
                 email: { label: "Email", type: "email" },
@@ -47,6 +49,11 @@ export const authOptions = {
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }),
+
+        GitHubProvider({
+            clientId: process.env.GITHUB_CLIENT_ID,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET,
         })
     ],
 
@@ -59,16 +66,16 @@ export const authOptions = {
             };
             token.accessToken = user.accessToken,
             token.refreshToken = user.refreshToken,
-            token.accessTokenExpirestAt = user.accessTokenExpiresAt,
+            token.accessTokenExpiresAt = user.accessTokenExpiresAt,
             token.error = undefined;
             return token;
         }
 
         if (account && account.provider !== "credentials"){
             const data = await LoginProvider({
-                provider: account.provider,
                 idToken: account.id_token,
                 accessToken: account.access_token,
+                provider: account.provider,
             });
 
             if (!data?.accessToken || !data?.user) {

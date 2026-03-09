@@ -1,7 +1,7 @@
 'use client';
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useRef, useId } from 'react';
-import './GlassSurface.css';
+import styles from './GlassSurface.module.css';
 
 const GlassSurface = ({
   children,
@@ -171,10 +171,10 @@ const GlassSurface = ({
   return (
     <div
       ref={containerRef}
-      className={`glass-surface ${svgSupported ? 'glass-surface--svg' : 'glass-surface--fallback'} ${className}`}
+      className={`${styles.glassSurface} ${svgSupported ? styles.svg : styles.fallback} ${className}`}
       style={containerStyle}
     >
-      <svg className="glass-surface__filter" xmlns="http://www.w3.org/2000/svg">
+      <svg className={styles.filter} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id={filterId} colorInterpolationFilters="sRGB" x="0%" y="0%" width="100%" height="100%">
             <feImage ref={feImageRef} x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map" />
@@ -225,7 +225,7 @@ const GlassSurface = ({
         </defs>
       </svg>
 
-      <div className="glass-surface__content">{children}</div>
+      <div className={styles.content}>{children}</div>
     </div>
   );
 };

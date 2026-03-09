@@ -1,7 +1,7 @@
 'use client';
 import { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
-import GlassSurface from './GlassSurface';
+import GlassSurface from '../GlassSurface/GlassSurface';
 
 export default function GlassNavIndicator({ items, defaultIndex = 0, pillHeight = 40 }) {
   const [active, setActive] = useState(defaultIndex);

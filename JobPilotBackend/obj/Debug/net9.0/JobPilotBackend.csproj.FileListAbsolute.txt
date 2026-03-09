@@ -136,3 +136,9 @@
 /Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
 /Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.dll
 /Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/bin/Debug/net9.0/Google.Apis.dll
+/Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/bin/Debug/net9.0/Google.Apis.Auth.dll
+/Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/bin/Debug/net9.0/Google.Apis.Core.dll
+/Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/bin/Debug/net9.0/Newtonsoft.Json.dll
+/Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/bin/Debug/net9.0/System.Management.dll
+/Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/bin/Debug/net9.0/runtimes/win/lib/net7.0/System.Management.dll

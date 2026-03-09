@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import styles from './dashboard.module.css';
-import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav';
+import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
 
 /* ── Icons ────────────────────────────────────────────── */
 const Icon = ({ d }) => (
