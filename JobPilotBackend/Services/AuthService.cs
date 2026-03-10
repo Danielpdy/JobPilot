@@ -31,7 +31,8 @@ public class AuthService : IAuthService
 
         var tokenResponse = new TokenResponseDto(
             AccessToken: _jwtService.CreateToken(user),
-            RefreshToken: await _jwtService.SaveRefreshToken(user)
+            RefreshToken: await _jwtService.SaveRefreshToken(user),
+            IsOnboarded: user.IsOnboarded
         );
         
         return tokenResponse;
@@ -92,7 +93,8 @@ public class AuthService : IAuthService
 
         return new TokenResponseDto(
             AccessToken: _jwtService.CreateToken(user),
-            RefreshToken: await _jwtService.SaveRefreshToken(user)
+            RefreshToken: await _jwtService.SaveRefreshToken(user),
+            IsOnboarded: user.IsOnboarded
         );
     }
 
@@ -104,7 +106,8 @@ public class AuthService : IAuthService
 
         var tokenResponse = new TokenResponseDto(
             AccessToken: _jwtService.CreateToken(user),
-            RefreshToken: await _jwtService.SaveRefreshToken(user)
+            RefreshToken: await _jwtService.SaveRefreshToken(user),
+            IsOnboarded: user.IsOnboarded
         );
 
         return tokenResponse;
@@ -125,7 +128,8 @@ public class AuthService : IAuthService
             FirstName = request.FirstName,
             LastName = request.LastName,
             Email = request.Email,
-            PasswordHashed = PasswordHashed
+            PasswordHashed = PasswordHashed,
+            IsOnboarded = false
         };
 
         _context.Users.Add(user);
