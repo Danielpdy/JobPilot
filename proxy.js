@@ -1,23 +1,27 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
-export function proxy(req){
-    const token = getToken({ 
+export async function proxy(req){
+    const token = await getToken({ 
         req, 
         secret: process.env.AUTH_SECRET,
     });
 
-     const pathname = req.nextUrl;
+     const pathname = req.nextUrl.pathname;
 
     if(!token){
         const loginUrl = new URL("/login", req.url);
         loginUrl.searchParams.set("next", `${pathname}`);
         return NextResponse.redirect(loginUrl);
     }
-    
+
+    if (token.IsOnboarded === false){
+        const onboardUrl = new URL("onboard", req.url);
+        return NextResponse.redirect(onboardUrl);
+    }    
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/dashboard", "/profile"],
+    matcher: ["/dashboard", "/profile", "/onboard"],
 };

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JobPilotBackend.Migrations
 {
     [DbContext(typeof(JobPilotDbContext))]
-    partial class JobPilotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260310175909_UserProfileTable")]
+    partial class UserProfileTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,51 +59,6 @@ namespace JobPilotBackend.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("UserProfile", b =>
-                {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
-
-                    b.Property<string>("ExperienceLevel")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsPremium")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("JobTiTle")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PreferredLocation")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("RefreshesResetsAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("RefreshesUsedToday")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SalaryRange")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Skills")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("WorkType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("UserProfiles");
                 });
 #pragma warning restore 612, 618
         }

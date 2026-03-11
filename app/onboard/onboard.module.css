@@ -1,0 +1,346 @@
+/* Color palette
+  Navy:  #0B2D72
+  Blue:  #0992C2
+  Cyan:  #0AC4E0
+  Beige: #F6E7BC
+*/
+
+/* ── Page ────────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  background: #F9FAFB;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Navbar ──────────────────────────────────────────── */
+.navbar {
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(11, 45, 114, 0.08);
+  padding: 0 2rem;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navLogo {
+  height: 80px;
+  width: auto;
+  mix-blend-mode: multiply;
+}
+
+/* ── Container ───────────────────────────────────────── */
+.container {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2.4rem 2.8rem;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 4px 40px rgba(11, 45, 114, 0.10);
+  border: 1px solid rgba(11, 45, 114, 0.08);
+  margin-bottom: 3rem;
+}
+
+/* ── Step Indicator ──────────────────────────────────── */
+.stepIndicator {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 540px;
+  padding: 2rem 0 1.4rem;
+}
+
+.stepItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.stepCircle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #D1D5DB;
+  background: white;
+  color: #9CA3AF;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
+  z-index: 1;
+}
+
+.stepActive {
+  background: #0AC4E0;
+  border-color: #0AC4E0;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(10, 196, 224, 0.18);
+}
+
+.stepDone {
+  background: #0B2D72;
+  border-color: #0B2D72;
+  color: white;
+}
+
+.connector {
+  flex: 1;
+  height: 2px;
+  background: #E5E7EB;
+  transition: background 0.3s;
+  align-self: flex-start;
+  margin-top: 17px;
+}
+
+.connectorDone {
+  background: #0B2D72;
+}
+
+.stepLabel {
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #9CA3AF;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stepLabelActive {
+  color: #0AC4E0;
+  font-weight: 700;
+}
+
+.stepLabelDone {
+  color: #0B2D72;
+  font-weight: 600;
+}
+
+/* ── Step Content ────────────────────────────────────── */
+.stepContent {
+  margin-bottom: 1.6rem;
+}
+
+.cardTitle {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.3rem;
+}
+
+.cardSubtitle {
+  font-size: 0.84rem;
+  color: #9CA3AF;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+/* ── Form Elements ───────────────────────────────────── */
+.fieldGroup {
+  margin-bottom: 1.1rem;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.45rem;
+}
+
+.fieldHint {
+  font-size: 0.76rem;
+  color: #9CA3AF;
+  margin: 0.4rem 0 0;
+}
+
+.fieldHintInline {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+.inputNoIcon {
+  width: 100%;
+  padding: 0.72rem 0.9rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  color: #374151;
+  background: white;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.inputNoIcon::placeholder {
+  color: #9CA3AF;
+}
+
+.inputNoIcon:focus {
+  border-color: #0AC4E0;
+}
+
+/* ── Pills ───────────────────────────────────────────── */
+.pillGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pill {
+  padding: 0.48rem 1rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 20px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #374151;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pill:hover {
+  border-color: #0AC4E0;
+  color: #0992C2;
+}
+
+.pillActive {
+  background: #0B2D72;
+  border-color: #0B2D72;
+  color: white;
+}
+
+.pillActive:hover {
+  background: #0a2460;
+  border-color: #0a2460;
+  color: white;
+}
+
+/* ── Tag Input ───────────────────────────────────────── */
+.tagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.55rem 0.7rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  min-height: 52px;
+  align-items: center;
+  cursor: text;
+  transition: border-color 0.2s;
+}
+
+.tagContainer:focus-within {
+  border-color: #0AC4E0;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(10, 196, 224, 0.12);
+  color: #0B2D72;
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.tagRemove {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #6B7280;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.tagRemove:hover {
+  color: #EF4444;
+}
+
+.tagInput {
+  border: none;
+  outline: none;
+  font-size: 0.86rem;
+  color: #374151;
+  flex: 1;
+  min-width: 100px;
+  background: transparent;
+  padding: 0.15rem;
+}
+
+.tagInput::placeholder {
+  color: #9CA3AF;
+}
+
+/* ── Navigation Row ──────────────────────────────────── */
+.navRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid #F3F4F6;
+}
+
+.continueBtn {
+  padding: 0.78rem 1.8rem;
+  background: #0B2D72;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+
+.continueBtn:hover {
+  background: #0a2460;
+}
+
+.continueBtn:disabled {
+  background: #D1D5DB;
+  cursor: not-allowed;
+}
+
+.backBtn {
+  padding: 0.78rem 1.2rem;
+  background: transparent;
+  color: #6B7280;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.backBtn:hover {
+  border-color: #0B2D72;
+  color: #0B2D72;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .container {
+    padding: 1.6rem 1.4rem;
+    border-radius: 16px;
+  }
+
+  .cardTitle {
+    font-size: 1.15rem;
+  }
+}

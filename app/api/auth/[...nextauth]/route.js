@@ -1,15 +1,19 @@
 import { LoginCredentials, LoginProvider } from "@/app/Services/UserService";
-import NextAuth from "next-auth"
+import NextAuth from "next-auth";
+
+console.log("API_BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
 import { jwtDecode } from "jwt-decode"
-import CredentialsProvider from "next-auth/providers/*";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { RefreshToken } from "@/app/Services/UserService";
+import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 
 export const authOptions = {
+
     session: {
         strategy: "jwt"
     },
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
 
     providers: [
         CredentialsProvider({
@@ -41,7 +45,8 @@ export const authOptions = {
                     name: user.name,
                     accessToken: data.accessToken,
                     refreshToken: data.refreshToken,
-                    accessTokenExpiresAt: user.expiracy
+                    accessTokenExpiresAt: user.expiracy,
+                    IsOnboarded: data.IsOnboarded
                 };
             },
         }),
@@ -67,6 +72,7 @@ export const authOptions = {
             token.accessToken = user.accessToken,
             token.refreshToken = user.refreshToken,
             token.accessTokenExpiresAt = user.accessTokenExpiresAt,
+            token.IsOnboarded = user.IsOnboarded,
             token.error = undefined;
             return token;
         }
@@ -77,19 +83,32 @@ export const authOptions = {
                 accessToken: account.access_token,
                 provider: account.provider,
             });
+            
+            console.log("Provider reponse:", data);
 
-            if (!data?.accessToken || !data?.user) {
+            if (!data?.accessToken) {
+                console.log("OAuth backend exchange failed"); 
                 token.error = "OAuth backend exchange failed"
                 return token;
             }
 
+            const decoded = jwtDecode(data.accessToken);
+
+                const user = {
+                    id: decoded.sub,
+                    name: decoded.name,
+                    email: decoded.email,
+                    expiracy: decoded.exp
+                };
+
             token.user = {
-                email: data.user.email,
-                name: data.user.name,
+                email: user.email,
+                name: user.name,
             };
             token.accessToken = data.accessToken;
             token.refreshToken = data.refreshToken;
-            token.accessTokenExpiresAt = data.accessTokenExpiresAt;
+            token.accessTokenExpiresAt = user.expiracy;
+            token.IsOnboarded = data.IsOnboarded;
             token.error = undefined;
             return token;
         }
@@ -132,4 +151,5 @@ export const authOptions = {
     }
 }
 
-export default NextAuth(authOptions);
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
