@@ -7,7 +7,7 @@ public class UserProfile
     public int UserId { get; set; }
     public string JobTiTle { get; set; } = string.Empty;
     public string ExperienceLevel { get; set; } = string.Empty;
-    public string Skills { get; set; } = string.Empty;
+    public List<string> Skills { get; set; } = string.Empty;
     public string WorkType { get; set; } = string.Empty;
     public string SalaryRange { get; set; } = string.Empty;
     public string? PreferredLocation { get; set; }

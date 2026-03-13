@@ -3394,11 +3394,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/JobPilotBackend.csproj",
+      "projectUniqueName": "/Users/danielpinzon/JobPilot/JobPilotBackend/JobPilotBackend.csproj",
       "projectName": "JobPilotBackend",
-      "projectPath": "/Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/JobPilotBackend.csproj",
+      "projectPath": "/Users/danielpinzon/JobPilot/JobPilotBackend/JobPilotBackend.csproj",
       "packagesPath": "/Users/danielpinzon/.nuget/packages/",
-      "outputPath": "/Users/danielpinzon/Downloads/jobpilot/JobPilotBackend/obj/",
+      "outputPath": "/Users/danielpinzon/JobPilot/JobPilotBackend/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/danielpinzon/.nuget/NuGet/NuGet.Config"
@@ -3481,7 +3481,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.308/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.312/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

@@ -4,10 +4,11 @@ import { NextResponse } from "next/server";
 export async function proxy(req){
     const token = await getToken({ 
         req, 
-        secret: process.env.AUTH_SECRET,
+        secret: process.env.NEXTAUTH_SECRET,
     });
 
      const pathname = req.nextUrl.pathname;
+
 
     if(!token){
         const loginUrl = new URL("/login", req.url);
@@ -15,10 +16,10 @@ export async function proxy(req){
         return NextResponse.redirect(loginUrl);
     }
 
-    if (token.IsOnboarded === false){
-        const onboardUrl = new URL("onboard", req.url);
+    if (token.IsOnboarded === false && pathname !== "/onboard"){
+        const onboardUrl = new URL("/onboard", req.url);
         return NextResponse.redirect(onboardUrl);
-    }    
+    }
     return NextResponse.next();
 }
 

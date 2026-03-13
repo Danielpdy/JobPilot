@@ -12,11 +12,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const loadCredentials = {
-    email: email,
-    password: password
-  };
-
   const safeNext = (next) => {
     return next && next.startsWith("/") ? next : "/dashboard";
   };
@@ -27,7 +22,8 @@ export default function LoginPage() {
   async function handleSubmit(e){
     e.preventDefault();
     await signIn("credentials", {
-      loadCredentials,
+      email,
+      password,
       callbackUrl: next
     });
   };

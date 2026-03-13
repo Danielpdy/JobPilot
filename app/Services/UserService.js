@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/httpClient";
+import { headers } from "next/headers";
 
 export const LoginCredentials = (credentials) => {
     return apiRequest("/auth/login", {
@@ -25,5 +26,15 @@ export const Register = (userData) => {
     return apiRequest("/auth/register", {
         method: "POST",
         body: JSON.stringify(userData)
+    });
+};
+
+export const RegisterProfile = (userInformation, accessToken) => {
+    return apiRequest("/user/registerprofile", {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        },
+        method: "POST",
+        body: JSON.stringify(userInformation)
     });
 };
