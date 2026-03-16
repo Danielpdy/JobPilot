@@ -1,7 +1,11 @@
+using System.Linq.Expressions;
+using System.Net.Mail;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Reflection.Metadata;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -14,10 +18,10 @@ public class UserController : ControllerBase
         _context = context;
     }
 
-    [HttpPost("registerProfile")]
-    public async Task<ActionResult<RegisterProfileDto>> RegisterProfile(RegisterProfileDto request)
+    [HttpPost("registerprofile")]
+    public async Task<ActionResult<Object>> RegisterProfile(RegisterProfileDto request)
     {
-        if (!request == null)
+        if (request == null)
         {
             return BadRequest();
         }
@@ -31,7 +35,12 @@ public class UserController : ControllerBase
 
         int userId = int.Parse(id);
 
-        var user = await _context.User.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+
+        if (user is null)
+        {
+            return NotFound();
+        }
 
         var newUser = new UserProfile
         {
@@ -41,13 +50,19 @@ public class UserController : ControllerBase
             Skills = request.Skills,
             WorkType = request.WorkType,
             SalaryRange = request.SalaryRange,
-            PreferredLocation = request.PreferredLocation ? request.PreferredLocation : null,
-            IsPremium = UserProfile.IsPremium,
-            RefreshesUsedToday = UserProfile.RefreshesUsedToday,
-            RefreshesResetsAt = DateTime.Today
+            PreferredLocation = request.PreferredLocation,
+            RefreshesResetsAt = DateTime.UtcNow.Date,
         };
 
-        _context.UserProfile.Add(newUser);
+        user.IsOnboarded = true;
+
+        _context.UserProfiles.Add(newUser);
         await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = "Profile created succesfully",
+            isOnboarded = user.IsOnboarded
+        });
     }
 }

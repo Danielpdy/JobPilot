@@ -68,7 +68,12 @@ export const authOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+      if(trigger === "update" && session?.IsOnboarded !== undefined){
+        token.IsOnboarded = session.IsOnboarded;
+        return token;
+      }
+      
       if (account?.provider === "credentials" && user) {
         token.user = {
           id: user.id,
@@ -90,15 +95,12 @@ export const authOptions = {
           provider: account.provider,
         });
 
-        console.log("Provider reponse:", data);
-
-        if (!data?.accessToken) {
-          console.log("OAuth backend exchange failed");
+        if (!data?.token?.accessToken) {
           token.error = "OAuth backend exchange failed";
           return token;
         }
 
-        const decoded = jwtDecode(data.accessToken);
+        const decoded = jwtDecode(data.token.accessToken);
 
         const user = {
           id: decoded.sub,
@@ -111,10 +113,10 @@ export const authOptions = {
           email: user.email,
           name: user.name,
         };
-        token.accessToken = data.accessToken;
-        token.refreshToken = data.refreshToken;
+        token.accessToken = data.token.accessToken;
+        token.refreshToken = data.token.refreshToken;
         token.accessTokenExpiresAt = user.expiracy;
-        token.IsOnboarded = data.IsOnboarded;
+        token.IsOnboarded = data.token.isOnboarded;
         token.error = undefined;
         return token;
       }
@@ -131,15 +133,15 @@ export const authOptions = {
         try {
           const request = await RefreshToken(token.refreshToken);
 
-          const decoded = jwtDecode(request.accessToken);
+          const decoded = jwtDecode(request.token.accessToken);
 
           const refreshed = {
             expiracy: decoded.exp,
           };
 
-          if (refreshed?.accessToken) {
-            token.accessToken = request.accessToken;
-            token.refreshToken = request.refreshToken;
+          if (request?.token?.accessToken) {
+            token.accessToken = request.token.accessToken;
+            token.refreshToken = request.token.refreshToken;
             token.accessTokenExpiresAt = refreshed.expiracy;
             token.error = undefined;
             return token;

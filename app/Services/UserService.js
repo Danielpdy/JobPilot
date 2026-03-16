@@ -1,5 +1,4 @@
 import { apiRequest } from "@/lib/httpClient";
-import { headers } from "next/headers";
 
 export const LoginCredentials = (credentials) => {
     return apiRequest("/auth/login", {

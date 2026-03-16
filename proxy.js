@@ -20,6 +20,11 @@ export async function proxy(req){
         const onboardUrl = new URL("/onboard", req.url);
         return NextResponse.redirect(onboardUrl);
     }
+
+    if (token.IsOnboarded === true && pathname !== "/dashboard"){
+        const dashboard = new URL("/dashboard", req.url);
+        return NextResponse.redirect(dashboard);
+    }
     return NextResponse.next();
 }
 

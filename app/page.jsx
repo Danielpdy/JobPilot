@@ -1,20 +1,21 @@
-'use client';
-import { useState } from 'react';
-import styles from './home.module.css';
-import LiquidChrome from '@/app/components/ui/LiquidChrome/LiquidChrome';
-import GlassNavIndicator from '@/app/components/ui/GlassNavIndicator/GlassNavIndicator';
-import TopAnimatedContent from '@/app/components/ui/TopAnimatedContent/TopAnimatedContent';
-import LogoLoop from '@/app/components/ui/LogoLoop/LogoLoop';
-import Link from 'next/link';
-import { placeholderLogos } from './components/ui/LogoLoop/PlaceholderLogos';
-
+"use client";
+import { useState } from "react";
+import styles from "./home.module.css";
+import LiquidChrome from "@/app/components/ui/LiquidChrome/LiquidChrome";
+import GlassNavIndicator from "@/app/components/ui/GlassNavIndicator/GlassNavIndicator";
+import TopAnimatedContent from "@/app/components/ui/TopAnimatedContent/TopAnimatedContent";
+import LogoLoop from "@/app/components/ui/LogoLoop/LogoLoop";
+import Link from "next/link";
+import { placeholderLogos } from "./components/ui/LogoLoop/PlaceholderLogos";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   return (
     <div className={styles.page}>
-
       {/* ── Full-page background ── */}
       <div className={styles.bgContainer}>
         <LiquidChrome
@@ -41,20 +42,36 @@ export default function HomePage() {
 
           {/* Desktop actions */}
           <div className={styles.navActions}>
-            <a href="/login" className={styles.navSignIn}>Sign In</a>
-            <a href="/signup" className={styles.navGetStarted}>Get Started</a>
+            {status === "loading" ? null : session ? (
+              <button className={styles.navSignOut} onClick={() => signOut()}>Sign Out</button>
+            ) : (
+              <>
+                <a href="/login" className={styles.navSignIn}>
+                  Sign In
+                </a>
+                <a href="/signup" className={styles.navGetStarted}>
+                  Get Started
+                </a>
+              </>
+            )}
           </div>
 
           {/* Hamburger button — mobile only */}
           <button
             className={styles.hamburger}
-            onClick={() => setMenuOpen(o => !o)}
+            onClick={() => setMenuOpen((o) => !o)}
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
           >
-            <span className={`${styles.hamburgerLine} ${menuOpen ? styles.hamburgerLine1Open : ''}`} />
-            <span className={`${styles.hamburgerLine} ${menuOpen ? styles.hamburgerLine2Open : ''}`} />
-            <span className={`${styles.hamburgerLine} ${menuOpen ? styles.hamburgerLine3Open : ''}`} />
+            <span
+              className={`${styles.hamburgerLine} ${menuOpen ? styles.hamburgerLine1Open : ""}`}
+            />
+            <span
+              className={`${styles.hamburgerLine} ${menuOpen ? styles.hamburgerLine2Open : ""}`}
+            />
+            <span
+              className={`${styles.hamburgerLine} ${menuOpen ? styles.hamburgerLine3Open : ""}`}
+            />
           </button>
         </div>
       </nav>
@@ -62,8 +79,20 @@ export default function HomePage() {
       {/* ── Mobile dropdown ── */}
       {menuOpen && (
         <div className={styles.mobileDropdown}>
-          <a href="/login" className={styles.mobileMenuLink} onClick={() => setMenuOpen(false)}>Sign In</a>
-          <a href="/signup" className={styles.mobileMenuGetStarted} onClick={() => setMenuOpen(false)}>Get Started</a>
+          <a
+            href="/login"
+            className={styles.mobileMenuLink}
+            onClick={() => setMenuOpen(false)}
+          >
+            Sign In
+          </a>
+          <a
+            href="/signup"
+            className={styles.mobileMenuGetStarted}
+            onClick={() => setMenuOpen(false)}
+          >
+            Get Started
+          </a>
         </div>
       )}
 
@@ -94,9 +123,9 @@ export default function HomePage() {
           delay={0.35}
         >
           <p className={styles.subheadline}>
-            JobPilot analyzes thousands of listings in real-time and matches them
-            to your skills, experience, and ambitions — so you spend less time
-            searching and more time landing.
+            JobPilot analyzes thousands of listings in real-time and matches
+            them to your skills, experience, and ambitions — so you spend less
+            time searching and more time landing.
           </p>
         </TopAnimatedContent>
 
@@ -110,8 +139,12 @@ export default function HomePage() {
           delay={0.5}
         >
           <div className={styles.ctaRow}>
-            <Link href="/dashboard" className={styles.ctaPrimary}>Go to Dashboard</Link>
-            <Link href="#how-it-works" className={styles.ctaSecondary}>See How It Works</Link>
+            <Link href="/dashboard" className={styles.ctaPrimary}>
+              Go to Dashboard
+            </Link>
+            <Link href="#how-it-works" className={styles.ctaSecondary}>
+              See How It Works
+            </Link>
           </div>
         </TopAnimatedContent>
 
@@ -124,7 +157,9 @@ export default function HomePage() {
           animateOpacity
           delay={0.65}
         >
-          <p className={styles.logoLoopLabel}>Get hired by top companies worldwide</p>
+          <p className={styles.logoLoopLabel}>
+            Get hired by top companies worldwide
+          </p>
           <div className={styles.logoLoopWrapper}>
             <LogoLoop
               logos={placeholderLogos}
@@ -139,7 +174,6 @@ export default function HomePage() {
           </div>
         </TopAnimatedContent>
       </section>
-
     </div>
   );
 }

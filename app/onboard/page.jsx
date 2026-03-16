@@ -3,6 +3,9 @@
 import { useState, Fragment } from 'react';
 import styles from './onboard.module.css';
 import AnimatedContent from '../components/ui/AnimatedContent/AnimatedContent';
+import { RegisterProfile } from '../Services/UserService';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const STEPS = ['Your Role', 'Your Skills', 'Preferences'];
 const EXPERIENCE_LEVELS = ['Entry Level', 'Mid-Level', 'Senior', 'Lead / Manager'];
@@ -17,6 +20,9 @@ const CheckIcon = () => (
 
 export default function OnboardPage() {
   const [step, setStep] = useState(0);
+
+  const { data: session, update } = useSession();
+  const router = useRouter();
 
   const [jobTitle, setJobTitle] = useState('');
   const [experience, setExperience] = useState('');
@@ -47,8 +53,25 @@ export default function OnboardPage() {
   }
 
   async function handleFinish() {
-    // TODO: PATCH /api/users/onboard with { jobTitle, experience, skills, workType, salary, location }
-    // then router.push('/dashboard')
+    const profileInfo = {
+      JobTitle: jobTitle,
+      ExperienceLevel: experience,
+      Skills: skills,
+      WorkType: workType,
+      SalaryRange: salary,
+      PreferredLocation: location ? location : ""
+    }
+
+    try{
+      const req = await RegisterProfile(profileInfo, session.accessToken);
+
+      if(req.isOnboarded){
+        await update({ IsOnboarded: true })
+        router.push("/dashboard")
+      }
+    } catch(error){
+      console.error(`Profile creation failed:`, error);
+    }
   }
 
   return (
