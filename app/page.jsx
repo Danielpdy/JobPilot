@@ -79,6 +79,13 @@ export default function HomePage() {
       {/* ── Mobile dropdown ── */}
       {menuOpen && (
         <div className={styles.mobileDropdown}>
+          { status === "loading" ? null : session ? (
+            <button
+              className={styles.mobileMenuSignOut}
+              onClick={() => { signOut(); setMenuOpen(false); }}
+            >Sign Out</button>
+          ) : (
+            <>
           <a
             href="/login"
             className={styles.mobileMenuLink}
@@ -93,6 +100,8 @@ export default function HomePage() {
           >
             Get Started
           </a>
+          </>
+        )}
         </div>
       )}
 

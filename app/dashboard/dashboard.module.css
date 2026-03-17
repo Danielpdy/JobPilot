@@ -9,7 +9,7 @@
 /* ── Sidebar ───────────────────────────────────────────── */
 .sidebar {
   width: 260px;
-  min-height: 100vh;
+  height: 100vh;
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
@@ -20,33 +20,24 @@
   border-right: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow: 2px 0 24px rgba(11, 45, 114, 0.06);
   flex-shrink: 0;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
 }
 
 .sidebarLogo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 4px 10px;
   text-decoration: none;
+  margin: -20px 0 -8px 4px;
 }
 
-.logoIcon {
-  width: 34px;
-  height: 34px;
-  background: linear-gradient(135deg, #0992C2, #0B2D72);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.sidebarLogoImg {
+  height: 90px;
+  width: auto;
+  mix-blend-mode: multiply;
 }
 
-.logoText {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #0B2D72;
-  letter-spacing: -0.02em;
-}
 
 .sidebarSection {
   display: flex;
@@ -114,8 +105,92 @@
   cursor: pointer;
 }
 
+/* ── Top Bar Left ──────────────────────────────────────── */
+.topBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Hamburger (mobile only) ───────────────────────────── */
+.menuBtn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.menuBtn:hover {
+  background: rgba(11, 45, 114, 0.08);
+}
+
+.menuLine {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #0B2D72;
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+  transform-origin: center;
+}
+
+.menuLine1Open {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menuLine2Open {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.menuLine3Open {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Overlay ───────────────────────────────────────────── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 45, 114, 0.25);
+  backdrop-filter: blur(2px);
+  z-index: 49;
+}
+
 /* ── Horizontal Tab Bar (demo) ─────────────────────────── */
 .tabBarWrapper {
   display: flex;
   align-items: center;
+}
+
+/* ── Mobile ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .overlay {
+    display: block;
+  }
+
+  .menuBtn {
+    display: flex;
+  }
 }

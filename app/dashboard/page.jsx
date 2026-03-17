@@ -2,25 +2,23 @@
 import { useState } from 'react';
 import styles from './dashboard.module.css';
 import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
-
-/* ── Icons ────────────────────────────────────────────── */
-const Icon = ({ d }) => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d={d} />
-  </svg>
-);
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faHouse, faBriefcase, faFile, faHeart, faFileLines,
+  faUser, faGear,
+} from '@fortawesome/free-solid-svg-icons';
 
 const sidebarItems = [
-  { label: 'Overview',      icon: <Icon d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /> },
-  { label: 'Job Matches',   icon: <Icon d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />, badge: '12' },
-  { label: 'Applications',  icon: <Icon d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /> },
-  { label: 'Saved Jobs',    icon: <Icon d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /> },
-  { label: 'Resume',        icon: <Icon d="M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h5" /> },
+  { label: 'Overview',     icon: <FontAwesomeIcon icon={faHouse}      style={{ width: 16, height: 16 }} /> },
+  { label: 'Job Matches',  icon: <FontAwesomeIcon icon={faBriefcase}  style={{ width: 16, height: 16 }} />, badge: '12' },
+  { label: 'Applications', icon: <FontAwesomeIcon icon={faFile}       style={{ width: 16, height: 16 }} /> },
+  { label: 'Saved Jobs',   icon: <FontAwesomeIcon icon={faHeart}      style={{ width: 16, height: 16 }} /> },
+  { label: 'Resume',       icon: <FontAwesomeIcon icon={faFileLines}  style={{ width: 16, height: 16 }} /> },
 ];
 
 const settingsItems = [
-  { label: 'Profile',    icon: <Icon d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /> },
-  { label: 'Settings',   icon: <Icon d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z M12 8v4l3 3" /> },
+  { label: 'Profile',  icon: <FontAwesomeIcon icon={faUser} style={{ width: 16, height: 16 }} /> },
+  { label: 'Settings', icon: <FontAwesomeIcon icon={faGear} style={{ width: 16, height: 16 }} /> },
 ];
 
 const contentTabs = [
@@ -35,21 +33,40 @@ const pageMap = ['Overview', 'Job Matches', 'Applications', 'Saved Jobs', 'Resum
 export default function DashboardPage() {
   const [activePage, setActivePage] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Shared selection: which section ('main' | 'settings') and which index is active
+  const [activeSection, setActiveSection] = useState('main');
+  const [mainIndex, setMainIndex] = useState(0);
+  const [settingsIndex, setSettingsIndex] = useState(-1);
+
+  const handleMainNav = (i) => {
+    setActiveSection('main');
+    setMainIndex(i);
+    setSettingsIndex(-1);
+    setActivePage(i);
+    setSidebarOpen(false);
+  };
+
+  const handleSettingsNav = (i) => {
+    setActiveSection('settings');
+    setSettingsIndex(i);
+    setMainIndex(-1);
+    setSidebarOpen(false);
+  };
 
   return (
     <div className={styles.page}>
 
+      {/* ── Mobile overlay ── */}
+      {sidebarOpen && (
+        <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />
+      )}
+
       {/* ── Sidebar ── */}
-      <aside className={styles.sidebar}>
+      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
         <a href="/" className={styles.sidebarLogo}>
-          <div className={styles.logoIcon}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-              <path d="M5 17.5L19 6.5M19 6.5H9M19 6.5V16.5"
-                stroke="white" strokeWidth="2.2"
-                strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <span className={styles.logoText}>JobPilot</span>
+          <img src="/icons/JobPilot (2).png" alt="JobPilot" className={styles.sidebarLogoImg} />
         </a>
 
         {/* Main nav with glass bubble */}
@@ -57,9 +74,9 @@ export default function DashboardPage() {
           <span className={styles.sectionLabel}>Main</span>
           <GlassBubbleNav
             items={sidebarItems}
-            defaultIndex={0}
+            activeIndex={mainIndex}
             orientation="vertical"
-            onChange={(i) => setActivePage(i)}
+            onChange={handleMainNav}
           />
         </div>
 
@@ -67,9 +84,9 @@ export default function DashboardPage() {
         <div className={styles.sidebarBottom}>
           <GlassBubbleNav
             items={settingsItems}
-            defaultIndex={-1}
+            activeIndex={settingsIndex}
             orientation="vertical"
-            onChange={() => {}}
+            onChange={handleSettingsNav}
           />
         </div>
       </aside>
@@ -79,7 +96,18 @@ export default function DashboardPage() {
 
         {/* Top bar */}
         <div className={styles.topBar}>
-          <h1 className={styles.pageTitle}>{pageMap[activePage]}</h1>
+          <div className={styles.topBarLeft}>
+            <button
+              className={styles.menuBtn}
+              onClick={() => setSidebarOpen(o => !o)}
+              aria-label="Toggle sidebar"
+            >
+              <span className={`${styles.menuLine} ${sidebarOpen ? styles.menuLine1Open : ''}`} />
+              <span className={`${styles.menuLine} ${sidebarOpen ? styles.menuLine2Open : ''}`} />
+              <span className={`${styles.menuLine} ${sidebarOpen ? styles.menuLine3Open : ''}`} />
+            </button>
+            <h1 className={styles.pageTitle}>{pageMap[activePage]}</h1>
+          </div>
           <div className={styles.topBarRight}>
             <div className={styles.avatar}>DP</div>
           </div>
