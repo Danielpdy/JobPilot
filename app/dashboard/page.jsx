@@ -10,9 +10,8 @@ import {
 
 const sidebarItems = [
   { label: 'Overview',     icon: <FontAwesomeIcon icon={faHouse}      style={{ width: 16, height: 16 }} /> },
-  { label: 'Job Matches',  icon: <FontAwesomeIcon icon={faBriefcase}  style={{ width: 16, height: 16 }} />, badge: '12' },
+  { label: 'Job Matches',  icon: <FontAwesomeIcon icon={faBriefcase}  style={{ width: 16, height: 16 }} /> },
   { label: 'Applications', icon: <FontAwesomeIcon icon={faFile}       style={{ width: 16, height: 16 }} /> },
-  { label: 'Saved Jobs',   icon: <FontAwesomeIcon icon={faHeart}      style={{ width: 16, height: 16 }} /> },
   { label: 'Resume',       icon: <FontAwesomeIcon icon={faFileLines}  style={{ width: 16, height: 16 }} /> },
 ];
 
@@ -25,7 +24,6 @@ const contentTabs = [
   { label: 'All Jobs' },
   { label: 'Best Match' },
   { label: 'Recent' },
-  { label: 'Remote' },
 ];
 
 const pageMap = ['Overview', 'Job Matches', 'Applications', 'Saved Jobs', 'Resume'];
@@ -113,15 +111,17 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Horizontal tab bar with glass bubble */}
-        <div className={styles.tabBarWrapper}>
-          <GlassBubbleNav
-            items={contentTabs}
-            defaultIndex={0}
-            orientation="horizontal"
-            onChange={(i) => setActiveTab(i)}
-          />
-        </div>
+        {/* Horizontal tab bar — only for Job Matches */}
+        {mainIndex === 1 && (
+          <div className={styles.tabBarWrapper}>
+            <GlassBubbleNav
+              items={contentTabs}
+              defaultIndex={0}
+              orientation="horizontal"
+              onChange={(i) => setActiveTab(i)}
+            />
+          </div>
+        )}
 
       </main>
     </div>

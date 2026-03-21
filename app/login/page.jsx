@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import LiquidChrome from '@/app/components/ui/LiquidChrome/LiquidChrome';
 import AnimatedContent from '@/app/components/ui/AnimatedContent/AnimatedContent';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBriefcase } from '@fortawesome/free-solid-svg-icons';
 
 
 export default function LoginPage() {
@@ -166,12 +168,11 @@ export default function LoginPage() {
         <div className={styles.rightPanel}>
           {/* Logo */}
           <div className={styles.logo}>
-            <div className={styles.logoIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M5 17.5L19 6.5M19 6.5H9M19 6.5V16.5" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <span className={styles.logoText}>JobPilot</span>
+            <img
+              src="/icons/JobPilot (2).png"
+              alt="JobPilot"
+              style={{ height: '80px', width: 'auto', filter: 'brightness(0) invert(1)' }}
+            />
           </div>
 
           {/* Illustration Area */}
@@ -245,17 +246,9 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Central robot avatar */}
+            {/* Central avatar */}
             <div className={styles.centralAvatar}>
-              <svg width="44" height="44" viewBox="0 0 24 24" fill="white">
-                <rect x="3" y="8" width="18" height="12" rx="3" fill="white" fillOpacity="0.9"/>
-                <rect x="7" y="4" width="10" height="5" rx="2" fill="white" fillOpacity="0.7"/>
-                <circle cx="9" cy="13" r="1.5" fill="#0AC4E0"/>
-                <circle cx="15" cy="13" r="1.5" fill="#0AC4E0"/>
-                <rect x="9" y="17" width="6" height="1.5" rx="0.75" fill="#0AC4E0"/>
-                <line x1="2" y1="12" x2="3" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                <line x1="21" y1="12" x2="22" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              <FontAwesomeIcon icon={faBriefcase} style={{ width: '44px', height: '44px', color: 'white' }} />
             </div>
           </div>
 
@@ -263,12 +256,31 @@ export default function LoginPage() {
           <div className={styles.bottomText}>
             <div className={styles.activeBadge}>
               <span className={styles.activeDot} />
-              AI MATCHING ACTIVE
+              AI MATCHING FEATURES
             </div>
             <h2 className={styles.engineTitle}>Intelligent Matching Engine</h2>
             <p className={styles.engineSubtitle}>
               Our AI analyzes your skills to instantly swipe right on your perfect career opportunities.
             </p>
+          </div>
+
+          {/* Mobile-only animated job card */}
+          <div className={styles.mobileJobCard}>
+            <div className={styles.mobileJobCardHeader}>
+              <div className={styles.mobileJobAvatar}>
+                <FontAwesomeIcon icon={faBriefcase} style={{ width: '16px', height: '16px', color: '#0AC4E0' }} />
+              </div>
+              <div className={styles.mobileJobInfo}>
+                <span className={styles.mobileJobTitle}>Senior Frontend Engineer</span>
+                <span className={styles.mobileJobCompany}>TechCorp · Remote</span>
+              </div>
+              <span className={styles.mobileJobMatch}>98%</span>
+            </div>
+            <div className={styles.mobileJobTags}>
+              <span className={styles.mobileJobTag}>React</span>
+              <span className={styles.mobileJobTag}>TypeScript</span>
+              <span className={styles.mobileJobTag}>$120k–$160k</span>
+            </div>
           </div>
         </div>
 

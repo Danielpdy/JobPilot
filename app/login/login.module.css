@@ -563,6 +563,11 @@
   max-width: 280px;
 }
 
+/* ── Mobile Job Card (hidden on desktop) ─────────────── */
+.mobileJobCard {
+  display: none;
+}
+
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 768px) {
   .page {
@@ -582,28 +587,120 @@
     padding: 2.5rem 1.5rem;
   }
 
+  /* Right panel: compact strip at the bottom */
   .rightPanel {
     flex: none;
-    min-height: 340px;
-    padding: 1.5rem;
+    padding: 1.2rem 1.5rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
   }
 
-  .engineTitle {
-    font-size: 1.2rem;
+  /* Shrink the logo image on mobile */
+  .rightPanel img {
+    height: 44px !important;
   }
 
-  .cardTopLeft,
-  .cardBottomRight {
+  /* Hide the illustration area entirely on mobile — too cramped */
+  .illustrationArea {
     display: none;
   }
 
-  .cardTopRight {
-    top: 10%;
-    right: 4%;
+  .bottomText {
+    text-align: center;
   }
 
-  .cardBottomLeft {
-    bottom: 20%;
-    left: 4%;
+  .engineTitle {
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .engineSubtitle {
+    font-size: 0.8rem;
+    max-width: 100%;
+  }
+
+  .activeBadge {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.75rem;
+  }
+
+  /* Animated job card on mobile */
+  .mobileJobCard {
+    display: block;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    animation: floatCard 3s ease-in-out infinite;
+  }
+
+  .mobileJobCardHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .mobileJobAvatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(10, 196, 224, 0.15);
+    border: 1px solid rgba(10, 196, 224, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .mobileJobInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .mobileJobTitle {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .mobileJobCompany {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .mobileJobMatch {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #0AC4E0;
+    background: rgba(10, 196, 224, 0.15);
+    border: 1px solid rgba(10, 196, 224, 0.3);
+    border-radius: 999px;
+    padding: 0.2rem 0.5rem;
+    white-space: nowrap;
+  }
+
+  .mobileJobTags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .mobileJobTag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+  }
+
+  @keyframes floatCard {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-5px); }
   }
 }

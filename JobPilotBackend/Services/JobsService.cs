@@ -6,9 +6,10 @@ public class JobsService : IJobsService
     private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public JobsService(IConfiguaration configuaration)
+    public JobsService(IConfiguration configuaration, IHttpClientFactory httpClientFactory)
     {
         _configuration = configuaration;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<List<JobResultDto>> JobSearchAsync(JobSearchRequestDto request)
@@ -44,14 +45,15 @@ public class JobsService : IJobsService
             throw new Exception($"Adzuna request failed: {errorText}");
         }
 
-        var json = await response.Content.ReadAsStringAsync();
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var json = System.Text.Encoding.UTF8.GetString(bytes);
 
         var options = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         };
 
-        var adzunaResponse = JsonSerializer.Deserialize<AdzunaSearchResponse>(json, options);
+        var adzunaResponse = JsonSerializer.Deserialize<AdzunaResponseDto>(json, options);
 
         if (adzunaResponse?.Results == null)
         {

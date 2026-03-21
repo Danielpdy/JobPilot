@@ -8,4 +8,5 @@ public class JobPilotDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<Job> Jobs { get; set; }
 }
