@@ -64,11 +64,12 @@
 /* ── Main Content ──────────────────────────────────────── */
 .main {
   flex: 1;
+  height: 100vh;
   padding: 32px;
   display: flex;
   flex-direction: column;
   gap: 28px;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 /* ── Top Bar ───────────────────────────────────────────── */
@@ -168,6 +169,16 @@
 .tabBarWrapper {
   display: flex;
   align-items: center;
+}
+
+/* ── Swipe card area ───────────────────────────────────── */
+.swipeArea {
+  flex: 1;
+  min-height: 0;           /* allows flex child to shrink below content size */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;        /* scrolls only if viewport is unusually short */
 }
 
 /* ── Mobile ────────────────────────────────────────────── */

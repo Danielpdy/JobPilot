@@ -51,7 +51,6 @@ public class UserController : ControllerBase
             WorkType = request.WorkType,
             SalaryRange = request.SalaryRange,
             PreferredLocation = request.PreferredLocation,
-            RefreshesResetsAt = DateTime.UtcNow.Date,
         };
 
         user.IsOnboarded = true;

@@ -32,7 +32,7 @@ public class JobsService : IJobsService
             $"?app_id={Uri.EscapeDataString(appId)}" +
             $"&app_key={Uri.EscapeDataString(appKey)}" +
             $"&what={Uri.EscapeDataString(what)}" +
-            $"&where={Uri.EscapeDataString(where)}" +
+            (string.IsNullOrWhiteSpace(where) ? "" : $"&where={Uri.EscapeDataString(where)}") +
             $"&results_per_page=20" +
             $"&content-type=application/json";
 

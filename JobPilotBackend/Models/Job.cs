@@ -13,9 +13,5 @@ public class Job
     public string Url { get; set; } = string.Empty;
     public List<string> Tags { get; set; } = new List<string>();
     public string Description { get; set; } = string.Empty;
-    public float? AiMatchScore { get; set; }
-    public string? AiMatchReason  { get; set; }
-    public string? RawData { get; set; }
-
 
 }

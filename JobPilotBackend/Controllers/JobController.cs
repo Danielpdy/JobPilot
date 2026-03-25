@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -8,15 +9,17 @@ using Microsoft.AspNetCore.Mvc;
 
 public class JobController : ControllerBase
 {
-    private readonly IGeminiService _geminiService;
+    private readonly IJobsService _jobsService;
+    private readonly JobPilotDbContext _context;
 
-    public JobController(IGeminiService geminiService)
+    public JobController(IJobsService jobsService, JobPilotDbContext context)
     {
-        _geminiService = geminiService;
+        _jobsService = jobsService;
+        _context = context;
     }
 
-    [HttpGet("rankedjobs")]
-    public async Task<ActionResult<JobResultDto>> GetJobListing()
+    [HttpGet("jobs")]
+    public async Task<ActionResult<List<JobResultDto>>> GetJobListing()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -27,15 +30,20 @@ public class JobController : ControllerBase
 
         int id = int.Parse(userId);
 
-        var rankedJobs = await _geminiService.GetRankedJobsAsync(id);
+        var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == id);
 
-        if (rankedJobs is null)
+        if (userProfile is null)
         {
-            return BadRequest("Something Failed returning renked jobs");
+            return NotFound("User profile not found");
         }
 
-        return Ok(rankedJobs);
+        var jobs = await _jobsService.JobSearchAsync(new JobSearchRequestDto(
+            What: userProfile.JobTitle,
+            Where: userProfile.PreferredLocation,
+            Page: 1
+        ));
 
+        return Ok(jobs);
     }
 
 }

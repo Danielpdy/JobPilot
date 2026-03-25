@@ -12,7 +12,4 @@ public class UserProfile
     public string SalaryRange { get; set; } = string.Empty;
     public string? PreferredLocation { get; set; }
     public bool IsPremium { get; set; } = false;
-    public int RefreshesUsedToday { get; set; } = 0;
-    public DateTime RefreshesResetsAt { get; set; }
-
 }

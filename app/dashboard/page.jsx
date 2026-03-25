@@ -2,14 +2,15 @@
 import { useState } from 'react';
 import styles from './dashboard.module.css';
 import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
+import SwipeCardStack from '@/app/components/ui/SwipeCardStack/SwipeCardStack';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faHouse, faBriefcase, faFile, faHeart, faFileLines,
+  faLayerGroup, faBriefcase, faFile, faFileLines,
   faUser, faGear,
 } from '@fortawesome/free-solid-svg-icons';
 
 const sidebarItems = [
-  { label: 'Overview',     icon: <FontAwesomeIcon icon={faHouse}      style={{ width: 16, height: 16 }} /> },
+  { label: 'Swipe Jobs',   icon: <FontAwesomeIcon icon={faLayerGroup} style={{ width: 16, height: 16 }} /> },
   { label: 'Job Matches',  icon: <FontAwesomeIcon icon={faBriefcase}  style={{ width: 16, height: 16 }} /> },
   { label: 'Applications', icon: <FontAwesomeIcon icon={faFile}       style={{ width: 16, height: 16 }} /> },
   { label: 'Resume',       icon: <FontAwesomeIcon icon={faFileLines}  style={{ width: 16, height: 16 }} /> },
@@ -26,7 +27,7 @@ const contentTabs = [
   { label: 'Recent' },
 ];
 
-const pageMap = ['Overview', 'Job Matches', 'Applications', 'Saved Jobs', 'Resume'];
+const pageMap = ['Swipe Jobs', 'Job Matches', 'Applications', 'Saved Jobs', 'Resume'];
 
 export default function DashboardPage() {
   const [activePage, setActivePage] = useState(0);
@@ -111,7 +112,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Horizontal tab bar — only for Job Matches */}
+        {/* Horizontal tab bar — Job Matches section */}
         {mainIndex === 1 && (
           <div className={styles.tabBarWrapper}>
             <GlassBubbleNav
@@ -120,6 +121,13 @@ export default function DashboardPage() {
               orientation="horizontal"
               onChange={(i) => setActiveTab(i)}
             />
+          </div>
+        )}
+
+        {/* Swipe card stack — Swipe Jobs section */}
+        {mainIndex === 0 && (
+          <div className={styles.swipeArea}>
+            <SwipeCardStack />
           </div>
         )}
 
