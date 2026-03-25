@@ -15,7 +15,7 @@ public class JobsService : IJobsService
     public async Task<List<JobResultDto>> JobSearchAsync(JobSearchRequestDto request)
     {
         var appId = _configuration["Adzuna:AppId"];
-        var appKey = _configuration["Adzuna:AppKey"];
+        var appKey = _configuration["Adzuna:ApiKey"];
         var country = _configuration["Adzuna:Country"];
 
         if (string.IsNullOrWhiteSpace(appId) || string.IsNullOrWhiteSpace(appKey) || string.IsNullOrWhiteSpace(country))

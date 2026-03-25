@@ -26,7 +26,7 @@ public class JobController : ControllerBase
         if (userId is null)
         {
             return Unauthorized();
-        }
+        };
 
         int id = int.Parse(userId);
 
@@ -35,7 +35,7 @@ public class JobController : ControllerBase
         if (userProfile is null)
         {
             return NotFound("User profile not found");
-        }
+        };
 
         var jobs = await _jobsService.JobSearchAsync(new JobSearchRequestDto(
             What: userProfile.JobTitle,
