@@ -21,6 +21,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<JobPilotDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString")));
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["Redis:ConnectionString"];
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

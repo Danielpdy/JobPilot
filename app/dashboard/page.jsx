@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import styles from './dashboard.module.css';
 import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
 import SwipeCardStack from '@/app/components/ui/SwipeCardStack/SwipeCardStack';
@@ -8,6 +9,7 @@ import {
   faLayerGroup, faBriefcase, faFile, faFileLines,
   faUser, faGear,
 } from '@fortawesome/free-solid-svg-icons';
+import { GetNewJobs } from '../Services/JobService';
 
 const sidebarItems = [
   { label: 'Swipe Jobs',   icon: <FontAwesomeIcon icon={faLayerGroup} style={{ width: 16, height: 16 }} /> },
@@ -30,14 +32,19 @@ const contentTabs = [
 const pageMap = ['Swipe Jobs', 'Job Matches', 'Applications', 'Saved Jobs', 'Resume'];
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
   const [activePage, setActivePage] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Shared selection: which section ('main' | 'settings') and which index is active
   const [activeSection, setActiveSection] = useState('main');
   const [mainIndex, setMainIndex] = useState(0);
   const [settingsIndex, setSettingsIndex] = useState(-1);
+  const [jobList, setJobList] = useState([]);
+
+  useEffect(() => {
+    if (!session?.accessToken) return;
+    getJobListing();
+  }, [session?.accessToken]);
 
   const handleMainNav = (i) => {
     setActiveSection('main');
@@ -53,6 +60,15 @@ export default function DashboardPage() {
     setMainIndex(-1);
     setSidebarOpen(false);
   };
+
+  const getJobListing = async () => {
+    try{
+      const jobs = await GetNewJobs(session.accessToken);
+      setJobList(jobs);
+    }catch(error){
+      console.error(error);
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -127,7 +143,7 @@ export default function DashboardPage() {
         {/* Swipe card stack — Swipe Jobs section */}
         {mainIndex === 0 && (
           <div className={styles.swipeArea}>
-            <SwipeCardStack />
+            <SwipeCardStack jobs={jobList} />
           </div>
         )}
 

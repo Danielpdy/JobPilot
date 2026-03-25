@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'motion/react';
+import { motion, useMotionValue, useTransform, animate } from 'motion/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faXmark,
@@ -8,10 +8,10 @@ import {
   faHeart,
   faMapPin,
   faDollarSign,
-  faClock,
+  faBriefcase,
+  faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import styles from './SwipeCardStack.module.css';
-import { jobCards } from './swipeCardData';
 
 // ── Thresholds ────────────────────────────────────────────────────────────────
 const SWIPE_OFFSET_THRESHOLD  = 100;
@@ -29,8 +29,8 @@ const sectionVariants = {
   visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 26 } },
 };
 
-// ── Shared card body (used by both live cards and FlyingCard) ─────────────────
-function CardBody({ card, showMore, onMoreClick }) {
+// ── Shared card body ──────────────────────────────────────────────────────────
+function CardBody({ card, isTop }) {
   return (
     <>
       <div className={styles.cardHeader}>
@@ -51,36 +51,50 @@ function CardBody({ card, showMore, onMoreClick }) {
         </span>
         <span className={styles.metaItem}>
           <FontAwesomeIcon icon={faDollarSign} className={styles.metaIcon} />
-          {card.salary}
+          {card.salaryMin?.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} - {card.salaryMax?.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}
         </span>
-        <span className={styles.metaItem}>
-          <FontAwesomeIcon icon={faClock} className={styles.metaIcon} />
-          {card.type}
-        </span>
+        {card.contractTime && (
+          <span className={styles.contractBadge}>
+            <FontAwesomeIcon icon={faBriefcase} className={styles.metaIcon} />
+            {card.contractTime === 'full_time' ? 'Full Time' : 'Part Time'}
+          </span>
+        )}
+        {card.category && (
+          <span className={styles.contractBadge}>
+            {card.category}
+          </span>
+        )}
       </div>
 
       <div className={styles.descriptionWrapper}>
         <p className={styles.description}>
-          {card.description.split('\n\n')[0]}
+          {card.description}
         </p>
-        {showMore && (
-          <button className={styles.moreBtn} onClick={onMoreClick}>
-            ...more
-          </button>
-        )}
       </div>
 
       <div className={styles.skillsRow}>
-        {card.skills.map((skill) => (
+        {(card.skills ?? []).map((skill) => (
           <span key={skill} className={styles.skillTag}>{skill}</span>
         ))}
       </div>
+
+      {isTop && card.redirectUrl && (
+        <a
+          href={card.redirectUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.viewJobBtn}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <FontAwesomeIcon icon={faArrowUpRightFromSquare} className={styles.viewJobIcon} />
+          View full job posting
+        </a>
+      )}
     </>
   );
 }
 
-// ── FlyingCard — owns its own motion value, animates fully independently ──────
-// Mounted the instant a swipe fires so the next card can appear with zero delay.
+// ── FlyingCard ────────────────────────────────────────────────────────────────
 function FlyingCard({ card, x0, y0, direction, onComplete }) {
   const x       = useMotionValue(x0);
   const y       = useMotionValue(y0);
@@ -107,35 +121,34 @@ function FlyingCard({ card, x0, y0, direction, onComplete }) {
       className={styles.card}
       style={{ x, y, rotate, opacity, zIndex: 50, pointerEvents: 'none' }}
     >
-      <CardBody card={card} showMore={false} />
+      <CardBody card={card} isTop={false} />
     </motion.div>
   );
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function SwipeCardStack() {
-  const [cards, setCards]           = useState(jobCards);
-  const [stats, setStats]           = useState({ liked: 0, passed: 0, saved: 0 });
-  const [modalCard, setModalCard]   = useState(null);
-  const [flyingCard, setFlyingCard] = useState(null); // { card, x0, y0, direction }
+export default function SwipeCardStack({ jobs }) {
+  const [cards, setCards] = useState(jobs ?? []);
+  const [stats, setStats] = useState({ liked: 0, passed: 0, saved: 0 });
+  const [flyingCard, setFlyingCard] = useState(null);
 
   const isSwiping = useRef(false);
 
-  // Shared motion values for the live top card
-  const x          = useMotionValue(0);
-  const y          = useMotionValue(0);
-  const rotate     = useTransform(x, [-280, 0, 280], [-22, 0, 22]);
+  useEffect(() => {
+    if (jobs) setCards(jobs);
+  }, [jobs]);
+
+  const x           = useMotionValue(0);
+  const y           = useMotionValue(0);
+  const rotate      = useTransform(x, [-280, 0, 280], [-22, 0, 22]);
   const cardOpacity = useTransform(x, [-280, -130, 0, 130, 280], [0, 1, 1, 1, 0]);
   const likeOpacity = useTransform(x, [20, 120], [0, 1]);
   const nopeOpacity = useTransform(x, [-120, -20], [1, 0]);
 
-  // ── Launch exit: remove card from stack immediately, hand off to FlyingCard ─
-  // The next card becomes visible the same frame — no await, no delay.
   const launchFlyingCard = (action, direction) => {
     setFlyingCard({ card: cards[0], x0: x.get(), y0: y.get(), direction });
     setStats((prev) => ({ ...prev, [action]: prev[action] + 1 }));
     setCards((prev) => prev.slice(1));
-    // Reset shared values so the incoming top card starts clean
     x.set(0);
     y.set(0);
   };
@@ -145,7 +158,6 @@ export default function SwipeCardStack() {
     isSwiping.current = false;
   };
 
-  // ── Drag-end handler ──────────────────────────────────────────────────────
   const handleDragEnd = (_, info) => {
     if (isSwiping.current) return;
 
@@ -167,7 +179,6 @@ export default function SwipeCardStack() {
     }
   };
 
-  // ── Button-triggered swipe ────────────────────────────────────────────────
   const triggerSwipe = (action) => {
     if (isSwiping.current || cards.length === 0) return;
     isSwiping.current = true;
@@ -176,12 +187,10 @@ export default function SwipeCardStack() {
     else                        launchFlyingCard('saved',  0);
   };
 
-  // ── Render helpers ────────────────────────────────────────────────────────
   const visibleCards = cards.slice(0, 3);
-  const totalCards   = jobCards.length;
+  const totalCards   = (jobs ?? []).length;
   const currentIndex = totalCards - cards.length + 1;
 
-  // ── Empty state ───────────────────────────────────────────────────────────
   if (cards.length === 0 && !flyingCard) {
     return (
       <motion.div className={styles.container} variants={containerVariants} initial="hidden" animate="visible">
@@ -192,7 +201,7 @@ export default function SwipeCardStack() {
           <button
             className={styles.resetBtn}
             onClick={() => {
-              setCards(jobCards);
+              setCards(jobs ?? []);
               setStats({ liked: 0, passed: 0, saved: 0 });
             }}
           >
@@ -210,7 +219,6 @@ export default function SwipeCardStack() {
       {/* ── Card stack ───────────────────────────────────────────────────── */}
       <motion.div variants={sectionVariants} className={styles.stack}>
 
-        {/* Back cards + live top card */}
         {visibleCards.map((card, i) => {
           const isTop = i === 0;
           return (
@@ -246,16 +254,11 @@ export default function SwipeCardStack() {
                   </motion.div>
                 </>
               )}
-              <CardBody
-                card={card}
-                showMore={isTop}
-                onMoreClick={(e) => { e.stopPropagation(); setModalCard(card); }}
-              />
+              <CardBody card={card} isTop={isTop} />
             </motion.div>
           );
         })}
 
-        {/* Flying card — exits independently, rendered above the stack */}
         {flyingCard && (
           <FlyingCard
             key="flying"
@@ -301,72 +304,6 @@ export default function SwipeCardStack() {
       {/* ── Stats ────────────────────────────────────────────────────────── */}
       <motion.div variants={sectionVariants}><StatsRow stats={stats} /></motion.div>
 
-      {/* ── Job detail modal (outside stagger — always instant) ──────────── */}
-      <AnimatePresence>
-        {modalCard && (
-          <motion.div
-            className={styles.modalOverlay}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setModalCard(null)}
-          >
-            <motion.div
-              className={styles.modal}
-              initial={{ scale: 0.92, opacity: 0, y: 24 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.92, opacity: 0, y: 24 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className={styles.modalHeader}>
-                <div className={styles.logoBox} style={{ background: modalCard.logoColor }}>
-                  {modalCard.logoEmoji}
-                </div>
-                <div className={styles.modalCompanyInfo}>
-                  <span className={styles.companyName}>{modalCard.company}</span>
-                  <h2 className={styles.modalTitle}>{modalCard.title}</h2>
-                </div>
-                <button className={styles.modalClose} onClick={() => setModalCard(null)} aria-label="Close">
-                  <FontAwesomeIcon icon={faXmark} />
-                </button>
-              </div>
-
-              <div className={styles.modalMeta}>
-                <span className={styles.metaItem}>
-                  <FontAwesomeIcon icon={faMapPin} className={styles.metaIcon} />
-                  {modalCard.location}
-                </span>
-                <span className={styles.metaItem}>
-                  <FontAwesomeIcon icon={faDollarSign} className={styles.metaIcon} />
-                  {modalCard.salary}
-                </span>
-                <span className={styles.metaItem}>
-                  <FontAwesomeIcon icon={faClock} className={styles.metaIcon} />
-                  {modalCard.type}
-                </span>
-              </div>
-
-              <div className={styles.modalSkills}>
-                {modalCard.skills.map((skill) => (
-                  <span key={skill} className={styles.skillTag}>{skill}</span>
-                ))}
-              </div>
-
-              <div className={styles.modalBody}>
-                {modalCard.description.split('\n\n').map((para, idx) => (
-                  <p key={idx} className={styles.modalPara}>{para}</p>
-                ))}
-              </div>
-
-              <div className={styles.modalFooter}>
-                <span className={styles.postedBadge}>{modalCard.postedAt}</span>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }

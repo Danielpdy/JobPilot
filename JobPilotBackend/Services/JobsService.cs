@@ -69,7 +69,9 @@ public class JobsService : IJobsService
             SalaryMax: job.SalaryMax,
             Description: job.Description ?? string.Empty,
             RedirectUrl: job.RedirectUrl ?? string.Empty,
-            Created: job.Created
+            Created: job.Created,
+            ContractTime: job.ContractTime,
+            Category: job.Category?.Label
         )).ToList();
     }
 }
