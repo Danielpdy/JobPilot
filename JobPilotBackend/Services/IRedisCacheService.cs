@@ -1,5 +1,5 @@
 public interface IRedisCacheService
 {
-    Task <List<JobResultDto>> AddJobsAsync(JobResultDto request);
-    Task <List<JobResultDto>> GetJobsAsync(JobResultDto request);
+    Task <string> AddJobsAsync(RedisRequestDto request);
+    Task <List<JobResultDto>> GetJobsAsync(string key);
 }

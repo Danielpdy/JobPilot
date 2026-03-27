@@ -1,19 +1,32 @@
 
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 public class JobsService : IJobsService
 {
     private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IRedisCacheService _redisCacheService;
+    private readonly JobPilotDbContext _context;
 
-    public JobsService(IConfiguration configuaration, IHttpClientFactory httpClientFactory)
+    public JobsService(IConfiguration configuaration, IHttpClientFactory httpClientFactory, IRedisCacheService redisCacheService, JobPilotDbContext context)
     {
         _configuration = configuaration;
         _httpClientFactory = httpClientFactory;
+        _redisCacheService = redisCacheService;
+        _context = context;
     }
 
     public async Task<List<JobResultDto>> JobSearchAsync(JobSearchRequestDto request)
     {
+        var cacheResults = await CachedResults(request.UserId);
+
+        if(cacheResults is null)
+        {
+            return null;
+        }
+
         var appId = _configuration["Adzuna:AppId"];
         var appKey = _configuration["Adzuna:ApiKey"];
         var country = _configuration["Adzuna:Country"];
@@ -60,7 +73,7 @@ public class JobsService : IJobsService
             return new List<JobResultDto>();
         }
 
-        return adzunaResponse.Results.Select(job => new JobResultDto(
+        var result = adzunaResponse.Results.Select(job => new JobResultDto(
             Id: job.Id ?? string.Empty,
             Title: job.Title ?? "Unknown title",
             Company: job.Company?.DisplayName ?? "Unknown company",
@@ -73,5 +86,32 @@ public class JobsService : IJobsService
             ContractTime: job.ContractTime,
             Category: job.Category?.Label
         )).ToList();
+
+        var key = $"Jobs:User:{request.UserId}";
+        await _redisCacheService.AddJobsAsync(new RedisRequestDto(key, result));
+        return result;
+    }
+
+    public async Task<List<JobResultDto>> CachedResults(int userId)
+    {
+        var key = $"Jobs:User:{userId}";
+
+        var user = await _context.Users.FirstOrDefaultAsync( u => u.UserId == userId);
+
+        if(user is null) return null;
+
+        var cacheJobs = await _redisCacheService.GetJobsAsync(key);
+
+        if (cacheJobs is not null && cacheJobs.Count > 0)
+        {
+            return cacheJobs;
+        }
+
+        if(user.UsedRefreshes >= 10)
+        {
+            return cacheJobs ?? new List<JobResultDto>();
+        }
+
+        return null;
     }
 }

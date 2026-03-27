@@ -1,13 +1,37 @@
+using System.Text.Json;
+using Microsoft.Extensions.Caching.Distributed;
 
 public class RedisCacheService : IRedisCacheService
 {
-    public async Task<List<JobResultDto>> AddJobsAsync(JobResultDto request)
+    readonly IDistributedCache _distributedCache;
+    public RedisCacheService(IDistributedCache distributedCache)
     {
-        return new List<JobResultDto>();
+        _distributedCache = distributedCache;
     }
 
-    public async Task<List<JobResultDto>> GetJobsAsync(JobResultDto request)
+    public async Task<string> AddJobsAsync(RedisRequestDto request)
     {
-        return new List<JobResultDto>();
+        var jobs = JsonSerializer.Serialize(request.Jobs);
+
+        await _distributedCache.SetStringAsync(request.Key, jobs, new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(20)
+        });
+
+        return jobs;
+    }
+
+    public async Task<List<JobResultDto>> GetJobsAsync(string key)
+    {
+        var json = await _distributedCache.GetStringAsync(key);
+        
+        if (json is null)
+        {
+            return new List<JobResultDto>();
+        }
+
+        var jobs = JsonSerializer.Deserialize<List<JobResultDto>>(json);
+
+        return jobs;
     }
 }

@@ -10,5 +10,6 @@ public class User
     public string? RefreshToken { get; set; }
     public DateTime RefreshTokenExpiresAt { get; set; }
     public bool IsOnboarded { get; set; } = false;
-    
+    public int UsedRefreshes { get; set; } = 0;
+    public DateTime LastResetRefreshes { get; set; }    
 }

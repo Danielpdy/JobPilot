@@ -40,7 +40,8 @@ public class JobController : ControllerBase
         var jobs = await _jobsService.JobSearchAsync(new JobSearchRequestDto(
             What: userProfile.JobTitle,
             Where: userProfile.PreferredLocation,
-            Page: 1
+            Page: 1,
+            UserId: id
         ));
 
         return Ok(jobs);
