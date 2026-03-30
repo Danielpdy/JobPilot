@@ -147,6 +147,7 @@ export const authOptions = {
             return token;
           }
         } catch {
+          token.accessToken = undefined;
           token.error = "Refresh token error";
         }
 
@@ -158,6 +159,7 @@ export const authOptions = {
       session.user = token.user || session.user;
       session.accessToken = token.accessToken;
       session.error = token.error;
+      session.IsOnboarded = token.IsOnboarded;
       return session;
     },
   },

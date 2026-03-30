@@ -22,9 +22,9 @@ public class JobsService : IJobsService
     {
         var cacheResults = await CachedResults(request.UserId);
 
-        if(cacheResults is null)
+        if(cacheResults is not null)
         {
-            return null;
+            return cacheResults;
         }
 
         var appId = _configuration["Adzuna:AppId"];

@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { signIn } from 'next-auth/react';
 import styles from './signup.module.css';
-import { Register } from '../Services/UserService';
+import { LoginCredentials, Register } from '../Services/UserService';
 import LiquidChrome from '../components/ui/LiquidChrome/LiquidChrome';
 import AnimatedContentLeft from '../components/ui/AnimatedContentLeft/AnimatedContentLeft';
 import AnimatedContentRight from '../components/ui/AnimatedContentRight/AnimatedContentRight';
+
 
 const CheckMark = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -25,6 +27,14 @@ export default function SignupPage() {
     await Register({ firstName, lastName, email, password });
     setDone(true);
   }
+
+  const login = async () =>{
+    await signIn("credentials",{
+      email,
+      password,
+      callbackUrl: "/dashboard"
+    });
+  };
 
   return (
     <div className={styles.page}>
@@ -191,9 +201,11 @@ export default function SignupPage() {
                 <p className={styles.successText}>
                   Our AI is already crunching through thousands of jobs to find your perfect matches. Time to start swiping!
                 </p>
-                <a href="/dashboard" className={styles.continueBtn} style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
+                <button href="/dashboard" className={styles.continueBtn} style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
+                  onClick={() => login()}
+                  >
                   Start Swiping &nbsp;→
-                </a>
+                </button>
               </div>
             )}
 

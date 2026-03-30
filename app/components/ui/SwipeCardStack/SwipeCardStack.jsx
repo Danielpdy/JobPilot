@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { motion, useMotionValue, useTransform, animate } from 'motion/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -12,6 +13,8 @@ import {
   faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import styles from './SwipeCardStack.module.css';
+import { useSwipesStore } from '@/app/stores/swipeStore';
+import { useSwipeFlush } from '@/app/hooks/useSwipeFlush';
 
 // ── Thresholds ────────────────────────────────────────────────────────────────
 const SWIPE_OFFSET_THRESHOLD  = 100;
@@ -127,7 +130,11 @@ function FlyingCard({ card, x0, y0, direction, onComplete }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function SwipeCardStack({ jobs }) {
+export default function SwipeCardStack({ jobs, loading }) {
+  const { data: session } = useSession();
+  const addSwipe = useSwipesStore(s => s.addSwipe);
+  const { flushQueue, scheduleFlush, cancelFlush } = useSwipeFlush(session?.accessToken);
+
   const [cards, setCards] = useState(jobs ?? []);
   const [stats, setStats] = useState({ liked: 0, passed: 0, saved: 0 });
   const [flyingCard, setFlyingCard] = useState(null);
@@ -138,6 +145,14 @@ export default function SwipeCardStack({ jobs }) {
     if (jobs) setCards(jobs);
   }, [jobs]);
 
+  // flush on unmount (user navigates away mid-swipe session)
+  useEffect(() => {
+    return () => {
+      cancelFlush();
+      flushQueue();
+    };
+  }, []);
+
   const x           = useMotionValue(0);
   const y           = useMotionValue(0);
   const rotate      = useTransform(x, [-280, 0, 280], [-22, 0, 22]);
@@ -146,6 +161,8 @@ export default function SwipeCardStack({ jobs }) {
   const nopeOpacity = useTransform(x, [-120, -20], [1, 0]);
 
   const launchFlyingCard = (action, direction) => {
+    addSwipe(cards[0], action);
+    scheduleFlush();
     setFlyingCard({ card: cards[0], x0: x.get(), y0: y.get(), direction });
     setStats((prev) => ({ ...prev, [action]: prev[action] + 1 }));
     setCards((prev) => prev.slice(1));
@@ -190,6 +207,26 @@ export default function SwipeCardStack({ jobs }) {
   const visibleCards = cards.slice(0, 3);
   const totalCards   = (jobs ?? []).length;
   const currentIndex = totalCards - cards.length + 1;
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.stack}>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className={`${styles.card} ${styles.skeletonCard}`}
+              style={{
+                zIndex: 3 - i,
+                transform: `scale(${1 - i * 0.04}) translateY(${i * 14}px)`,
+                opacity: 1 - i * 0.2,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (cards.length === 0 && !flyingCard) {
     return (

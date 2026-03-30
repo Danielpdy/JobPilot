@@ -1,15 +1,20 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
 import styles from './dashboard.module.css';
 import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
-import SwipeCardStack from '@/app/components/ui/SwipeCardStack/SwipeCardStack';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faLayerGroup, faBriefcase, faFile, faFileLines,
   faUser, faGear,
 } from '@fortawesome/free-solid-svg-icons';
 import { GetNewJobs } from '../Services/JobService';
+import { useSwipeFlush } from '../hooks/useSwipeFlush';
+import { GetlikedJobs } from '../Services/UserService';
+import { useSwipesStore } from '../stores/swipeStore';
+import JobSwipes from './jobswipes/page';
+import JobMatches from './jobmatches/page';
 
 const sidebarItems = [
   { label: 'Swipe Jobs',   icon: <FontAwesomeIcon icon={faLayerGroup} style={{ width: 16, height: 16 }} /> },
@@ -40,9 +45,25 @@ export default function DashboardPage() {
   const [mainIndex, setMainIndex] = useState(0);
   const [settingsIndex, setSettingsIndex] = useState(-1);
   const [jobList, setJobList] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
+
+  const { flushQueue } = useSwipeFlush(session?.accessToken);
+  const hydrateLiked   = useSwipesStore(s => s.hydrateLiked);
+
+
+  useEffect(() => {
+    if (session?.error){
+      flushQueue().then(() =>signOut({ callbackUrl: '/login' }));
+    }
+  }, [session?.error]);
 
   useEffect(() => {
     if (!session?.accessToken) return;
+
+    flushQueue();
+
+    GetlikedJobs(session.accessToken).then(jobs => hydrateLiked(jobs));
+    
     getJobListing();
   }, [session?.accessToken]);
 
@@ -67,8 +88,10 @@ export default function DashboardPage() {
       setJobList(jobs);
     }catch(error){
       console.error(error);
+    } finally{
+      setJobsLoading(false);
     }
-  }
+  };
 
   return (
     <div className={styles.page}>
@@ -140,10 +163,15 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Swipe card stack — Swipe Jobs section */}
+        {/* Swipe Jobs section */}
         {mainIndex === 0 && (
+          <JobSwipes jobs={jobList} loading={jobsLoading} />
+        )}
+
+        {/* Job Matches section */}
+        {mainIndex === 1 && (
           <div className={styles.swipeArea}>
-            <SwipeCardStack jobs={jobList} />
+            <JobMatches />
           </div>
         )}
 

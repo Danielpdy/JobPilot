@@ -1,5 +1,6 @@
 import { apiRequest } from "@/lib/httpClient";
 
+
 export const LoginCredentials = (credentials) => {
     return apiRequest("/auth/login", {
         method: "POST",
@@ -17,7 +18,7 @@ export const LoginProvider = (provider) => {
 export const RefreshToken = (refreshToken) => {
     return apiRequest("auth/refresh", {
         method: "POST",
-        body: JSON.stringify(refreshToken)
+        body: JSON.stringify({ refreshToken })
     })
 }
 
@@ -37,3 +38,22 @@ export const RegisterProfile = (userInformation, accessToken) => {
         body: JSON.stringify(userInformation)
     });
 };
+
+export const SaveSwipeBatch = (swipes, accessToken) => {
+    return apiRequest("/job/swipes", {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        },
+        method: "POST",
+        body: JSON.stringify(swipes)
+    });
+};
+
+export const GetlikedJobs = (accessToken) => {
+    return apiRequest("/job/likedjobs", {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        },
+        method: "GET"
+    })
+}
