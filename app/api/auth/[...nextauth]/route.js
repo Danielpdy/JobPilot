@@ -133,13 +133,12 @@ export const authOptions = {
         try {
           const request = await RefreshToken(token.refreshToken);
 
-          const decoded = jwtDecode(request.token.accessToken);
-
-          const refreshed = {
-            expiracy: decoded.exp,
-          };
-
           if (request?.token?.accessToken) {
+            const decoded = jwtDecode(request.token.accessToken);
+            const refreshed = {
+              expiracy: decoded.exp,
+            };
+
             token.accessToken = request.token.accessToken;
             token.refreshToken = request.token.refreshToken;
             token.accessTokenExpiresAt = refreshed.expiracy;

@@ -11,7 +11,6 @@ public class Job
     public decimal? SalaryMax { get; set; }
     public string Url { get; set; } = string.Empty;
     public string Created { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
 
 }

@@ -32,7 +32,7 @@ public class AuthService : IAuthService
         var tokenResponse = new TokenResponseDto(
             AccessToken: _jwtService.CreateToken(user),
             RefreshToken: await _jwtService.SaveRefreshToken(user),
-            IsOnboarded: false
+            IsOnboarded: user.IsOnboarded
         );
         
         return tokenResponse;

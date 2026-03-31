@@ -16,7 +16,7 @@ export const LoginProvider = (provider) => {
 }
 
 export const RefreshToken = (refreshToken) => {
-    return apiRequest("auth/refresh", {
+    return apiRequest("/auth/refresh", {
         method: "POST",
         body: JSON.stringify({ refreshToken })
     })

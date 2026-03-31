@@ -70,9 +70,8 @@ public class JobController : ControllerBase
                 s.Job.Location,
                 s.Job.SalaryMin,
                 s.Job.SalaryMax,
-                s.Job.Description,
-                s.Job.Url,         
-                s.Job.Created,
+                s.Job.Url,
+                DateHelper.JobPostDays(s.Job.Created),
                 null,              
                 s.Job.Category
             ))
@@ -102,6 +101,21 @@ public class JobController : ControllerBase
 
         return Ok("Jobs Saved Succesfully");
 
+    }
+
+    [HttpDelete("deletelikedjobs")]
+    public async Task<IActionResult> DeleteLikedJobs()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if(userId is null)
+        {
+            return Unauthorized();
+        }
+
+        int id = int.Parse(userId);
+
+        return Ok();
     }
 
 }

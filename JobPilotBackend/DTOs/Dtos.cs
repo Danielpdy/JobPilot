@@ -12,10 +12,10 @@ public record RegisterProfileDto(string JobTitle, string ExperienceLevel, List<s
 string WorkType, string SalaryRange, string? PreferredLocation);
 public record JobSearchRequestDto(string What, string? Where, int Page, int UserId);
 public record JobResultDto(string Id, string Title, string Company, string Location, decimal? SalaryMin, decimal? SalaryMax,
-    string Description, string RedirectUrl, string? Created, string? ContractTime = null, string? Category = null);
+    string RedirectUrl, string? Created, string? ContractTime = null, string? Category = null);
 
 public record SwipeDto(string Id, string Title, string Company, string Location, decimal? SalaryMin, decimal? SalaryMax,
-    string Description, string RedirectUrl, string Action, string? Created, string? ContractTime = null, string? Category = null);
+    string RedirectUrl, string Action, string? Created, string? ContractTime = null, string? Category = null);
 
 // Adzuna dtos
 public record AdzunaCompanyDto([property: System.Text.Json.Serialization.JsonPropertyName("display_name")] string? DisplayName);
@@ -28,7 +28,6 @@ public record AdzunaJobDto(
     AdzunaLocationDto? Location,
     [property: System.Text.Json.Serialization.JsonPropertyName("salary_min")] decimal? SalaryMin,
     [property: System.Text.Json.Serialization.JsonPropertyName("salary_max")] decimal? SalaryMax,
-    string? Description,
     [property: System.Text.Json.Serialization.JsonPropertyName("redirect_url")] string? RedirectUrl,
     string? Created,
     [property: System.Text.Json.Serialization.JsonPropertyName("contract_time")] string? ContractTime,

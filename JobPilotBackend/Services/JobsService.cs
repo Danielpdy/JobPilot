@@ -1,5 +1,6 @@
 
 using System.Text.Json;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -80,9 +81,8 @@ public class JobsService : IJobsService
             Location: job.Location?.DisplayName ?? "Unknown location",
             SalaryMin: job.SalaryMin,
             SalaryMax: job.SalaryMax,
-            Description: job.Description ?? string.Empty,
             RedirectUrl: job.RedirectUrl ?? string.Empty,
-            Created: job.Created,
+            Created: DateHelper.JobPostDays(job.Created),
             ContractTime: job.ContractTime,
             Category: job.Category?.Label
         )).ToList();
@@ -104,8 +104,7 @@ public class JobsService : IJobsService
             SalaryMin = job.SalaryMin,
             SalaryMax = job.SalaryMax ?? null,
             Url = job.RedirectUrl,
-            Created = job.Created ?? null,
-            Description = job.Description,
+            Created = job.Created,
             Category = job.Category ?? null
         }).ToList();
 
@@ -147,4 +146,6 @@ public class JobsService : IJobsService
 
         return null;
     }
+
+    
 }
