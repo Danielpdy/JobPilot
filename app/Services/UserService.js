@@ -38,22 +38,3 @@ export const RegisterProfile = (userInformation, accessToken) => {
         body: JSON.stringify(userInformation)
     });
 };
-
-export const SaveSwipeBatch = (swipes, accessToken) => {
-    return apiRequest("/job/swipes", {
-        headers: {
-            "Authorization": `Bearer ${accessToken}`
-        },
-        method: "POST",
-        body: JSON.stringify(swipes)
-    });
-};
-
-export const GetlikedJobs = (accessToken) => {
-    return apiRequest("/job/likedjobs", {
-        headers: {
-            "Authorization": `Bearer ${accessToken}`
-        },
-        method: "GET"
-    })
-}

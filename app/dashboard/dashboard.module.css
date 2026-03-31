@@ -69,7 +69,8 @@
   display: flex;
   flex-direction: column;
   gap: 28px;
-  overflow: clip;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 /* ── Top Bar ───────────────────────────────────────────── */
@@ -174,15 +175,23 @@
 /* ── Swipe card area ───────────────────────────────────── */
 .swipeArea {
   flex: 1;
-  min-height: 0;           /* allows flex child to shrink below content size */
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  overflow-y: auto;        /* scrolls only if viewport is unusually short */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ── Mobile ────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .main {
+    padding: 20px 16px;
+    gap: 16px;
+  }
+
   .sidebar {
     position: fixed;
     top: 0;
@@ -203,5 +212,12 @@
 
   .menuBtn {
     display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: 16px 12px;
+    gap: 12px;
   }
 }

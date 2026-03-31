@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -12,6 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useSwipesStore } from '@/app/stores/swipeStore';
 import styles from './page.module.css';
+import { GetLikedJobs } from '@/app/Services/JobService';
 
 const containerVariants = {
   hidden: {},
@@ -24,12 +25,18 @@ const cardVariants = {
   exit:     { opacity: 0, scale: 0.88, transition: { duration: 0.18 } },
 };
 
-export default function JobMatches() {
+export default function JobMatches({ accessToken }) {
   const likedJobs = useSwipesStore(s => s.likedJobs);
   const unlikeJob = useSwipesStore(s => s.unlikeJob);
 
   const [search, setSearch] = useState('');
   const [sort, setSort]     = useState('recent');
+
+  useEffect(() => {
+    if(!accessToken) return;
+
+    getlikedJobs();
+  }, [accessToken])
 
   const filtered = useMemo(() => {
     let list = [...likedJobs];
@@ -44,6 +51,14 @@ export default function JobMatches() {
     if (sort === 'salary-low')  list.sort((a, b) => (a.salaryMin ?? 0) - (b.salaryMin ?? 0));
     return list;
   }, [likedJobs, search, sort]);
+
+  const getlikedJobs = async () => {
+    try{
+      await GetLikedJobs(accessToken);
+    } catch(error){
+      console.error(error);
+    }
+  }
 
   return (
     <div className={styles.wrapper}>

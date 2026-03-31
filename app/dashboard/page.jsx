@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { GetNewJobs } from '../Services/JobService';
 import { useSwipeFlush } from '../hooks/useSwipeFlush';
-import { GetlikedJobs } from '../Services/UserService';
+import { GetLikedJobs } from '../Services/JobService';
 import { useSwipesStore } from '../stores/swipeStore';
 import JobSwipes from './jobswipes/page';
 import JobMatches from './jobmatches/page';
@@ -62,7 +62,7 @@ export default function DashboardPage() {
 
     flushQueue();
 
-    GetlikedJobs(session.accessToken).then(jobs => hydrateLiked(jobs));
+    GetLikedJobs(session.accessToken).then(jobs => hydrateLiked(jobs));
     
     getJobListing();
   }, [session?.accessToken]);
@@ -171,7 +171,7 @@ export default function DashboardPage() {
         {/* Job Matches section */}
         {mainIndex === 1 && (
           <div className={styles.swipeArea}>
-            <JobMatches />
+            <JobMatches accessToken={session.accessToken} />
           </div>
         )}
 

@@ -4,13 +4,13 @@ const STORAGE_KEY = 'pendingSwipes';
 
 export const useSwipesStore = create((set, get) => ({
     likedJobs: [],
-    pendingQueue: JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'),
+    pendingQueue: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') : [],
 
     hydrateLiked: (jobs) => set({ likedJobs: jobs }),
 
     addSwipe: (job, action) => {
         set(state => {
-            const newQueue = [...state.pendingQueue, {jobId: job.id, action}];
+            const newQueue = [...state.pendingQueue, {...job, action}];
             localStorage.setItem(STORAGE_KEY, JSON.stringify(newQueue));
             return {
                 pendingQueue: newQueue,
@@ -21,7 +21,10 @@ export const useSwipesStore = create((set, get) => ({
 
     unlikeJob: (jobId) => {
         set(state => {
-            const newQueue = [...state.pendingQueue, { jobId, action: 'passed' }];
+            const job = state.likedJobs.find(j => j.id === jobId);
+            const newQueue = job
+                ? [...state.pendingQueue, { ...job, action: 'passed' }]
+                : state.pendingQueue;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(newQueue));
             return {
                 pendingQueue: newQueue,

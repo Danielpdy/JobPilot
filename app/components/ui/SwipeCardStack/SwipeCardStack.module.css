@@ -2,19 +2,39 @@
 .container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
   width: 100%;
-  padding: 4px 0 8px;
+  height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Two halves ──────────────────────────────────────────────────────────── */
+.topHalf {
+  flex: 1;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 16px 8px;
+}
+
+.bottomHalf {
+  flex: 1;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 16px 16px;
 }
 
 /* ── Stack wrapper ───────────────────────────────────────────────────────── */
 .stack {
   position: relative;
   width: 100%;
-  max-width: 620px;
-  height: 460px;
+  max-width: 520px;
+  height: min(460px, 100%);
+  overflow: hidden;
 }
 
 /* ── Individual card ─────────────────────────────────────────────────────── */
@@ -23,7 +43,8 @@
   top: 0;
   left: 0;
   width: 100%;
-  min-height: 380px;
+  min-height: 0;
+  height: 100%;
   background: #ffffff;
   border-radius: 22px;
   padding: 22px 24px 24px;
@@ -395,14 +416,46 @@
   transform: scale(1.03);
 }
 
-/* ── Mobile ──────────────────────────────────────────────────────────────── */
-@media (max-width: 520px) {
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
   .stack {
-    height: 420px;
+    max-width: 100%;
+    height: min(420px, 100%);
   }
 
   .card {
-    padding: 16px 16px 18px;
+    padding: 18px 18px 20px;
+    overflow-y: auto;
+  }
+
+  .description {
+    -webkit-line-clamp: 4;
+  }
+}
+
+@media (max-width: 480px) {
+  .topHalf {
+    flex: 3;
+    min-height: 360px;
+  }
+
+  .bottomHalf {
+    flex: 2;
+    min-height: 140px;
+    gap: 12px;
+  }
+
+  .stack {
+    height: min(460px, 100%);
+  }
+
+  .card {
+    padding: 14px 14px 16px;
+    overflow-y: auto;
+  }
+
+  .description {
+    -webkit-line-clamp: 3;
   }
 
   .jobTitle {
@@ -410,16 +463,12 @@
   }
 
   .actionBtn {
-    width: 54px;
-    height: 54px;
-  }
-
-  .saveBtn {
-    width: 46px;
-    height: 46px;
+    width: 52px;
+    height: 52px;
+    font-size: 1rem;
   }
 
   .statsRow {
-    gap: 28px;
+    gap: 24px;
   }
 }

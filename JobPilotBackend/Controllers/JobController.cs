@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,6 +46,62 @@ public class JobController : ControllerBase
         ));
 
         return Ok(jobs);
+    }
+
+    [HttpGet("likedjobs")]
+    public async Task<ActionResult<List<JobResultDto>>> GetLikedJobs()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        int id = int.Parse(userId);
+
+        var jobs = await _context.UserJobSwipes
+            .Where(s => s.UserId == id && s.Action == "liked")
+            .Include(s => s.Job)
+            .Select(s => new JobResultDto(
+                s.Job.ExternalId,
+                s.Job.Title,
+                s.Job.Company,
+                s.Job.Location,
+                s.Job.SalaryMin,
+                s.Job.SalaryMax,
+                s.Job.Description,
+                s.Job.Url,         
+                s.Job.Created,
+                null,              
+                s.Job.Category
+            ))
+            .ToListAsync();
+
+        return Ok(jobs);
+    }
+
+    [HttpPost("swipes")]
+    public async Task<ActionResult<string>> SaveSwipes(List<SwipeDto> request)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+        
+        int id = int.Parse(userId);
+
+       var swipes = await _jobsService.SaveLikedJobs(request, id);
+
+       if (swipes != "Succeed")
+        {
+            return BadRequest("Saving swipes failed");
+        }
+
+        return Ok("Jobs Saved Succesfully");
+
     }
 
 }

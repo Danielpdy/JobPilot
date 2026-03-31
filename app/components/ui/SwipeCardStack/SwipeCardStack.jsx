@@ -5,7 +5,6 @@ import { motion, useMotionValue, useTransform, animate } from 'motion/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faXmark,
-  faBookmark,
   faHeart,
   faMapPin,
   faDollarSign,
@@ -136,7 +135,7 @@ export default function SwipeCardStack({ jobs, loading }) {
   const { flushQueue, scheduleFlush, cancelFlush } = useSwipeFlush(session?.accessToken);
 
   const [cards, setCards] = useState(jobs ?? []);
-  const [stats, setStats] = useState({ liked: 0, passed: 0, saved: 0 });
+  const [stats, setStats] = useState({ liked: 0, passed: 0 });
   const [flyingCard, setFlyingCard] = useState(null);
 
   const isSwiping = useRef(false);
@@ -199,9 +198,8 @@ export default function SwipeCardStack({ jobs, loading }) {
   const triggerSwipe = (action) => {
     if (isSwiping.current || cards.length === 0) return;
     isSwiping.current = true;
-    if (action === 'like')      launchFlyingCard('liked',  1);
-    else if (action === 'pass') launchFlyingCard('passed', -1);
-    else                        launchFlyingCard('saved',  0);
+    if (action === 'like') launchFlyingCard('liked',  1);
+    else                   launchFlyingCard('passed', -1);
   };
 
   const visibleCards = cards.slice(0, 3);
@@ -239,7 +237,7 @@ export default function SwipeCardStack({ jobs, loading }) {
             className={styles.resetBtn}
             onClick={() => {
               setCards(jobs ?? []);
-              setStats({ liked: 0, passed: 0, saved: 0 });
+              setStats({ liked: 0, passed: 0 });
             }}
           >
             Start Over
@@ -253,7 +251,8 @@ export default function SwipeCardStack({ jobs, loading }) {
   return (
     <motion.div className={styles.container} variants={containerVariants} initial="hidden" animate="visible">
 
-      {/* ── Card stack ───────────────────────────────────────────────────── */}
+      {/* ── Top half: card ───────────────────────────────────────────────── */}
+      <div className={styles.topHalf}>
       <motion.div variants={sectionVariants} className={styles.stack}>
 
         {visibleCards.map((card, i) => {
@@ -307,39 +306,38 @@ export default function SwipeCardStack({ jobs, loading }) {
           />
         )}
       </motion.div>
+      </div>
 
-      {/* ── Counter ──────────────────────────────────────────────────────── */}
-      <motion.p variants={sectionVariants} className={styles.counter}>
-        {currentIndex} of {totalCards}&nbsp;&middot;&nbsp;Drag or tap buttons
-      </motion.p>
+      {/* ── Bottom half: counter + buttons + stats ───────────────────────── */}
+      <div className={styles.bottomHalf}>
 
-      {/* ── Action buttons ───────────────────────────────────────────────── */}
-      <motion.div variants={sectionVariants} className={styles.actions}>
-        <button
-          className={`${styles.actionBtn} ${styles.passBtn}`}
-          onClick={() => triggerSwipe('pass')}
-          aria-label="Pass"
-        >
-          <FontAwesomeIcon icon={faXmark} />
-        </button>
-        <button
-          className={`${styles.actionBtn} ${styles.saveBtn}`}
-          onClick={() => triggerSwipe('save')}
-          aria-label="Save"
-        >
-          <FontAwesomeIcon icon={faBookmark} />
-        </button>
-        <button
-          className={`${styles.actionBtn} ${styles.likeBtn}`}
-          onClick={() => triggerSwipe('like')}
-          aria-label="Like"
-        >
-          <FontAwesomeIcon icon={faHeart} />
-        </button>
-      </motion.div>
+        {/* ── Counter ──────────────────────────────────────────────────────── */}
+        <motion.p variants={sectionVariants} className={styles.counter}>
+          {currentIndex} of {totalCards}&nbsp;&middot;&nbsp;Drag or tap buttons
+        </motion.p>
 
-      {/* ── Stats ────────────────────────────────────────────────────────── */}
-      <motion.div variants={sectionVariants}><StatsRow stats={stats} /></motion.div>
+        {/* ── Action buttons ───────────────────────────────────────────────── */}
+        <motion.div variants={sectionVariants} className={styles.actions}>
+          <button
+            className={`${styles.actionBtn} ${styles.passBtn}`}
+            onClick={() => triggerSwipe('pass')}
+            aria-label="Pass"
+          >
+            <FontAwesomeIcon icon={faXmark} />
+          </button>
+          <button
+            className={`${styles.actionBtn} ${styles.likeBtn}`}
+            onClick={() => triggerSwipe('like')}
+            aria-label="Like"
+          >
+            <FontAwesomeIcon icon={faHeart} />
+          </button>
+        </motion.div>
+
+        {/* ── Stats ────────────────────────────────────────────────────────── */}
+        <motion.div variants={sectionVariants}><StatsRow stats={stats} /></motion.div>
+
+      </div>
 
     </motion.div>
   );
@@ -356,10 +354,6 @@ function StatsRow({ stats }) {
       <div className={styles.stat}>
         <span className={`${styles.statCount} ${styles.passedCount}`}>{stats.passed}</span>
         <span className={styles.statLabel}>PASSED</span>
-      </div>
-      <div className={styles.stat}>
-        <span className={`${styles.statCount} ${styles.savedCount}`}>{stats.saved}</span>
-        <span className={styles.statLabel}>SAVED</span>
       </div>
     </div>
   );

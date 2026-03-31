@@ -92,6 +92,39 @@ public class JobsService : IJobsService
         return result;
     }
 
+    public async Task<string> SaveLikedJobs(List<SwipeDto> request, int userId)
+    {
+        var jobs = request.Select(job => new Job
+        {
+            ExternalId = job.Id,
+            Source = "Adzuna",
+            Title = job.Title,
+            Company = job.Company,
+            Location = job.Location,
+            SalaryMin = job.SalaryMin,
+            SalaryMax = job.SalaryMax ?? null,
+            Url = job.RedirectUrl,
+            Created = job.Created ?? null,
+            Description = job.Description,
+            Category = job.Category ?? null
+        }).ToList();
+
+        await _context.Jobs.AddRangeAsync(jobs);
+        await _context.SaveChangesAsync();
+
+        var swipes = jobs.Select((swipe, i) => new UserJobSwipe
+        {
+            UserId = userId,
+            JobId = swipe.JobId,
+            Action = request[i].Action
+        }).ToList();
+
+        await _context.UserJobSwipes.AddRangeAsync(swipes);
+        await _context.SaveChangesAsync();
+
+        return "Succeed";
+    }
+
     public async Task<List<JobResultDto>> CachedResults(int userId)
     {
         var key = $"Jobs:User:{userId}";

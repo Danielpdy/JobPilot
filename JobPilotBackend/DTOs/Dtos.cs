@@ -14,6 +14,9 @@ public record JobSearchRequestDto(string What, string? Where, int Page, int User
 public record JobResultDto(string Id, string Title, string Company, string Location, decimal? SalaryMin, decimal? SalaryMax,
     string Description, string RedirectUrl, string? Created, string? ContractTime = null, string? Category = null);
 
+public record SwipeDto(string Id, string Title, string Company, string Location, decimal? SalaryMin, decimal? SalaryMax,
+    string Description, string RedirectUrl, string Action, string? Created, string? ContractTime = null, string? Category = null);
+
 // Adzuna dtos
 public record AdzunaCompanyDto([property: System.Text.Json.Serialization.JsonPropertyName("display_name")] string? DisplayName);
 public record AdzunaLocationDto([property: System.Text.Json.Serialization.JsonPropertyName("display_name")] string? DisplayName);
