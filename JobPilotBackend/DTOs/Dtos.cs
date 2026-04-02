@@ -14,12 +14,15 @@ public record JobSearchRequestDto(string What, string? Where, int Page, int User
 public record JobResultDto(string Id, string Title, string Company, string Location, decimal? SalaryMin, decimal? SalaryMax,
     string RedirectUrl, string? Created, string? ContractTime = null, string? Category = null);
 
-public record SwipeDto(string Id, string Title, string Company, string Location, decimal? SalaryMin, decimal? SalaryMax,
-    string RedirectUrl, string Action, string? Created, string? ContractTime = null, string? Category = null);
+public record SwipeDto(string Id, string Title, string Company, string? Location, decimal? SalaryMin, decimal? SalaryMax,
+    string RedirectUrl, string Action, string? Created, string? ContractTime = null, string? Category = null, string? LocationSummary = null);
 
 // Adzuna dtos
 public record AdzunaCompanyDto([property: System.Text.Json.Serialization.JsonPropertyName("display_name")] string? DisplayName);
-public record AdzunaLocationDto([property: System.Text.Json.Serialization.JsonPropertyName("display_name")] string? DisplayName);
+public record AdzunaLocationDto(
+    [property: System.Text.Json.Serialization.JsonPropertyName("display_name")] string? DisplayName,
+    [property: System.Text.Json.Serialization.JsonPropertyName("area")] List<string>? Area
+);
 public record AdzunaCategoryDto([property: System.Text.Json.Serialization.JsonPropertyName("label")] string? Label);
 public record AdzunaJobDto(
     string? Id,
@@ -34,7 +37,22 @@ public record AdzunaJobDto(
     AdzunaCategoryDto? Category
 );
 public record AdzunaResponseDto(List<AdzunaJobDto>? Results);
-public record RedisRequestDto(string Key, List<JobResultDto> Jobs);
+public record RedisRequestDto(string Key, List<GroupedJobResultDto> Jobs);
+public record ApplyOptionDto(string Location, string RedirectUrl);
+public record GroupedJobResultDto(
+    string Id,
+    string Title,
+    string Company,
+    List<string> Locations,
+    string LocationSummary,
+    decimal? SalaryMin,
+    decimal? SalaryMax,
+    string RedirectUrl,
+    List<ApplyOptionDto> ApplyOptions,
+    string? Created,
+    string? ContractTime,
+    string? Category
+);
 
 
 

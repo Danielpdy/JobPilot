@@ -72,12 +72,13 @@ public class JobController : ControllerBase
                 s.Job.SalaryMax,
                 s.Job.Url,
                 DateHelper.JobPostDays(s.Job.Created),
-                null,              
+                null,
                 s.Job.Category
             ))
             .ToListAsync();
 
-        return Ok(jobs);
+        var distinct = jobs.DistinctBy(j => j.Id).ToList();
+        return Ok(distinct);
     }
 
     [HttpPost("swipes")]

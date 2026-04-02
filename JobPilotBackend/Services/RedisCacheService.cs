@@ -21,16 +21,16 @@ public class RedisCacheService : IRedisCacheService
         return jobs;
     }
 
-    public async Task<List<JobResultDto>> GetJobsAsync(string key)
+    public async Task<List<GroupedJobResultDto>> GetJobsAsync(string key)
     {
         var json = await _distributedCache.GetStringAsync(key);
         
         if (json is null)
         {
-            return new List<JobResultDto>();
+            return new List<GroupedJobResultDto>();
         }
 
-        var jobs = JsonSerializer.Deserialize<List<JobResultDto>>(json);
+        var jobs = JsonSerializer.Deserialize<List<GroupedJobResultDto>>(json);
 
         return jobs;
     }

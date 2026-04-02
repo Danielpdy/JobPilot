@@ -117,7 +117,7 @@ export default function JobMatches({ accessToken }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 280, damping: 24 }}
         >
-          <span className={styles.emptyEmoji}>💼</span>
+          <FontAwesomeIcon icon={faHeartCrack} className={styles.emptyIcon} />
           <h3>{search ? 'No jobs match your search.' : 'No liked jobs yet.'}</h3>
           <p>{search ? 'Try a different search term.' : 'Start swiping to save jobs you like.'}</p>
         </motion.div>
@@ -125,12 +125,13 @@ export default function JobMatches({ accessToken }) {
 
       {/* ── Grid ──────────────────────────────────────────────── */}
       <div className={styles.grid}>
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {filtered.map((job, i) => {
-            const color    = companyColor(job.company);
-            const initials = companyInitials(job.company);
-            const salary   = formatSalary(job.salaryMin, job.salaryMax);
-            const contract = contractLabel(job.contractTime);
+            const color           = companyColor(job.company);
+            const initials        = companyInitials(job.company);
+            const salary          = formatSalary(job.salaryMin, job.salaryMax);
+            const contract        = contractLabel(job.contractTime);
+            const locationDisplay = job.locationSummary || job.location;
 
             return (
               <motion.div
@@ -156,10 +157,10 @@ export default function JobMatches({ accessToken }) {
                     </div>
                     <div className={styles.cardInfo}>
                       <span className={styles.companyName}>{job.company}</span>
-                      {job.location && (
+                      {locationDisplay && (
                         <span className={styles.locationMini}>
                           <FontAwesomeIcon icon={faMapPin} className={styles.locationIcon} />
-                          {job.location}
+                          {locationDisplay}
                         </span>
                       )}
                     </div>

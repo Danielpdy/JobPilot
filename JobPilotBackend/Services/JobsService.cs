@@ -19,7 +19,7 @@ public class JobsService : IJobsService
         _context = context;
     }
 
-    public async Task<List<JobResultDto>> JobSearchAsync(JobSearchRequestDto request)
+    public async Task<List<GroupedJobResultDto>> JobSearchAsync(JobSearchRequestDto request)
     {
         var cacheResults = await CachedResults(request.UserId);
 
@@ -41,13 +41,13 @@ public class JobsService : IJobsService
         var where = request.Where;
         var page = request.Page <= 0 ? 1 : request.Page;
 
-        var url = 
+        var url =
             $"https://api.adzuna.com/v1/api/jobs/{country}/search/{page}" +
             $"?app_id={Uri.EscapeDataString(appId)}" +
             $"&app_key={Uri.EscapeDataString(appKey)}" +
             $"&what={Uri.EscapeDataString(what)}" +
             (string.IsNullOrWhiteSpace(where) ? "" : $"&where={Uri.EscapeDataString(where)}") +
-            $"&results_per_page=20" +
+            $"&results_per_page=50" +
             $"&content-type=application/json";
 
         var client = _httpClientFactory.CreateClient();
@@ -71,25 +71,96 @@ public class JobsService : IJobsService
 
         if (adzunaResponse?.Results == null)
         {
-            return new List<JobResultDto>();
+            return new List<GroupedJobResultDto>();
         }
 
-        var result = adzunaResponse.Results.Select(job => new JobResultDto(
-            Id: job.Id ?? string.Empty,
-            Title: job.Title ?? "Unknown title",
-            Company: job.Company?.DisplayName ?? "Unknown company",
-            Location: job.Location?.DisplayName ?? "Unknown location",
-            SalaryMin: job.SalaryMin,
-            SalaryMax: job.SalaryMax,
-            RedirectUrl: job.RedirectUrl ?? string.Empty,
-            Created: DateHelper.JobPostDays(job.Created),
-            ContractTime: job.ContractTime,
-            Category: job.Category?.Label
-        )).ToList();
+        var result = GroupJobs(adzunaResponse.Results);
 
         var key = $"Jobs:User:{request.UserId}";
         await _redisCacheService.AddJobsAsync(new RedisRequestDto(key, result));
         return result;
+    }
+
+    private static string FormatLocation(AdzunaLocationDto? location)
+    {
+        var area = location?.Area;
+        if (area != null && area.Count >= 2)
+        {
+            var city  = area[^1];
+            var state = area[1];
+            return $"{city}, {state}";
+        }
+        return location?.DisplayName ?? "";
+    }
+
+    private static string NormalizeKey(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+        var cleaned = System.Text.RegularExpressions.Regex.Replace(
+            input,
+            @"\s*[\(\-\|].*$",
+            "",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase
+        );
+        return cleaned.Trim().ToLowerInvariant();
+    }
+
+    private List<GroupedJobResultDto> GroupJobs(List<AdzunaJobDto> rawJobs)
+    {
+        var groups = new Dictionary<string, List<AdzunaJobDto>>();
+
+        foreach (var job in rawJobs)
+        {
+            var key = $"{NormalizeKey(job.Company?.DisplayName)}::{NormalizeKey(job.Title)}";
+            if (!groups.ContainsKey(key))
+                groups[key] = new List<AdzunaJobDto>();
+            groups[key].Add(job);
+        }
+
+        return groups.Values.Select(records =>
+        {
+            var first = records[0];
+
+            var locations = records
+                .Select(r => FormatLocation(r.Location))
+                .Where(l => !string.IsNullOrWhiteSpace(l))
+                .Distinct()
+                .ToList();
+
+            var locationSummary = locations.Count switch
+            {
+                0 => "Location unknown",
+                1 => locations[0],
+                2 or 3 => string.Join(" \u2022 ", locations),
+                _ => $"{string.Join(" \u2022 ", locations.Take(2))} \u2022 +{locations.Count - 2} more"
+            };
+
+            var salaryMins = records.Where(r => r.SalaryMin.HasValue).Select(r => r.SalaryMin!.Value).ToList();
+            var salaryMaxes = records.Where(r => r.SalaryMax.HasValue).Select(r => r.SalaryMax!.Value).ToList();
+
+            var applyOptions = records
+                .Where(r => !string.IsNullOrWhiteSpace(r.RedirectUrl))
+                .Select(r => new ApplyOptionDto(
+                    FormatLocation(r.Location) is { Length: > 0 } loc ? loc : "Unknown location",
+                    r.RedirectUrl!
+                ))
+                .ToList();
+
+            return new GroupedJobResultDto(
+                Id: first.Id ?? string.Empty,
+                Title: first.Title ?? "Unknown title",
+                Company: first.Company?.DisplayName ?? "Unknown company",
+                Locations: locations,
+                LocationSummary: locationSummary,
+                SalaryMin: salaryMins.Count > 0 ? salaryMins.Min() : null,
+                SalaryMax: salaryMaxes.Count > 0 ? salaryMaxes.Max() : null,
+                RedirectUrl: first.RedirectUrl ?? string.Empty,
+                ApplyOptions: applyOptions,
+                Created: DateHelper.JobPostDays(first.Created),
+                ContractTime: first.ContractTime,
+                Category: first.Category?.Label
+            );
+        }).ToList();
     }
 
     public async Task<string> SaveLikedJobs(List<SwipeDto> request, int userId)
@@ -100,7 +171,7 @@ public class JobsService : IJobsService
             Source = "Adzuna",
             Title = job.Title,
             Company = job.Company,
-            Location = job.Location,
+            Location = !string.IsNullOrWhiteSpace(job.LocationSummary) ? job.LocationSummary : job.Location,
             SalaryMin = job.SalaryMin,
             SalaryMax = job.SalaryMax ?? null,
             Url = job.RedirectUrl,
@@ -124,7 +195,7 @@ public class JobsService : IJobsService
         return "Succeed";
     }
 
-    public async Task<List<JobResultDto>> CachedResults(int userId)
+    public async Task<List<GroupedJobResultDto>?> CachedResults(int userId)
     {
         var key = $"Jobs:User:{userId}";
 
@@ -141,7 +212,7 @@ public class JobsService : IJobsService
 
         if(user.UsedRefreshes >= 10)
         {
-            return cacheJobs ?? new List<JobResultDto>();
+            return cacheJobs ?? new List<GroupedJobResultDto>();
         }
 
         return null;
