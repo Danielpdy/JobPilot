@@ -1,4 +1,5 @@
 
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -21,11 +22,18 @@ public class JobsService : IJobsService
 
     public async Task<List<GroupedJobResultDto>> JobSearchAsync(JobSearchRequestDto request)
     {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId);
+
+        if (user is null)
+        {
+            throw new NullReferenceException();
+        }
+
         var cacheResults = await CachedResults(request.UserId);
 
-        if(cacheResults is not null)
+        if (user.UsedRefreshes >= 10 && cacheResults is not null)
         {
-            return cacheResults;
+           return cacheResults;
         }
 
         var appId = _configuration["Adzuna:AppId"];
@@ -39,7 +47,7 @@ public class JobsService : IJobsService
 
         var what = request.What;
         var where = request.Where;
-        var page = request.Page <= 0 ? 1 : request.Page;
+        var page = user.UsedRefreshes;
 
         var url =
             $"https://api.adzuna.com/v1/api/jobs/{country}/search/{page}" +
@@ -78,6 +86,10 @@ public class JobsService : IJobsService
 
         var key = $"Jobs:User:{request.UserId}";
         await _redisCacheService.AddJobsAsync(new RedisRequestDto(key, result));
+
+        user.UsedRefreshes++;
+        await _context.SaveChangesAsync();
+
         return result;
     }
 
@@ -199,20 +211,11 @@ public class JobsService : IJobsService
     {
         var key = $"Jobs:User:{userId}";
 
-        var user = await _context.Users.FirstOrDefaultAsync( u => u.UserId == userId);
-
-        if(user is null) return null;
-
         var cacheJobs = await _redisCacheService.GetJobsAsync(key);
 
         if (cacheJobs is not null && cacheJobs.Count > 0)
         {
             return cacheJobs;
-        }
-
-        if(user.UsedRefreshes >= 10)
-        {
-            return cacheJobs ?? new List<GroupedJobResultDto>();
         }
 
         return null;

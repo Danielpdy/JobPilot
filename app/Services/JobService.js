@@ -21,9 +21,18 @@ export const GetLikedJobs = (accessToken) => {
 export const SaveSwipeBatch = (swipes, accessToken) => {
   return apiRequest("/job/swipes", {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`
     },
     method: "POST",
     body: JSON.stringify(swipes),
   });
+};
+
+export const UnlikeJobs = (externalId, accessToken) => {
+    return apiRequest(`/job/${externalId}/unlike`, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        },
+        method: "PATCH"
+    });
 };

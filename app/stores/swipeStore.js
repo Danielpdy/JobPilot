@@ -40,4 +40,14 @@ export const useSwipesStore = create((set, get) => ({
             return { pendingQueue: remaining };
         });
     },
+
+    updateQueueAction: (jobid, action) => {
+        set(state => {
+            const newQueue = state.pendingQueue.map(s =>
+                s.id === jobid ? { ...s, action } : s
+            );
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(newQueue));
+            return { pendingQueue: newQueue };
+        })
+    }
 }));

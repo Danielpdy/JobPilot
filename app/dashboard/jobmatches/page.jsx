@@ -10,10 +10,11 @@ import {
   faHeartCrack,
   faMagnifyingGlass,
   faChevronDown,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { useSwipesStore } from '@/app/stores/swipeStore';
 import styles from './page.module.css';
-import { GetLikedJobs } from '@/app/Services/JobService';
+import { GetLikedJobs, UnlikeJobs } from '@/app/Services/JobService';
 
 // ── Avatar helpers (same deterministic palette as swipe cards) ────────────────
 const PALETTE = [
@@ -52,12 +53,84 @@ const cardVariants = {
   exit:    { opacity: 0, scale: 0.88, transition: { duration: 0.18 } },
 };
 
+function parseLocations(job) {
+  if (job.applyOptions?.length > 0) return job.applyOptions;
+  if (job.locations?.length > 0) return job.locations.map(l => ({ location: l, redirectUrl: job.redirectUrl }));
+  const raw = job.locationSummary || job.location || '';
+  return raw.split(' • ')
+    .map(l => l.replace(/\s*\+\d+\s*more$/i, '').trim())
+    .filter(Boolean)
+    .map(l => ({ location: l, redirectUrl: job.redirectUrl }));
+}
+
+function LocationSheet({ job, onClose }) {
+  const color   = companyColor(job.company);
+  const options = parseLocations(job);
+
+  return (
+    <motion.div
+      className={styles.sheetOverlay}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+      onClick={onClose}
+    >
+      <motion.div
+        className={styles.sheet}
+        initial={{ opacity: 0, scale: 0.92, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.92, y: 16 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 36 }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className={styles.sheetHeader}>
+          <div className={styles.sheetHeaderText}>
+            <p className={styles.sheetCompany}>{job.company}</p>
+            <h3 className={styles.sheetTitle}>{job.title}</h3>
+          </div>
+          <button className={styles.sheetClose} onClick={onClose} aria-label="Close">
+            <FontAwesomeIcon icon={faXmark} />
+          </button>
+        </div>
+
+        <p className={styles.sheetSubtitle}>
+          {options.length} location{options.length !== 1 ? 's' : ''} available
+        </p>
+
+        <div className={styles.sheetList}>
+          {options.map((opt, i) => (
+            <div key={i} className={styles.sheetItem}>
+              <div className={styles.sheetItemDot} style={{ background: color }} />
+              <span className={styles.sheetItemLocation}>{opt.location}</span>
+            </div>
+          ))}
+          {job.redirectUrl && (
+            <a
+              href={job.redirectUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.sheetApplyBtn}
+              style={{ background: color }}
+            >
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare} className={styles.sheetApplyIcon} />
+              Apply for this job
+            </a>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function JobMatches({ accessToken }) {
   const likedJobs = useSwipesStore(s => s.likedJobs);
   const unlikeJob = useSwipesStore(s => s.unlikeJob);
 
-  const [search, setSearch] = useState('');
-  const [sort, setSort]     = useState('recent');
+  const [search, setSearch]         = useState('');
+  const [sort, setSort]             = useState('recent');
+  const [locationJob, setLocationJob] = useState(null);
+  const hydrateLiked = useSwipesStore(s => s.hydrateLiked);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -76,8 +149,29 @@ export default function JobMatches({ accessToken }) {
   }, [likedJobs, search, sort]);
 
   const getlikedJobs = async () => {
-    try { await GetLikedJobs(accessToken); }
-    catch (error) { console.error(error); }
+    try { 
+      const jobs = await GetLikedJobs(accessToken);
+      hydrateLiked(jobs); 
+    }
+    catch (error) { 
+      console.error(error); 
+    }
+  };
+
+  const unlikeJobs = async (externalId, token) => {
+    try{
+      const pending = useSwipesStore.getState().pendingQueue;
+      const isPending = pending.some(j => j.id === externalId && j.action === "liked");
+
+      if(isPending){
+        updateQueueAction(externalId, 'passed');
+      }
+
+      await UnlikeJobs(externalId, token);
+      unlikeJob(externalId)
+    } catch(error){
+      console.error(error);
+    };
   };
 
   return (
@@ -132,6 +226,8 @@ export default function JobMatches({ accessToken }) {
             const salary          = formatSalary(job.salaryMin, job.salaryMax);
             const contract        = contractLabel(job.contractTime);
             const locationDisplay = job.locationSummary || job.location;
+            const parsedLocations = parseLocations(job);
+            const hasMultiple     = parsedLocations.length > 1;
 
             return (
               <motion.div
@@ -158,9 +254,17 @@ export default function JobMatches({ accessToken }) {
                     <div className={styles.cardInfo}>
                       <span className={styles.companyName}>{job.company}</span>
                       {locationDisplay && (
-                        <span className={styles.locationMini}>
+                        <span
+                          className={`${styles.locationMini} ${hasMultiple ? styles.locationClickable : ''}`}
+                          onClick={hasMultiple ? () => setLocationJob(job) : undefined}
+                        >
                           <FontAwesomeIcon icon={faMapPin} className={styles.locationIcon} />
                           {locationDisplay}
+                          {hasMultiple && (
+                            <span className={styles.locationCount}>
+                              +{parsedLocations.length - 1}
+                            </span>
+                          )}
                         </span>
                       )}
                     </div>
@@ -200,7 +304,7 @@ export default function JobMatches({ accessToken }) {
                       <FontAwesomeIcon icon={faArrowUpRightFromSquare} className={styles.btnIcon} />
                       View Job
                     </a>
-                    <button className={styles.unlikeBtn} onClick={() => unlikeJob(job.id)}>
+                    <button className={styles.unlikeBtn} onClick={() => unlikeJobs(job.id, accessToken)}>
                       <FontAwesomeIcon icon={faHeartCrack} className={styles.btnIcon} />
                       Unlike
                     </button>
@@ -212,6 +316,10 @@ export default function JobMatches({ accessToken }) {
           })}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {locationJob && <LocationSheet job={locationJob} onClose={() => setLocationJob(null)} />}
+      </AnimatePresence>
 
     </div>
   );

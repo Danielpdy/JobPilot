@@ -9,7 +9,6 @@ export const useSwipeFlush = (accessToken) => {
     const flushQueue = useCallback(async () => {
       const batch = useSwipesStore.getState().pendingQueue;
       if (batch.length === 0) return;
-      console.log("Sending batch:", JSON.stringify(batch)); 
       clearFlushed(batch);
       await SaveSwipeBatch(batch, accessToken);
     }, [accessToken]);

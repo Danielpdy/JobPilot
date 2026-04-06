@@ -94,6 +94,11 @@ function CardBody({ card, onLocationClick }) {
               >
                 <FontAwesomeIcon icon={faMapPin} className={styles.locationIcon} />
                 {card.locationSummary || card.location}
+                {hasMultiple && (
+                  <span className={styles.locationCount}>
+                    +{(card.applyOptions?.length || card.locations?.length) - 1}
+                  </span>
+                )}
               </span>
             )}
           </div>

@@ -104,8 +104,8 @@ public class JobController : ControllerBase
 
     }
 
-    [HttpDelete("deletelikedjobs")]
-    public async Task<IActionResult> DeleteLikedJobs()
+    [HttpPatch("{externalId}/unlike")]
+    public async Task<IActionResult> DeleteLikedJobs(string externalId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -114,9 +114,22 @@ public class JobController : ControllerBase
             return Unauthorized();
         }
 
-        int id = int.Parse(userId);
+        var dislikedJob = await _context.Jobs
+            .Where(dj => dj.ExternalId == externalId)
+            .Select(dj => dj.JobId)
+            .FirstOrDefaultAsync();
 
-        return Ok();
+        var userSwipe = await _context.UserJobSwipes.FirstOrDefaultAsync(us => us.JobId == dislikedJob);
+
+        if(userSwipe is null)
+        {
+            return NotFound();
+        }
+
+        userSwipe.Action = "passed";
+        await _context.SaveChangesAsync();
+
+        return Ok("Job succesfully removed from job matches");
     }
 
 }
