@@ -29,7 +29,18 @@ public class JobsService : IJobsService
             throw new NullReferenceException();
         }
 
+        if(user.UsedRefreshes >= 10)
+        {
+            return null;
+        }
+
         var cacheResults = await CachedResults(request.UserId);
+
+        if (user.LastResetRefreshes.Date < DateTime.UtcNow.Date)
+        {
+            user.UsedRefreshes = 0;
+            user.LastResetRefreshes = DateTime.UtcNow;
+        }
 
         if (user.UsedRefreshes >= 10 && cacheResults is not null)
         {
@@ -47,7 +58,7 @@ public class JobsService : IJobsService
 
         var what = request.What;
         var where = request.Where;
-        var page = user.UsedRefreshes;
+        var page = user.UsedRefreshes + 1;
 
         var url =
             $"https://api.adzuna.com/v1/api/jobs/{country}/search/{page}" +
@@ -55,8 +66,7 @@ public class JobsService : IJobsService
             $"&app_key={Uri.EscapeDataString(appKey)}" +
             $"&what={Uri.EscapeDataString(what)}" +
             (string.IsNullOrWhiteSpace(where) ? "" : $"&where={Uri.EscapeDataString(where)}") +
-            $"&results_per_page=50" +
-            $"&content-type=application/json";
+            $"&results_per_page=50";
 
         var client = _httpClientFactory.CreateClient();
         var response = await client.GetAsync(url);
@@ -82,7 +92,17 @@ public class JobsService : IJobsService
             return new List<GroupedJobResultDto>();
         }
 
-        var result = GroupJobs(adzunaResponse.Results);
+        var swipeIds = await _context.UserJobSwipes
+            .Where(s => s.UserId == request.UserId)
+            .Include(s => s.Job)
+            .Select(s => s.Job.ExternalId)
+            .ToHashSetAsync();
+
+        var unseenJobs = adzunaResponse.Results
+            .Where(j => !swipeIds.Contains(j.Id))
+            .ToList();
+
+        var result = GroupJobs(unseenJobs);
 
         var key = $"Jobs:User:{request.UserId}";
         await _redisCacheService.AddJobsAsync(new RedisRequestDto(key, result));

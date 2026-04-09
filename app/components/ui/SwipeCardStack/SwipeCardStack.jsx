@@ -30,6 +30,19 @@ const sectionVariants = {
   visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 26 } },
 };
 
+// ── Location helpers ──────────────────────────────────────────────────────────
+function parseLocations(card) {
+  if (card.applyOptions?.length > 0) return card.applyOptions;
+  if (card.locations?.length > 0)
+    return card.locations.map(l => ({ location: l, redirectUrl: card.redirectUrl }));
+  const raw = card.locationSummary || card.location || '';
+  return raw
+    .split(' • ')
+    .map(l => l.replace(/\s*\+\d+\s*more$/i, '').trim())
+    .filter(Boolean)
+    .map(l => ({ location: l, redirectUrl: card.redirectUrl }));
+}
+
 // ── Avatar helpers ─────────────────────────────────────────────────────────────
 const PALETTE = [
   '#4a7fa5', '#5a9e6f', '#a0714f', '#7c5cbf',
@@ -68,11 +81,13 @@ function contractLabel(ct) {
 
 // ── Card body ─────────────────────────────────────────────────────────────────
 function CardBody({ card, onLocationClick }) {
-  const color    = companyColor(card.company);
-  const initials = companyInitials(card.company);
-  const salary   = formatSalary(card.salaryMin, card.salaryMax);
-  const contract = contractLabel(card.contractTime);
-  const hasMultiple = card.applyOptions?.length > 1 || card.locations?.length > 1;
+  const color          = companyColor(card.company);
+  const initials       = companyInitials(card.company);
+  const salary         = formatSalary(card.salaryMin, card.salaryMax);
+  const contract       = contractLabel(card.contractTime);
+  const parsedLocations = parseLocations(card);
+  const hasMultiple    = parsedLocations.length > 1;
+  const primaryLocation = parsedLocations[0]?.location || card.locationSummary || card.location;
 
   return (
     <>
@@ -86,18 +101,16 @@ function CardBody({ card, onLocationClick }) {
           </div>
           <div className={styles.companyBlock}>
             <span className={styles.companyName}>{card.company}</span>
-            {(card.locationSummary || card.location) && (
+            {primaryLocation && (
               <span
                 className={`${styles.locationMini} ${onLocationClick && hasMultiple ? styles.locationClickable : ''}`}
                 data-location={onLocationClick && hasMultiple ? 'true' : undefined}
                 onClick={onLocationClick && hasMultiple ? e => { e.stopPropagation(); onLocationClick(card); } : undefined}
               >
                 <FontAwesomeIcon icon={faMapPin} className={styles.locationIcon} />
-                {card.locationSummary || card.location}
+                {primaryLocation}
                 {hasMultiple && (
-                  <span className={styles.locationCount}>
-                    +{(card.applyOptions?.length || card.locations?.length) - 1}
-                  </span>
+                  <span className={styles.locationCount}>+{parsedLocations.length - 1}</span>
                 )}
               </span>
             )}
@@ -301,7 +314,7 @@ function FlyingCard({ card, x0, y0, direction, onComplete }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function SwipeCardStack({ jobs, loading }) {
+export default function SwipeCardStack({ jobs, loading, onRefresh }) {
   const { data: session } = useSession();
   const addSwipe = useSwipesStore(s => s.addSwipe);
   const { flushQueue, scheduleFlush, cancelFlush } = useSwipeFlush(session?.accessToken);
@@ -374,7 +387,10 @@ export default function SwipeCardStack({ jobs, loading }) {
           <FontAwesomeIcon icon={faBriefcase} className={styles.emptyIcon} />
           <h3>You&apos;ve seen all jobs!</h3>
           <p>Check back later for new matches.</p>
-          <button className={styles.resetBtn} onClick={() => { setCards(jobs ?? []); setStats({ liked: 0, passed: 0 }); }}>
+          <button className={styles.resetBtn} onClick={() => {
+            setStats({ liked: 0, passed: 0 });
+            onRefresh?.();
+            }}>
             Start Over
           </button>
         </motion.div>

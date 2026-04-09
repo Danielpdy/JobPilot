@@ -225,9 +225,9 @@ export default function JobMatches({ accessToken }) {
             const initials        = companyInitials(job.company);
             const salary          = formatSalary(job.salaryMin, job.salaryMax);
             const contract        = contractLabel(job.contractTime);
-            const locationDisplay = job.locationSummary || job.location;
-            const parsedLocations = parseLocations(job);
-            const hasMultiple     = parsedLocations.length > 1;
+            const parsedLocations  = parseLocations(job);
+            const hasMultiple      = parsedLocations.length > 1;
+            const primaryLocation  = parsedLocations[0]?.location || job.locationSummary || job.location;
 
             return (
               <motion.div
@@ -253,17 +253,15 @@ export default function JobMatches({ accessToken }) {
                     </div>
                     <div className={styles.cardInfo}>
                       <span className={styles.companyName}>{job.company}</span>
-                      {locationDisplay && (
+                      {primaryLocation && (
                         <span
                           className={`${styles.locationMini} ${hasMultiple ? styles.locationClickable : ''}`}
                           onClick={hasMultiple ? () => setLocationJob(job) : undefined}
                         >
                           <FontAwesomeIcon icon={faMapPin} className={styles.locationIcon} />
-                          {locationDisplay}
+                          {primaryLocation}
                           {hasMultiple && (
-                            <span className={styles.locationCount}>
-                              +{parsedLocations.length - 1}
-                            </span>
+                            <span className={styles.locationCount}>+{parsedLocations.length - 1}</span>
                           )}
                         </span>
                       )}

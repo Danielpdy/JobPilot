@@ -15,12 +15,13 @@ import { GetLikedJobs } from '../Services/JobService';
 import { useSwipesStore } from '../stores/swipeStore';
 import JobSwipes from './jobswipes/page';
 import JobMatches from './jobmatches/page';
+import ResumeAnalyzer from './resumeAnalyzer/page';
 
 const sidebarItems = [
   { label: 'Swipe Jobs',   icon: <FontAwesomeIcon icon={faLayerGroup} style={{ width: 16, height: 16 }} /> },
   { label: 'Job Matches',  icon: <FontAwesomeIcon icon={faBriefcase}  style={{ width: 16, height: 16 }} /> },
   { label: 'Applications', icon: <FontAwesomeIcon icon={faFile}       style={{ width: 16, height: 16 }} /> },
-  { label: 'Resume',       icon: <FontAwesomeIcon icon={faFileLines}  style={{ width: 16, height: 16 }} /> },
+  { label: 'Resume Analyzer', icon: <FontAwesomeIcon icon={faFileLines}  style={{ width: 16, height: 16 }} /> },
 ];
 
 const settingsItems = [
@@ -34,7 +35,7 @@ const contentTabs = [
   { label: 'Recent' },
 ];
 
-const pageMap = ['Swipe Jobs', 'Job Matches', 'Applications', 'Saved Jobs', 'Resume'];
+const pageMap = ['Swipe Jobs', 'Job Matches', 'Applications', 'Resume Analyzer'];
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -83,6 +84,7 @@ export default function DashboardPage() {
   };
 
   const getJobListing = async () => {
+    setJobsLoading(true);
     try{
       const jobs = await GetNewJobs(session.accessToken);
       setJobList(jobs);
@@ -165,13 +167,20 @@ export default function DashboardPage() {
 
         {/* Swipe Jobs section */}
         {mainIndex === 0 && (
-          <JobSwipes jobs={jobList} loading={jobsLoading} />
+          <JobSwipes jobs={jobList} loading={jobsLoading} onRefresh={getJobListing} />
         )}
 
         {/* Job Matches section */}
         {mainIndex === 1 && (
           <div className={styles.swipeArea}>
             <JobMatches accessToken={session.accessToken} />
+          </div>
+        )}
+
+        {/* Resume Builder section */}
+        {mainIndex === 3 && (
+          <div className={styles.swipeArea}>
+            <ResumeAnalyzer />
           </div>
         )}
 
