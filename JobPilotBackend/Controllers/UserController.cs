@@ -13,9 +13,11 @@ using System.Reflection.Metadata;
 public class UserController : ControllerBase
 {
     private readonly JobPilotDbContext _context;
-    public UserController(JobPilotDbContext context)
+    private readonly IUserService _userService;
+    public UserController(JobPilotDbContext context, IUserService userService)
     {
         _context = context;
+        _userService = userService;
     }
 
     [HttpPost("registerprofile")]
@@ -63,5 +65,27 @@ public class UserController : ControllerBase
             message = "Profile created succesfully",
             isOnboarded = user.IsOnboarded
         });
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<string>> UploadResume(UploadResumeRequestDto request)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+        
+        int id = int.Parse(userId);
+
+        var resume = await _userService.UploadResumeAsync(request, id);
+
+        if(resume is null || resume != "success")
+        {
+            return BadRequest("Something went wrong uploading pdf");
+        }
+
+        return Ok("Resume succesfully uploaded");
     }
 }

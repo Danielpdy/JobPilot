@@ -53,6 +53,7 @@ public record GroupedJobResultDto(
     string? ContractTime,
     string? Category
 );
+public record UploadResumeRequestDto(IFormFile File);
 
 
 
