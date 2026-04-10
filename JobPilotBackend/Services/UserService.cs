@@ -1,4 +1,6 @@
 
+using ErrorOr;
+
 public class UserService : IUserService
 {
     private readonly JobPilotDbContext _context;
@@ -8,20 +10,20 @@ public class UserService : IUserService
         _context = context;
     }
 
-    public async Task<string> UploadResumeAsync(UploadResumeRequestDto request, int userId)
+    public async Task<ErrorOr<Success>> UploadResumeAsync(UploadResumeRequestDto request, int userId)
     {
         var file = request.File;
 
         if (file is null || file.Length == 0)
         {
-            throw new ArgumentException("No file was founded");
+            return UserErrors.InvalidResume;
         }
 
         var maxFileSizeBytes = 5 * 1024 * 1024;
 
         if (file.Length > maxFileSizeBytes)
         {
-            throw new ArgumentException("File exceeded the maximum allow size");
+            return UserErrors.ExceededSizeAllowed;
         }
 
         await using var memoryStream = new MemoryStream();
@@ -42,6 +44,6 @@ public class UserService : IUserService
         _context.UserResumes.Add(userResume);
         await _context.SaveChangesAsync();
 
-        return("success");
+        return Result.Success;
     }
 }

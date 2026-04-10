@@ -2,6 +2,19 @@
   "version": 3,
   "targets": {
     "net9.0": {
+      "ErrorOr/2.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/ErrorOr.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/ErrorOr.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Google.Apis/1.73.0": {
         "type": "package",
         "dependencies": {
@@ -1309,6 +1322,23 @@
     }
   },
   "libraries": {
+    "ErrorOr/2.0.1": {
+      "sha512": "aje9lUVEAsusPFmaRcVM5EUqWBofd7hYtb9N8+ycgPYrtOzyFajMpzRgIO4uuiCllNLBc3x48+cpA+4v4koUDQ==",
+      "type": "package",
+      "path": "erroror/2.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "erroror.2.0.1.nupkg.sha512",
+        "erroror.nuspec",
+        "icon-square.png",
+        "lib/net6.0/ErrorOr.dll",
+        "lib/net6.0/ErrorOr.xml",
+        "lib/netstandard2.0/ErrorOr.dll",
+        "lib/netstandard2.0/ErrorOr.xml"
+      ]
+    },
     "Google.Apis/1.73.0": {
       "sha512": "TnCjEyV2aCLQ6Zl40OCbEJULDuEkEWc6C/g81KYw5l1PqGo+G7pFZrV+YH8XgUL0JRUanz+IrUp8SsKF4dzkqg==",
       "type": "package",
@@ -3716,6 +3746,7 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
+      "ErrorOr >= 2.0.1",
       "Google.Apis.Auth >= 1.73.0",
       "Google.GenAI >= 1.5.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 9.0.2",
@@ -3770,6 +3801,10 @@
       "net9.0": {
         "targetAlias": "net9.0",
         "dependencies": {
+          "ErrorOr": {
+            "target": "Package",
+            "version": "[2.0.1, )"
+          },
           "Google.Apis.Auth": {
             "target": "Package",
             "version": "[1.73.0, )"

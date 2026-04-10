@@ -1,6 +1,8 @@
 'use client';
 import { useState, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { Upload, Sparkles, BarChart2, ArrowRight, Zap } from 'lucide-react';
+import { uploadResumeRequest } from '@/app/Services/ResumeService';
 import styles from './emptyState.module.css';
 
 const MAX_ANALYSES = 3;
@@ -11,7 +13,7 @@ const steps = [
   { Icon: BarChart2, title: 'Improve', desc: 'Get score & feedback'   },
 ];
 
-export default function ResumeBuilder() {
+export default function EmptyState({ token }) {
   const [file, setFile]                 = useState(null);
   const [dragging, setDragging]         = useState(false);
   const [isAnalyzing, setIsAnalyzing]   = useState(false);
@@ -33,14 +35,12 @@ export default function ResumeBuilder() {
   const onDragLeave   = ()  => setDragging(false);
 
   const handleAnalyze = async () => {
-    if (!file || analysesLeft <= 0 || isAnalyzing) return;
-    setIsAnalyzing(true);
-    // TODO: call real API
-    await new Promise(r => setTimeout(r, 2000));
-    setScore(72);
-    setFeedback('Your resume is well-structured. Consider adding quantified achievements to your experience section and tailoring keywords to each job description to improve ATS compatibility.');
-    setAnalysesLeft(n => n - 1);
-    setIsAnalyzing(false);
+    try{
+      var response = await uploadResumeRequest(file, token);
+      
+    }catch(error){
+      console.error(error);
+    }
   };
 
   /* ── Score ring ─────────────────────────────────────────── */

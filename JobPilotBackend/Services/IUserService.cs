@@ -1,5 +1,8 @@
 
+using ErrorOr;
+using Microsoft.AspNetCore.Mvc;
+
 public interface IUserService
 {
-    Task<string> UploadResumeAsync(UploadResumeRequestDto request, int userId);
+    Task<ErrorOr<Success>> UploadResumeAsync(UploadResumeRequestDto request, int userId);
 }

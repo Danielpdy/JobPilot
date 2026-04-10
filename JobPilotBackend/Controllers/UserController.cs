@@ -67,8 +67,8 @@ public class UserController : ControllerBase
         });
     }
 
-    [HttpPost]
-    public async Task<ActionResult<string>> UploadResume(UploadResumeRequestDto request)
+    [HttpPost("uploadresume")]
+    public async Task<ActionResult<string>> UploadResume([FromForm] UploadResumeRequestDto request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
