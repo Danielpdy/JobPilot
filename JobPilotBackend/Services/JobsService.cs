@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using ErrorOr;
 
 public class JobsService : IJobsService
 {
@@ -20,21 +21,21 @@ public class JobsService : IJobsService
         _context = context;
     }
 
-    public async Task<List<GroupedJobResultDto>> JobSearchAsync(JobSearchRequestDto request)
+    public async Task<ErrorOr<List<GroupedJobResultDto>>> JobSearchAsync(int userId)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (user is null)
         {
-            throw new NullReferenceException();
+            return UserErrors.NotFound;
         }
 
         if(user.UsedRefreshes >= 10)
         {
-            return null;
+            return UserErrors.NotRefreshesLeft;
         }
 
-        var cacheResults = await CachedResults(request.UserId);
+        var cacheResults = await CachedResults(userId);
 
         if (user.LastResetRefreshes.Date < DateTime.UtcNow.Date)
         {
@@ -54,6 +55,13 @@ public class JobsService : IJobsService
         if (string.IsNullOrWhiteSpace(appId) || string.IsNullOrWhiteSpace(appKey) || string.IsNullOrWhiteSpace(country))
         {
             throw new Exception("Invalid Adzuna credentials");
+        }
+
+        var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+
+        if(userProfile is null)
+        {
+            return UserProfileErrors.NotFound;
         }
 
         var what = request.What;

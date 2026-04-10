@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Reflection.Metadata;
+using ErrorOr;
 
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class UserController : ControllerBase
+public class UserController : BaseApiController
 {
     private readonly JobPilotDbContext _context;
     private readonly IUserService _userService;
@@ -21,54 +22,27 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("registerprofile")]
-    public async Task<ActionResult<Object>> RegisterProfile(RegisterProfileDto request)
+    public async Task<IActionResult> RegisterProfile(RegisterProfileDto request)
     {
-        if (request == null)
-        {
-            return BadRequest();
-        }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (id is null)
+        if (userId is null)
         {
             return Unauthorized();
         }
 
-        int userId = int.Parse(id);
+        int id = int.Parse(userId);
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+        var result = await _userService.RegisterProfileAsync(request, id);
 
-        if (user is null)
-        {
-            return NotFound();
-        }
-
-        var newUser = new UserProfile
-        {
-            UserId = userId,
-            JobTitle = request.JobTitle,
-            ExperienceLevel = request.ExperienceLevel,
-            Skills = request.Skills,
-            WorkType = request.WorkType,
-            SalaryRange = request.SalaryRange,
-            PreferredLocation = request.PreferredLocation,
-        };
-
-        user.IsOnboarded = true;
-
-        _context.UserProfiles.Add(newUser);
-        await _context.SaveChangesAsync();
-
-        return Ok(new
-        {
-            message = "Profile created succesfully",
-            isOnboarded = user.IsOnboarded
-        });
+        return result.Match(
+            _ => NoContent(),
+            errors => MapErrors(errors)
+        );
     }
 
     [HttpPost("uploadresume")]
-    public async Task<ActionResult<string>> UploadResume([FromForm] UploadResumeRequestDto request)
+    public async Task<IActionResult> UploadResume([FromForm] UploadResumeRequestDto request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -79,13 +53,11 @@ public class UserController : ControllerBase
         
         int id = int.Parse(userId);
 
-        var resume = await _userService.UploadResumeAsync(request, id);
+        var result = await _userService.UploadResumeAsync(request, id);
 
-        if(resume is null || resume != "success")
-        {
-            return BadRequest("Something went wrong uploading pdf");
-        }
-
-        return Ok("Resume succesfully uploaded");
+        return result.Match(
+            _ => NoContent(),
+            errors => MapErrors(errors)
+        );
     }
 }

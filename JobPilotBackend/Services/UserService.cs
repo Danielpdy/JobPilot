@@ -1,5 +1,6 @@
 
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
 
 public class UserService : IUserService
 {
@@ -16,14 +17,14 @@ public class UserService : IUserService
 
         if (file is null || file.Length == 0)
         {
-            return UserErrors.InvalidResume;
+            return UserProfileErrors.InvalidResume;
         }
 
         var maxFileSizeBytes = 5 * 1024 * 1024;
 
         if (file.Length > maxFileSizeBytes)
         {
-            return UserErrors.ExceededSizeAllowed;
+            return UserProfileErrors.ExceededSizeAllowed;
         }
 
         await using var memoryStream = new MemoryStream();
@@ -45,5 +46,39 @@ public class UserService : IUserService
         await _context.SaveChangesAsync();
 
         return Result.Success;
+    }
+
+    public async Task<ErrorOr<Success>> RegisterProfileAsync(RegisterProfileDto request, int userId)
+    {
+        if(request is null)
+        {
+            return UserProfileErrors.InvalidResume;
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+
+        if(user is null)
+        {
+            return UserErrors.NotFound;
+        }
+
+        var newUserProfile = new UserProfile
+        {
+            UserId = userId,
+            JobTitle = request.JobTitle,
+            ExperienceLevel =request.ExperienceLevel,
+            Skills = request.Skills,
+            WorkType = request.WorkType,
+            SalaryRange = request.SalaryRange,
+            PreferredLocation = request.PreferredLocation
+        };
+
+        user.IsOnboarded = true;
+
+        _context.UserProfiles.Add(newUserProfile);
+        await _context.SaveChangesAsync();
+
+        return Result.Success;
+
     }
 }

@@ -17,12 +17,8 @@ public static class UserErrors
         description: "This account is deactivated."
     );
 
-    public static readonly Error InvalidResume = Error.Validation(
-        code: "User.InvalidResume",
-        description: "No valid resume file was provided."
-    );
-    public static readonly Error ExceededSizeAllowed = Error.Validation(
-        code: "User.ExceededSizeAllowed",
-        description: "File exceeds size allowed."
+    public static readonly Error NotRefreshesLeft = Error.Validation(
+        code: "User.NotRefreshesLeft",
+        description: "No Refreshes token Left. Refreshesh reset at 12:00am"
     );
 }

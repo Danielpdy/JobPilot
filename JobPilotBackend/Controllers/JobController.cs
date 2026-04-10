@@ -42,7 +42,7 @@ public class JobController : ControllerBase
             What: userProfile.JobTitle,
             Where: userProfile.PreferredLocation,
             Page: 1,
-            UserId: id
+            id: id
         ));
 
         return Ok(jobs);

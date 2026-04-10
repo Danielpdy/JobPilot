@@ -10,7 +10,7 @@ public record RefreshTokenRequestDto(string RefreshToken);
 public record TokenResponseDto(string AccessToken, string RefreshToken, bool IsOnboarded);
 public record RegisterProfileDto(string JobTitle, string ExperienceLevel, List<string> Skills, 
 string WorkType, string SalaryRange, string? PreferredLocation);
-public record JobSearchRequestDto(string What, string? Where, int Page, int UserId);
+public record JobSearchRequestDto(string What, string? Where, int Page);
 public record JobResultDto(string Id, string Title, string Company, string Location, decimal? SalaryMin, decimal? SalaryMax,
     string RedirectUrl, string? Created, string? ContractTime = null, string? Category = null);
 
