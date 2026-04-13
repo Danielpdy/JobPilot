@@ -3,12 +3,13 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ErrorOr;
 
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
 
-public class JobController : ControllerBase
+public class JobController : BaseApiController
 {
     private readonly IJobsService _jobsService;
     private readonly JobPilotDbContext _context;
@@ -20,7 +21,7 @@ public class JobController : ControllerBase
     }
 
     [HttpGet("jobs")]
-    public async Task<ActionResult<List<JobResultDto>>> GetJobListing()
+    public async Task<IActionResult> GetJobListing()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -31,25 +32,16 @@ public class JobController : ControllerBase
 
         int id = int.Parse(userId);
 
-        var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == id);
+        var jobs = await _jobsService.JobSearchAsync(id);
 
-        if (userProfile is null)
-        {
-            return NotFound("User profile not found");
-        };
-
-        var jobs = await _jobsService.JobSearchAsync(new JobSearchRequestDto(
-            What: userProfile.JobTitle,
-            Where: userProfile.PreferredLocation,
-            Page: 1,
-            id: id
-        ));
-
-        return Ok(jobs);
+        return jobs.Match(
+            result => Ok(result),
+            errors => MapErrors(errors)
+        );
     }
 
     [HttpGet("likedjobs")]
-    public async Task<ActionResult<List<JobResultDto>>> GetLikedJobs()
+    public async Task<IActionResult> GetLikedJobs()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -60,29 +52,16 @@ public class JobController : ControllerBase
 
         int id = int.Parse(userId);
 
-        var jobs = await _context.UserJobSwipes
-            .Where(s => s.UserId == id && s.Action == "liked")
-            .Include(s => s.Job)
-            .Select(s => new JobResultDto(
-                s.Job.ExternalId,
-                s.Job.Title,
-                s.Job.Company,
-                s.Job.Location,
-                s.Job.SalaryMin,
-                s.Job.SalaryMax,
-                s.Job.Url,
-                DateHelper.JobPostDays(s.Job.Created),
-                null,
-                s.Job.Category
-            ))
-            .ToListAsync();
+        var likedJobs = await _jobsService.GetLikedJobs(id);
 
-        var distinct = jobs.DistinctBy(j => j.Id).ToList();
-        return Ok(distinct);
+        return likedJobs.Match(
+            jobs => Ok(jobs),
+            errors => MapErrors(errors)
+        );
     }
 
     [HttpPost("swipes")]
-    public async Task<ActionResult<string>> SaveSwipes(List<SwipeDto> request)
+    public async Task<IActionResult> SaveSwipes(List<SwipeDto> request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -95,12 +74,10 @@ public class JobController : ControllerBase
 
        var swipes = await _jobsService.SaveLikedJobs(request, id);
 
-       if (swipes != "Succeed")
-        {
-            return BadRequest("Saving swipes failed");
-        }
-
-        return Ok("Jobs Saved Succesfully");
+       return swipes.Match(
+            _ => NoContent(),
+            errors => MapErrors(errors)
+       );
 
     }
 

@@ -64,8 +64,8 @@ public class JobsService : IJobsService
             return UserProfileErrors.NotFound;
         }
 
-        var what = request.What;
-        var where = request.Where;
+        var what = userProfile.JobTitle;
+        var where = userProfile.PreferredLocation;
         var page = user.UsedRefreshes + 1;
 
         var url =
@@ -101,7 +101,7 @@ public class JobsService : IJobsService
         }
 
         var swipeIds = await _context.UserJobSwipes
-            .Where(s => s.UserId == request.UserId)
+            .Where(s => s.UserId == userId)
             .Include(s => s.Job)
             .Select(s => s.Job.ExternalId)
             .ToHashSetAsync();
@@ -112,13 +112,42 @@ public class JobsService : IJobsService
 
         var result = GroupJobs(unseenJobs);
 
-        var key = $"Jobs:User:{request.UserId}";
+        var key = $"Jobs:User:{userId}";
         await _redisCacheService.AddJobsAsync(new RedisRequestDto(key, result));
 
         user.UsedRefreshes++;
         await _context.SaveChangesAsync();
 
         return result;
+    }
+
+    public async Task<ErrorOr<List<JobResultDto>>> GetLikedJobs(int userId)
+    {
+        var likedJobs = await _context.UserJobSwipes
+            .Where(j => j.UserId == userId && j.Action == "liked")
+            .Include(j => j.Job)
+            .Select(j => new JobResultDto(
+                j.Job.ExternalId,
+                j.Job.Title,
+                j.Job.Company,
+                j.Job.Location,
+                j.Job.SalaryMin,
+                j.Job.SalaryMax,
+                j.Job.Url,
+                DateHelper.JobPostDays(j.Job.Created),
+                null,
+                j.Job.Category
+            ))
+            .ToListAsync();
+
+        if (likedJobs is null)
+        {
+            return JobErrors.LikedJobsNotFound;
+        }
+
+        var distinct = likedJobs.DistinctBy(j => j.Id).ToList();
+
+        return distinct;
     }
 
     private static string FormatLocation(AdzunaLocationDto? location)
@@ -203,8 +232,13 @@ public class JobsService : IJobsService
         }).ToList();
     }
 
-    public async Task<string> SaveLikedJobs(List<SwipeDto> request, int userId)
+    public async Task<ErrorOr<Success>> SaveLikedJobs(List<SwipeDto> request, int userId)
     {
+        if( request is null)
+        {
+            return JobErrors.InvalidSwipes;
+        }
+
         var jobs = request.Select(job => new Job
         {
             ExternalId = job.Id,
@@ -226,13 +260,15 @@ public class JobsService : IJobsService
         {
             UserId = userId,
             JobId = swipe.JobId,
-            Action = request[i].Action
-        }).ToList();
+            Action = request[i].Action,
+            SwipedAt = DateTime.UtcNow
+        })
+        .ToList();
 
         await _context.UserJobSwipes.AddRangeAsync(swipes);
         await _context.SaveChangesAsync();
 
-        return "Succeed";
+        return Result.Success;
     }
 
     public async Task<List<GroupedJobResultDto>?> CachedResults(int userId)

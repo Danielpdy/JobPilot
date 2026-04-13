@@ -9,7 +9,7 @@ public class UserProfileErrors
         code: "UserProfile.ExceededSizeAllowed",
         description: "File exceeds size allowed."
     );
-    public static readonly Error NotFound = Error.Validation(
+    public static readonly Error NotFound = Error.NotFound(
         code: "UserProfile.NotFound",
         description: "No user profile found."
     );
