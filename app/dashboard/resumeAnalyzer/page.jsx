@@ -7,8 +7,8 @@ export default function ResumeAnalyzer() {
   const { data: session } = useSession();
   return (
     <div>
-      
-      <EmptyState token={session.accessToken}/>
+      <Preview />
+      {/*<EmptyState token={session.accessToken} />*/}
     </div>
   );
 }

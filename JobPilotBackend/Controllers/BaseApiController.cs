@@ -14,6 +14,7 @@ public class BaseApiController : ControllerBase
             ErrorType.Conflict   => 409,
             ErrorType.Forbidden  => 403,
             ErrorType.Validation => 400,
+            ErrorType.Unauthorized => 401,
             _                    => 500
         };
 

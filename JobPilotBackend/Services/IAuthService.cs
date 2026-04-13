@@ -1,7 +1,9 @@
+using ErrorOr;
+
 public interface IAuthService
 {
-    Task<User> RegisterAsync(SignupDto request);
-    Task<TokenResponseDto> LoginAsync(LoginDto request);
-    Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
-    Task<TokenResponseDto> OauthAsync(OauthDto request);
+    Task<ErrorOr<Success>> RegisterAsync(SignupDto request);
+    Task<ErrorOr<TokenResponseDto>> LoginAsync(LoginDto request);
+    Task<ErrorOr<TokenResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request);
+    Task<ErrorOr<TokenResponseDto>> OauthAsync(OauthDto request);
 }

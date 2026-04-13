@@ -298,3 +298,4 @@
 /Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/Pipelines.Sockets.Unofficial.dll
 /Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/StackExchange.Redis.dll
 /Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/System.Diagnostics.DiagnosticSource.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/ErrorOr.dll

@@ -3,7 +3,9 @@ using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ErrorOr;
 
 public class AuthService : IAuthService
 {
@@ -17,16 +19,20 @@ public class AuthService : IAuthService
         _context = context;
         _configuration = configuration;
     }
-    public async Task<TokenResponseDto> LoginAsync(LoginDto request)
+    public async Task<ErrorOr<TokenResponseDto>> LoginAsync(LoginDto request)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
-        if (user is null) return null;
+        if (user is null)
+        {
+            return UserErrors.NotFound;
+        }
+        ;
 
         if(new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHashed, request.Password)
             == PasswordVerificationResult.Failed)
         {
-            return null;
+            return AuthErrors.IncorrectPassword;
         }
 
         var tokenResponse = new TokenResponseDto(
@@ -38,7 +44,7 @@ public class AuthService : IAuthService
         return tokenResponse;
     }
 
-    public async Task<TokenResponseDto> OauthAsync(OauthDto request)
+    public async Task<ErrorOr<TokenResponseDto>> OauthAsync(OauthDto request)
     {
         string email, firstName, lastName;
 
@@ -62,22 +68,32 @@ public class AuthService : IAuthService
             http.DefaultRequestHeaders.Add("User-Agent", "JobPilot");
 
             var response = await http.GetAsync("https://api.github.com/user");
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode)
+            {
+                return AuthErrors.AuthGithubFailed;
+            };
 
             using var json = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
             var root = json.RootElement;
 
             email = root.GetProperty("email").GetString() ?? "";
-            if (string.IsNullOrEmpty(email)) return null;
+            if (string.IsNullOrEmpty(email))
+            {
+                return AuthErrors.GitHubEmailNotPublic;
+            };
 
             var name = root.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "";
             var parts = name.Split(' ', 2);
             firstName = parts[0];
             lastName = parts.Length > 1 ? parts[1] : "";
         }
-        else return null;
+        else
+        {
+            return AuthErrors.OAuthFailed;
+        }
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
         if (user is null)
         {
             user = new User
@@ -90,6 +106,7 @@ public class AuthService : IAuthService
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
+        
 
         return new TokenResponseDto(
             AccessToken: _jwtService.CreateToken(user),
@@ -98,11 +115,15 @@ public class AuthService : IAuthService
         );
     }
 
-    public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
+    public async Task<ErrorOr<TokenResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.RefreshToken);
 
-        if (user is null) return null;
+        if (user is null)
+        {
+            return AuthErrors.NotRefreshTokenFound;
+        }
+        ;
 
         var tokenResponse = new TokenResponseDto(
             AccessToken: _jwtService.CreateToken(user),
@@ -113,11 +134,11 @@ public class AuthService : IAuthService
         return tokenResponse;
     }
 
-    public async Task<User> RegisterAsync(SignupDto request)
+    public async Task<ErrorOr<Success>> RegisterAsync(SignupDto request)
     {
         if (await _context.Users.AnyAsync(u => u.Email == request.Email))
         {
-            return null;
+            return UserErrors.EmailTaken;
         }
 
         var PasswordHashed = new PasswordHasher<User>()
@@ -135,7 +156,7 @@ public class AuthService : IAuthService
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        return user;
+        return Result.Success;
 
     }
 }
