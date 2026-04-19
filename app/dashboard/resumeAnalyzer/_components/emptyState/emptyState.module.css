@@ -249,6 +249,149 @@
   line-height: 1.7;
 }
 
+/* ── Loading state ───────────────────────────────────────── */
+.loadingWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  width: 100%;
+  margin: 0 auto;
+  background: linear-gradient(160deg, rgba(10, 196, 224, 0.05) 0%, transparent 55%);
+  border-radius: 24px;
+}
+
+.loadingModule {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(11, 45, 114, 0.08);
+  border-radius: 20px;
+  padding: 36px 40px;
+  box-shadow: 0 4px 32px rgba(11, 45, 114, 0.10), 0 1px 4px rgba(11, 45, 114, 0.06);
+  width: 100%;
+  max-width: 520px;
+}
+
+.loadingTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ── Horizontal step row ─────────────────────────────────── */
+.hStepRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.hStepGroup {
+  display: flex;
+  align-items: center;
+}
+
+.hStepItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Icons ───────────────────────────────────────────────── */
+.hStepIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.hStepIconDone    { background: rgba(9, 146, 194, 0.10); }
+.hStepIconPending { background: #F3F4F6; }
+.hStepIconActive  {
+  background: rgba(9, 146, 194, 0.16);
+  box-shadow: 0 0 0 5px rgba(9, 146, 194, 0.08), 0 0 16px rgba(9, 146, 194, 0.16);
+}
+
+.hStepCheck {
+  width: 16px !important;
+  height: 16px !important;
+  color: #0992C2;
+  stroke-width: 2;
+}
+
+.hStepActiveIcon {
+  width: 16px !important;
+  height: 16px !important;
+  color: #0992C2;
+  display: block;
+  stroke-width: 2;
+}
+
+.hStepPendingIcon {
+  width: 14px !important;
+  height: 14px !important;
+  color: #D1D5DB;
+  display: block;
+  stroke-width: 1.75;
+}
+
+/* ── Horizontal connector ────────────────────────────────── */
+.hConnectorWrapper {
+  position: relative;
+  width: 40px;
+  height: 2px;
+  margin: 0 6px;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.hConnectorTrack {
+  position: absolute;
+  inset: 0;
+  background: #E5E7EB;
+  border-radius: 2px;
+}
+
+.hConnectorFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: #0992C2;
+  border-radius: 2px;
+}
+
+/* ── Labels ──────────────────────────────────────────────── */
+.hStepLabel {
+  font-size: 0.75rem;
+}
+
+.hStepLabelDone    { color: #9CA3AF; font-weight: 400; }
+.hStepLabelActive  { color: #0992C2; font-weight: 700; }
+.hStepLabelPending { color: #D1D5DB; font-weight: 400; }
+
+/* ── Active subtext ──────────────────────────────────────── */
+.activeSubtext {
+  font-size: 0.85rem;
+  color: #6B7280;
+  text-align: center;
+  min-height: 1.25em;
+}
+
+/* ── Step count ──────────────────────────────────────────── */
+.stepCount {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 600px) {
   .stepsRow {

@@ -1,0 +1,387 @@
+/* ── Layout ──────────────────────────────────────────────── */
+.page {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 4px 0 40px;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 280px;
+  flex-shrink: 0;
+}
+
+/* ── Card ────────────────────────────────────────────────── */
+.card {
+  background: #ffffff;
+  border: 1px solid rgba(11, 45, 114, 0.07);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(11, 45, 114, 0.05);
+}
+
+/* ── User header ─────────────────────────────────────────── */
+.userRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(10, 196, 224, 0.14);
+  color: #0B2D72;
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.userName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.userTitle {
+  font-size: 0.9rem;
+  color: #6B7280;
+}
+
+.userMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.userMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  color: #6B7280;
+}
+
+.userMetaIcon {
+  width: 13px !important;
+  height: 13px !important;
+  color: #9CA3AF;
+  flex-shrink: 0;
+}
+
+.editBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid #E5E7EB;
+  background: #ffffff;
+  color: #374151;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.editBtn:hover {
+  border-color: #0AC4E0;
+  background: rgba(10, 196, 224, 0.04);
+}
+
+.editIcon {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+/* ── Section header ──────────────────────────────────────── */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.sectionIcon {
+  width: 18px !important;
+  height: 18px !important;
+  color: #0B2D72;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  flex: 1;
+}
+
+/* ── Career info grid ────────────────────────────────────── */
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #F3F4F6;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.infoCell {
+  padding: 14px 16px;
+  border-bottom: 1px solid #F3F4F6;
+  border-right: 1px solid #F3F4F6;
+}
+
+.infoCell:nth-child(even) {
+  border-right: none;
+}
+
+.infoCell:nth-last-child(-n+2) {
+  border-bottom: none;
+}
+
+.infoCellLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #9CA3AF;
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+}
+
+.infoCellValue {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.infoCellHighlight {
+  color: #0992C2;
+  font-weight: 600;
+}
+
+/* ── Skills ──────────────────────────────────────────────── */
+.addSkillBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0992C2;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.addSkillPlus {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(11, 45, 114, 0.06);
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* ── Resume context ──────────────────────────────────────── */
+.resumeRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.resumeIconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(11, 45, 114, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.resumeFileIcon {
+  width: 20px !important;
+  height: 20px !important;
+  color: #0B2D72;
+}
+
+.resumeInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.resumeName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resumeSub {
+  font-size: 0.8rem;
+  color: #6B7280;
+  margin: 3px 0 8px;
+}
+
+.scoreBarTrack {
+  height: 5px;
+  background: #F3F4F6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.scoreBarFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  background: #ffffff;
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.viewBtn:hover {
+  border-color: #0AC4E0;
+}
+
+.viewIcon {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.noResume {
+  font-size: 0.85rem;
+  color: #9CA3AF;
+}
+
+/* ── Quick stats ─────────────────────────────────────────── */
+.statRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid #F3F4F6;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.statValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ── Activity ────────────────────────────────────────────── */
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.activityIconWrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(11, 45, 114, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activityIcon {
+  width: 15px !important;
+  height: 15px !important;
+  color: #0B2D72;
+}
+
+.activityLabel {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+}
+
+.activityValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page {
+    flex-direction: column;
+  }
+
+  .right {
+    width: 100%;
+  }
+
+  .userRow {
+    flex-wrap: wrap;
+  }
+
+  .editBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -12,15 +12,15 @@ export const LoginProvider = (provider) => {
     return apiRequest("/auth/oauth", {
         method: "POST",
         body: JSON.stringify(provider)
-    })
-}
+    });
+};
 
 export const RefreshToken = (refreshToken) => {
     return apiRequest("/auth/refresh", {
         method: "POST",
         body: JSON.stringify({ refreshToken })
-    })
-}
+    });
+};
 
 export const Register = (userData) => {
     return apiRequest("/auth/register", {
@@ -36,5 +36,14 @@ export const RegisterProfile = (userInformation, accessToken) => {
         },
         method: "POST",
         body: JSON.stringify(userInformation)
+    });
+};
+
+export const GetUserProfile = (accessToken) => {
+    return apiRequest("/user/userprofile", {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        },
+        method: "GET"
     });
 };

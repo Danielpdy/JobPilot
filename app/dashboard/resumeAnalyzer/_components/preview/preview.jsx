@@ -1,8 +1,17 @@
 'use client';
 import { motion, useMotionValue, useTransform, animate } from 'motion/react';
-import { useEffect } from 'react';
-import { FileText, Upload, Download, CheckCircle2, AlertCircle, Lightbulb, RotateCcw, Zap, X, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { FileText, Upload, Download, Lightbulb, RotateCcw, Zap, X, Sparkles } from 'lucide-react';
+import { getAnalysis, getResume } from '@/app/Services/ResumeService';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 import styles from './preview.module.css';
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 const fadeUp = (delay = 0) => ({
   initial:    { opacity: 0, y: 24 },
@@ -10,31 +19,6 @@ const fadeUp = (delay = 0) => ({
   transition: { type: 'spring', stiffness: 280, damping: 26, delay },
 });
 
-/* ── SAMPLE DATA — replace with API response later ───────── */
-const SAMPLE = {
-  fileName:      'John_Doe_Resume.pdf',
-  fileSize:      '245 KB',
-  creditsLeft:   3,
-  score:         82,
-  scoreLabel:    'Strong Overall',
-  scoreSubtitle: 'With room for improvement in key areas',
-  strengths: [
-    'Clear and concise professional summary',
-    'Strong technical skills aligned with role',
-    'Good use of action verbs throughout',
-  ],
-  weaknesses: [
-    'Lacks quantifiable achievements',
-    'Formatting inconsistencies across sections',
-    'Education section lacks detail',
-  ],
-  improvements: [
-    'Add measurable impact (e.g., "Improved performance by 25%")',
-    'Standardize spacing and typography',
-    'Expand education or add notable projects',
-  ],
-};
-/* ────────────────────────────────────────────────────────── */
 
 function ScoreRing({ score }) {
   const radius = 54;
@@ -75,8 +59,39 @@ function ScoreRing({ score }) {
   );
 }
 
-export default function Preview({ onUploadNew, onReanalyze }) {
-  const d = SAMPLE;
+export default function Preview({ onUploadNew, token }) {
+
+  const [pdfUrl, setPdfUrl]     = useState(null);
+  const [fileName, setFileName] = useState('');
+  const [fileSize, setFileSize] = useState('');
+  const [numPages, setNumPages] = useState(null);
+  const [pageWidth, setPageWidth] = useState(300);
+  const [resumeAnalysis, setResumeAnalysis] = useState({});
+
+  useEffect(() => {
+    if (!token) return;
+
+    analysis();
+
+    getResume(token)
+      .then(({ pdfUrl, fileName, fileSize }) => {
+        setPdfUrl(pdfUrl);
+        setFileName(fileName);
+        setFileSize((fileSize / 1024).toFixed(0) + ' KB');
+      })
+      .catch((err) => console.error(err));
+
+    return () => URL.revokeObjectURL(pdfUrl);
+  }, [token]);
+
+  const analysis = async () => {
+    try{
+      const response = await getAnalysis(token);
+      setResumeAnalysis(response);
+    }catch(error){
+      console.error(error);
+    }
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -87,8 +102,8 @@ export default function Preview({ onUploadNew, onReanalyze }) {
         {/* File bar */}
         <div className={styles.fileBar}>
           <FileText className={styles.fileBarIcon} />
-          <span className={styles.fileName}>{d.fileName.replace(/(.{12}).*(\.\w+)$/, '$1…$2')}</span>
-          <span className={styles.fileSize}>{d.fileSize}</span>
+          <span className={styles.fileName}>{fileName.replace(/(.{12}).*(\.\w+)$/, '$1…$2')}</span>
+          <span className={styles.fileSize}>{fileSize}</span>
           <button className={styles.uploadNewBtn} onClick={onUploadNew}>
             <Upload className={styles.uploadNewIcon} />
             Upload New
@@ -98,29 +113,51 @@ export default function Preview({ onUploadNew, onReanalyze }) {
           </button>
         </div>
 
-        {/* Skeleton preview */}
-        <div className={styles.previewArea}>
-          <div className={styles.skeletonPage}>
-            <div className={`${styles.skLine} ${styles.skTitle}`} />
-            <div className={`${styles.skLine} ${styles.skMd}`} />
-            <div className={`${styles.skLine} ${styles.skLg}`} />
-            <div className={`${styles.skLine} ${styles.skSm}`} />
-            <div className={styles.skGap} />
-            <div className={`${styles.skLine} ${styles.skLg}`} />
-            <div className={`${styles.skLine} ${styles.skMd}`} />
-            <div className={`${styles.skLine} ${styles.skLg}`} />
-            <div className={`${styles.skLine} ${styles.skSm}`} />
-            <div className={styles.skGap} />
-            <div className={`${styles.skLine} ${styles.skMd}`} />
-            <div className={`${styles.skLine} ${styles.skLg}`} />
-            <div className={styles.skGap} />
-            <div className={styles.skChipsRow}>
-              <div className={styles.skChip} />
-              <div className={styles.skChip} />
-              <div className={styles.skChip} />
+        {/* PDF preview */}
+        <div
+          className={styles.previewArea}
+          ref={el => { if (el) setPageWidth(el.clientWidth - 32); }}
+        >
+          {pdfUrl && (
+            <Document
+              file={pdfUrl}
+              onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+              className={styles.pdfDocument}
+              loading={null}
+            >
+              {Array.from({ length: numPages }, (_, i) => (
+                <Page
+                  key={i + 1}
+                  pageNumber={i + 1}
+                  width={pageWidth}
+                  className={styles.pdfPage}
+                />
+              ))}
+            </Document>
+          )}
+          {(!pdfUrl || !numPages) && (
+            <div className={styles.skeletonPage}>
+              <div className={`${styles.skLine} ${styles.skTitle}`} />
+              <div className={`${styles.skLine} ${styles.skMd}`} />
+              <div className={`${styles.skLine} ${styles.skLg}`} />
+              <div className={`${styles.skLine} ${styles.skSm}`} />
+              <div className={styles.skGap} />
+              <div className={`${styles.skLine} ${styles.skLg}`} />
+              <div className={`${styles.skLine} ${styles.skMd}`} />
+              <div className={`${styles.skLine} ${styles.skLg}`} />
+              <div className={`${styles.skLine} ${styles.skSm}`} />
+              <div className={styles.skGap} />
+              <div className={`${styles.skLine} ${styles.skMd}`} />
+              <div className={`${styles.skLine} ${styles.skLg}`} />
+              <div className={styles.skGap} />
+              <div className={styles.skChipsRow}>
+                <div className={styles.skChip} />
+                <div className={styles.skChip} />
+                <div className={styles.skChip} />
+              </div>
+              <div className={`${styles.skLine} ${styles.skSm}`} />
             </div>
-            <div className={`${styles.skLine} ${styles.skSm}`} />
-          </div>
+          )}
         </div>
 
         {/* Download bar */}
@@ -139,11 +176,11 @@ export default function Preview({ onUploadNew, onReanalyze }) {
         {/* Score card */}
         <motion.div className={styles.card} {...fadeUp(0.08)}>
           <div className={styles.scoreRow}>
-            <ScoreRing score={d.score} />
+            <ScoreRing score={resumeAnalysis.resumeScore ?? 0} />
             <div className={styles.scoreInfo}>
               <p className={styles.scoreLabel}>RESUME SCORE</p>
-              <p className={styles.scoreTitle}>{d.scoreLabel}</p>
-              <p className={styles.scoreSub}>{d.scoreSubtitle}</p>
+              <p className={styles.scoreTitle}>{resumeAnalysis.scoreLabel ?? ''}</p>
+              <p className={styles.scoreSub}>{resumeAnalysis.scoreSummary ?? ''}</p>
               <p className={styles.aiIndicator}>
                 <Sparkles className={styles.aiIndicatorIcon} />
                 AI-powered analysis
@@ -152,44 +189,8 @@ export default function Preview({ onUploadNew, onReanalyze }) {
           </div>
         </motion.div>
 
-        {/* Strengths + Weaknesses + Improvements card */}
+        {/* Improvements card */}
         <motion.div className={styles.card} {...fadeUp(0.16)}>
-
-          {/* Strengths */}
-          <div className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <CheckCircle2 className={styles.sectionIconGreen} />
-              <h3 className={styles.sectionTitle}>Strengths</h3>
-            </div>
-            <ul className={styles.bulletList}>
-              {d.strengths.map((s, i) => (
-                <li key={i} className={styles.bulletItem}>
-                  <span className={styles.dotGreen} />
-                  {s}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <hr className={styles.divider} />
-
-          {/* Weaknesses */}
-          <div className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <AlertCircle className={styles.sectionIconRed} />
-              <h3 className={styles.sectionTitle}>Weaknesses</h3>
-            </div>
-            <ul className={styles.bulletList}>
-              {d.weaknesses.map((w, i) => (
-                <li key={i} className={styles.bulletItem}>
-                  <span className={styles.dotRed} />
-                  {w}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <hr className={styles.divider} />
 
           {/* Improvements */}
           <div className={`${styles.section} ${styles.improvementsSection}`}>
@@ -198,7 +199,7 @@ export default function Preview({ onUploadNew, onReanalyze }) {
               <h3 className={styles.sectionTitle}>Improvements</h3>
             </div>
             <ul className={styles.bulletList}>
-              {d.improvements.map((imp, i) => (
+              {(resumeAnalysis.improvements ?? []).map((imp, i) => (
                 <li key={i} className={styles.bulletItem}>
                   <span className={styles.dotBlue} />
                   {imp}
@@ -211,13 +212,13 @@ export default function Preview({ onUploadNew, onReanalyze }) {
 
         {/* Re-analyze card */}
         <motion.div className={styles.card} {...fadeUp(0.24)}>
-          <button className={styles.reanalyzeBtn} onClick={onReanalyze}>
+          <button className={styles.reanalyzeBtn}>
             <RotateCcw className={styles.reanalyzeIcon} />
             Re-analyze Resume
           </button>
           <p className={styles.creditsLeft}>
             <Zap className={styles.creditsIcon} />
-            {d.creditsLeft} credits remaining
+3 credits remaining
           </p>
         </motion.div>
 

@@ -14,7 +14,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:3000")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .WithExposedHeaders("X-File-Size", "X-File-Name");
     });
 });
 
@@ -50,6 +51,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJobsService, JobsService>();
 builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IResumeAnalyzerService, ResumeAnalyzerService>();
 builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 

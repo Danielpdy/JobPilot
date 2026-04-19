@@ -30,22 +30,23 @@ public class JobsService : IJobsService
             return UserErrors.NotFound;
         }
 
-        if(user.UsedRefreshes >= 10)
-        {
-            return UserErrors.NotRefreshesLeft;
-        }
-
-        var cacheResults = await CachedResults(userId);
-
         if (user.LastResetRefreshes.Date < DateTime.UtcNow.Date)
         {
             user.UsedRefreshes = 0;
             user.LastResetRefreshes = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
         }
 
-        if (user.UsedRefreshes >= 10 && cacheResults is not null)
+        var cacheResults = await CachedResults(userId);
+
+        if (cacheResults is not null)
         {
            return cacheResults;
+        }
+
+        if(user.UsedRefreshes >= 10)
+        {
+            return UserErrors.NotRefreshesLeft;
         }
 
         var appId = _configuration["Adzuna:AppId"];

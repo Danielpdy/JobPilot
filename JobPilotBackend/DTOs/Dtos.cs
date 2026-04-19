@@ -2,6 +2,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json.Serialization;
 
 public record SignupDto(string FirstName, string LastName, string Email, string Password);
 public record LoginDto(string Email, string Password);
@@ -54,6 +55,23 @@ public record GroupedJobResultDto(
     string? Category
 );
 public record UploadResumeRequestDto(IFormFile File);
+public record ResumeAnalysisDto(
+    int UserId,
+    [property: JsonPropertyName("resume_score")] int ResumeScore,
+    [property: JsonPropertyName("score_label")] string ScoreLabel,
+    [property: JsonPropertyName("score_summary")] string ScoreSummary,
+    [property: JsonPropertyName("actionable_improvements")] List<string> Improvements
+);
+public record UserProfileDto(
+    string UserFirstName,
+    string UserLastName,
+    string UserEmail,
+    string UserJobTitle,
+    string UserExperienceLevel,
+    string UserWorkType,
+    string UserSalaryRange,
+    List<string> UserSkills
+);
 
 
 

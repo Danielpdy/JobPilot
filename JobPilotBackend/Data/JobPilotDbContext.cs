@@ -11,4 +11,5 @@ public class JobPilotDbContext : DbContext
     public DbSet<Job> Jobs { get; set; }
     public DbSet<UserJobSwipe> UserJobSwipes { get; set; }
     public DbSet<UserResume> UserResumes { get; set; }
+    public DbSet<ResumeAnalysisResult> ResumeAnalysisResults { get; set; }
 }

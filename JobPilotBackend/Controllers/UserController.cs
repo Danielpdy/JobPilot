@@ -41,8 +41,28 @@ public class UserController : BaseApiController
         );
     }
 
-    [HttpPost("uploadresume")]
-    public async Task<IActionResult> UploadResume([FromForm] UploadResumeRequestDto request)
+    [HttpGet("userprofile")]
+    public async Task<IActionResult> GetUserProfile()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        int id = int.Parse(userId);
+
+        var userProfile = await _userService.GetUserProfileAsync(id);
+
+        return userProfile.Match(
+            profile => Ok(profile),
+            errors => MapErrors(errors)
+        );
+    }
+
+    /*[HttpPost("uploadresume")]
+    public async Task<IActionResult> UploadAnalyze([FromForm] UploadResumeRequestDto request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -59,5 +79,5 @@ public class UserController : BaseApiController
             _ => NoContent(),
             errors => MapErrors(errors)
         );
-    }
+    }*/
 }

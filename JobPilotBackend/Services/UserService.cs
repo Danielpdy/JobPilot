@@ -11,20 +11,20 @@ public class UserService : IUserService
         _context = context;
     }
 
-    public async Task<ErrorOr<Success>> UploadResumeAsync(UploadResumeRequestDto request, int userId)
+    /*public async Task<ErrorOr<Success>> UploadResumeAsync(UploadResumeRequestDto request, int userId)
     {
         var file = request.File;
 
         if (file is null || file.Length == 0)
         {
-            return UserProfileErrors.InvalidResume;
+            return ResumeErrors.InvalidResume;
         }
 
         var maxFileSizeBytes = 5 * 1024 * 1024;
 
         if (file.Length > maxFileSizeBytes)
         {
-            return UserProfileErrors.ExceededSizeAllowed;
+            return ResumeErrors.ExceededSizeAllowed;
         }
 
         await using var memoryStream = new MemoryStream();
@@ -46,13 +46,13 @@ public class UserService : IUserService
         await _context.SaveChangesAsync();
 
         return Result.Success;
-    }
+    }*/
 
     public async Task<ErrorOr<Success>> RegisterProfileAsync(RegisterProfileDto request, int userId)
     {
         if(request is null)
         {
-            return UserProfileErrors.InvalidResume;
+            return ResumeErrors.InvalidResume;
         }
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
@@ -80,5 +80,33 @@ public class UserService : IUserService
 
         return Result.Success;
 
+    }
+
+    public async Task<ErrorOr<UserProfileDto>> GetUserProfileAsync(int userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+
+        if(user is null)
+        {
+            return UserErrors.NotFound;
+        }
+
+        var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+
+        if (userProfile is null)
+        {
+            return UserProfileErrors.NotFound;
+        }
+
+        return new UserProfileDto(
+            UserFirstName: user.FirstName,
+            UserLastName: user.LastName,
+            UserEmail: user.Email,
+            UserJobTitle: userProfile.JobTitle,
+            UserExperienceLevel: userProfile.ExperienceLevel,
+            UserWorkType: userProfile.WorkType,
+            UserSalaryRange: userProfile.SalaryRange,
+            UserSkills: userProfile.Skills
+        );
     }
 }

@@ -16,6 +16,7 @@ import { useSwipesStore } from '../stores/swipeStore';
 import JobSwipes from './jobswipes/page';
 import JobMatches from './jobmatches/page';
 import ResumeAnalyzer from './resumeAnalyzer/page';
+import ProfilePage from './profile/page';
 
 const sidebarItems = [
   { label: 'Swipe Jobs',   icon: <FontAwesomeIcon icon={faLayerGroup} style={{ width: 16, height: 16 }} /> },
@@ -35,7 +36,8 @@ const contentTabs = [
   { label: 'Recent' },
 ];
 
-const pageMap = ['Swipe Jobs', 'Job Matches', 'Applications', 'Resume Analyzer'];
+const pageMap        = ['Swipe Jobs', 'Job Matches', 'Applications', 'Resume Analyzer'];
+const settingsMap    = ['Profile', 'Settings'];
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -146,7 +148,9 @@ export default function DashboardPage() {
               <span className={`${styles.menuLine} ${sidebarOpen ? styles.menuLine2Open : ''}`} />
               <span className={`${styles.menuLine} ${sidebarOpen ? styles.menuLine3Open : ''}`} />
             </button>
-            <h1 className={styles.pageTitle}>{pageMap[activePage]}</h1>
+            <h1 className={styles.pageTitle}>
+              {activeSection === 'settings' ? settingsMap[settingsIndex] : pageMap[activePage]}
+            </h1>
           </div>
           <div className={styles.topBarRight}>
             <div className={styles.avatar}>DP</div>
@@ -181,6 +185,13 @@ export default function DashboardPage() {
         {mainIndex === 3 && (
           <div className={styles.swipeArea}>
             <ResumeAnalyzer />
+          </div>
+        )}
+
+        {/* Profile section */}
+        {activeSection === 'settings' && settingsIndex === 0 && (
+          <div className={styles.swipeArea}>
+            <ProfilePage />
           </div>
         )}
 

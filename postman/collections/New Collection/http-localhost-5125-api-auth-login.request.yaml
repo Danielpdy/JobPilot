@@ -1,0 +1,10 @@
+$kind: http-request
+name: http://localhost:5125/api/auth/login
+url: http://localhost:5125/api/auth/login
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: ""
+order: 1776288454209

@@ -299,3 +299,14 @@
 /Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/StackExchange.Redis.dll
 /Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/System.Diagnostics.DiagnosticSource.dll
 /Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/ErrorOr.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/Json.More.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/JsonPointer.Net.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/JsonSchema.Net.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/JsonSchema.Net.Generation.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/Microsoft.Extensions.Configuration.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/Microsoft.Extensions.Configuration.Binder.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/Microsoft.Extensions.Diagnostics.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/Microsoft.Extensions.Diagnostics.Abstractions.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/Microsoft.Extensions.Http.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll
+/Users/danielpinzon/JobPilot/JobPilotBackend/bin/Debug/net9.0/Mscc.GenerativeAI.dll

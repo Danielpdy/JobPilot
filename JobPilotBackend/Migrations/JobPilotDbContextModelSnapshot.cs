@@ -73,6 +73,40 @@ namespace JobPilotBackend.Migrations
                     b.ToTable("Jobs");
                 });
 
+            modelBuilder.Entity("ResumeAnalysisResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.PrimitiveCollection<List<string>>("Improvements")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<int>("ResumeScore")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ScoreLabel")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ScoreSummary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ResumeAnalysisResults");
+                });
+
             modelBuilder.Entity("User", b =>
                 {
                     b.Property<int>("UserId")

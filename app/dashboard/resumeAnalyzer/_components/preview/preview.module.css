@@ -14,7 +14,7 @@
   border: 1px solid rgba(11, 45, 114, 0.08);
   border-radius: 16px;
   background: #ffffff;
-  overflow: hidden;
+  overflow: clip;
   box-shadow: 0 2px 12px rgba(11, 45, 114, 0.06);
 }
 
@@ -103,8 +103,8 @@
 /* ── Skeleton preview ────────────────────────────────────── */
 .previewArea {
   flex: 1;
-  padding: 20px;
   background: #F9FAFB;
+  overflow-y: auto;
 }
 
 .skeletonPage {
@@ -142,6 +142,21 @@
   width: 60px;
   border-radius: 999px;
   background: #E5E7EB;
+}
+
+/* ── PDF (react-pdf) ─────────────────────────────────────── */
+.pdfDocument {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.pdfPage {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* ── Download bar ────────────────────────────────────────── */

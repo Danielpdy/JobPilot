@@ -32,10 +32,10 @@ export const authOptions = {
           return null;
         }
 
-        if (!data?.token?.accessToken || !data?.token?.refreshToken)
+        if (!data?.accessToken || !data?.refreshToken)
           return null;
 
-        const decoded = jwtDecode(data.token.accessToken);
+        const decoded = jwtDecode(data.accessToken);
 
         const user = {
           id: decoded.sub,
@@ -48,10 +48,10 @@ export const authOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          accessToken: data.token.accessToken,
-          refreshToken: data.token.refreshToken,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
           accessTokenExpiresAt: user.expiracy,
-          IsOnboarded: data.token.isOnboarded,
+          IsOnboarded: data.isOnboarded,
         };
       },
     }),
@@ -95,12 +95,12 @@ export const authOptions = {
           provider: account.provider,
         });
 
-        if (!data?.token?.accessToken) {
+        if (!data?.accessToken) {
           token.error = "OAuth backend exchange failed";
           return token;
         }
 
-        const decoded = jwtDecode(data.token.accessToken);
+        const decoded = jwtDecode(data.accessToken);
 
         const user = {
           id: decoded.sub,
@@ -113,10 +113,10 @@ export const authOptions = {
           email: user.email,
           name: user.name,
         };
-        token.accessToken = data.token.accessToken;
-        token.refreshToken = data.token.refreshToken;
+        token.accessToken = data.accessToken;
+        token.refreshToken = data.refreshToken;
         token.accessTokenExpiresAt = user.expiracy;
-        token.IsOnboarded = data.token.isOnboarded;
+        token.IsOnboarded = data.isOnboarded;
         token.error = undefined;
         return token;
       }
@@ -133,14 +133,14 @@ export const authOptions = {
         try {
           const request = await RefreshToken(token.refreshToken);
 
-          if (request?.token?.accessToken) {
-            const decoded = jwtDecode(request.token.accessToken);
+          if (request?.accessToken) {
+            const decoded = jwtDecode(request.accessToken);
             const refreshed = {
               expiracy: decoded.exp,
             };
 
-            token.accessToken = request.token.accessToken;
-            token.refreshToken = request.token.refreshToken;
+            token.accessToken = request.accessToken;
+            token.refreshToken = request.refreshToken;
             token.accessTokenExpiresAt = refreshed.expiracy;
             token.error = undefined;
             return token;
