@@ -41,6 +41,32 @@ public class UserController : BaseApiController
         );
     }
 
+    [HttpGet("jobrefreshesleft")]
+    public async Task<IActionResult> GetJobRefreshesLeft()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null) return Unauthorized();
+
+        var result = await _userService.GetJobRefreshesLeftAsync(int.Parse(userId));
+        return result.Match(
+            data   => Ok(data),
+            errors => MapErrors(errors)
+        );
+    }
+
+    [HttpGet("analysesused")]
+    public async Task<IActionResult> GetAnalysesUsed()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null) return Unauthorized();
+
+        var result = await _userService.GetAnalysesUsedAsync(int.Parse(userId));
+        return result.Match(
+            data   => Ok(data),
+            errors => MapErrors(errors)
+        );
+    }
+
     [HttpGet("userprofile")]
     public async Task<IActionResult> GetUserProfile()
     {

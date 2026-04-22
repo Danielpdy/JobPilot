@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Upload, Sparkles, BarChart2, ArrowRight, Zap, CheckCircle, FileText, Search } from 'lucide-react';
 import { analyzeResume } from '@/app/Services/ResumeService';
+import { GetAnalysesUsed } from '@/app/Services/UserService';
 import { motion } from 'motion/react';
 import styles from './emptyState.module.css';
 
@@ -37,6 +38,7 @@ const STEP_TIMINGS = [0, 2000, 6000, 16000];
 
 const MAX_ANALYSES = 3;
 
+
 const steps = [
   { Icon: Upload,    title: 'Upload',  desc: 'Drop your PDF resume'   },
   { Icon: Sparkles,  title: 'Analyze', desc: 'AI reviews your resume' },
@@ -49,7 +51,14 @@ export default function EmptyState({ token, onAnalyzed }) {
   const [isAnalyzing, setIsAnalyzing]   = useState(false);
   const [score, setScore]               = useState(null);
   const [feedback, setFeedback]         = useState(null);
-  const [analysesLeft, setAnalysesLeft] = useState(MAX_ANALYSES);
+  const [analysesLeft, setAnalysesLeft] = useState(null);
+
+  useEffect(() => {
+    if (!token) return;
+    GetAnalysesUsed(token)
+      .then(data => setAnalysesLeft(data.resumeAnalyses))
+      .catch(() => setAnalysesLeft(MAX_ANALYSES));
+  }, [token]);
   const inputRef       = useRef(null);
   const stepTimersRef  = useRef([]);
   const currentStepRef = useRef(0);
@@ -278,15 +287,15 @@ export default function EmptyState({ token, onAnalyzed }) {
       {/* ── Analyses count ───────────────────────────────────── */}
       <p className={styles.analysesCount}>
         <Zap className={styles.analysesIcon} />
-        <strong>{analysesLeft}</strong> free {analysesLeft === 1 ? 'analysis' : 'analyses'} available
+        <strong>{analysesLeft ?? '—'}</strong> of {MAX_ANALYSES} free {analysesLeft === 1 ? 'analysis' : 'analyses'} remaining
       </p>
 
       {/* ── Analyze button (shown once file is loaded) ───────── */}
       {file && (
         <button
-          className={`${styles.analyzeBtn} ${(analysesLeft <= 0 || isAnalyzing) ? styles.analyzeBtnDisabled : ''}`}
+          className={`${styles.analyzeBtn} ${(analysesLeft !== null && analysesLeft <= 0 || isAnalyzing) ? styles.analyzeBtnDisabled : ''}`}
           onClick={handleAnalyze}
-          disabled={analysesLeft <= 0 || isAnalyzing}
+          disabled={analysesLeft !== null && analysesLeft <= 0 || isAnalyzing}
         >
           <Sparkles className={styles.analyzeBtnIcon} />
           {isAnalyzing ? 'Analyzing…' : 'Analyze Resume'}

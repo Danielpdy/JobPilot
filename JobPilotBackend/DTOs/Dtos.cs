@@ -62,6 +62,8 @@ public record ResumeAnalysisDto(
     [property: JsonPropertyName("score_summary")] string ScoreSummary,
     [property: JsonPropertyName("actionable_improvements")] List<string> Improvements
 );
+public record ResumeAnalysesDto(int ResumeAnalyses);
+public record JobRefreshesDto(int RefreshesLeft);
 public record UserProfileDto(
     string UserFirstName,
     string UserLastName,

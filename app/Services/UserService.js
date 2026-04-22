@@ -47,3 +47,20 @@ export const GetUserProfile = (accessToken) => {
         method: "GET"
     });
 };
+
+export const GetJobRefreshesLeft = (accessToken) => {
+    return apiRequest("/user/jobrefreshesleft", {
+        headers: { "Authorization": `Bearer ${accessToken}` },
+        method: "GET"
+    });
+};
+
+export const GetAnalysesUsed = (accessToken) => {
+    return apiRequest("/user/analysesused", {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        },
+        method: "GET"
+    });
+};
+

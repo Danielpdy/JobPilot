@@ -6,15 +6,8 @@ import {
   Clock, BarChart2, Activity, RefreshCw, Mail,
 } from 'lucide-react';
 import { getResume, getAnalysis, existResume } from '@/app/Services/ResumeService';
-import { GetUserProfile } from '@/app/Services/UserService';
+import { GetUserProfile, GetAnalysesUsed, GetJobRefreshesLeft } from '@/app/Services/UserService';
 import styles from './page.module.css';
-
-// Only data we have no endpoints for yet
-const HARDCODED_ACTIVITY = [
-  { Icon: Clock,     label: 'Last analysis',        value: 'April 17, 2026' },
-  { Icon: FileText,  label: 'Resume analyses left',  value: '3 of 3'         },
-  { Icon: RefreshCw, label: 'Job refreshes left',    value: '5 of 5'         },
-];
 
 function Initials({ name }) {
   const letter = (name ?? '?').trim()[0] ?? '?';
@@ -25,10 +18,12 @@ export default function ProfilePage() {
   const { data: session } = useSession();
   const token = session?.accessToken;
 
-  const [profile,   setProfile]   = useState(null);
-  const [resume,    setResume]    = useState(null);
-  const [score,     setScore]     = useState(null);
-  const [hasResume, setHasResume] = useState(false);
+  const [profile,      setProfile]      = useState(null);
+  const [resume,       setResume]       = useState(null);
+  const [score,        setScore]        = useState(null);
+  const [hasResume,    setHasResume]    = useState(false);
+  const [analysesLeft,  setAnalysesLeft]  = useState(null);
+  const [refreshesLeft, setRefreshesLeft] = useState(null);
 
   useEffect(() => {
     if (!token) return;
@@ -36,6 +31,14 @@ export default function ProfilePage() {
     GetUserProfile(token)
       .then(data => setProfile(data))
       .catch(err => console.error(err));
+
+    GetAnalysesUsed(token)
+      .then(data => setAnalysesLeft(data.resumeAnalyses))
+      .catch(() => {});
+
+    GetJobRefreshesLeft(token)
+      .then(data => setRefreshesLeft(data.refreshesLeft))
+      .catch(err => console.error('[JobRefreshesLeft]', err));
 
     existResume(token)
       .then(() => {
@@ -187,7 +190,11 @@ export default function ProfilePage() {
             <h2 className={styles.sectionTitle}>Activity</h2>
           </div>
           <div className={styles.activityList}>
-            {HARDCODED_ACTIVITY.map(({ Icon, label, value }) => (
+            {[
+              { Icon: Clock,     label: 'Last analysis',       value: 'April 17, 2026' },
+              { Icon: FileText,  label: 'Resume analyses left', value: analysesLeft !== null ? `${analysesLeft}` : '—' },
+              { Icon: RefreshCw, label: 'Job refreshes left',   value: refreshesLeft !== null ? `${refreshesLeft}` : '—' },
+            ].map(({ Icon, label, value }) => (
               <div key={label} className={styles.activityItem}>
                 <div className={styles.activityIconWrap}>
                   <Icon className={styles.activityIcon} />

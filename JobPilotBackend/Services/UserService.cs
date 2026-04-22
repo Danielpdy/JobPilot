@@ -62,24 +62,56 @@ public class UserService : IUserService
             return UserErrors.NotFound;
         }
 
-        var newUserProfile = new UserProfile
+        var existingProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+
+        if (existingProfile is not null)
         {
-            UserId = userId,
-            JobTitle = request.JobTitle,
-            ExperienceLevel =request.ExperienceLevel,
-            Skills = request.Skills,
-            WorkType = request.WorkType,
-            SalaryRange = request.SalaryRange,
-            PreferredLocation = request.PreferredLocation
-        };
+            existingProfile.JobTitle = request.JobTitle;
+            existingProfile.ExperienceLevel = request.ExperienceLevel;
+            existingProfile.Skills = request.Skills;
+            existingProfile.WorkType = request.WorkType;
+            existingProfile.SalaryRange = request.SalaryRange;
+            existingProfile.PreferredLocation = request.PreferredLocation;
+        }
+        else
+        {
+            var newUserProfile = new UserProfile
+            {
+                UserId = userId,
+                JobTitle = request.JobTitle,
+                ExperienceLevel = request.ExperienceLevel,
+                Skills = request.Skills,
+                WorkType = request.WorkType,
+                SalaryRange = request.SalaryRange,
+                PreferredLocation = request.PreferredLocation
+            };
+            _context.UserProfiles.Add(newUserProfile);
+        }
 
         user.IsOnboarded = true;
 
-        _context.UserProfiles.Add(newUserProfile);
         await _context.SaveChangesAsync();
 
         return Result.Success;
 
+    }
+
+    public async Task<ErrorOr<JobRefreshesDto>> GetJobRefreshesLeftAsync(int userId)
+    {
+        const int maxRefreshes = 10;
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+
+        if (user is null)
+            return UserErrors.NotFound;
+
+        return new JobRefreshesDto(maxRefreshes - user.UsedRefreshes);
+    }
+
+    public async Task<ErrorOr<ResumeAnalysesDto>> GetAnalysesUsedAsync(int userId)
+    {
+        var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+
+        return new ResumeAnalysesDto(userProfile?.ResumeAnalyses ?? 3);
     }
 
     public async Task<ErrorOr<UserProfileDto>> GetUserProfileAsync(int userId)

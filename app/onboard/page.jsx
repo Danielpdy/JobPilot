@@ -63,12 +63,9 @@ export default function OnboardPage() {
     }
 
     try{
-      const req = await RegisterProfile(profileInfo, session.accessToken);
-
-      if(req.isOnboarded){
-        await update({ IsOnboarded: true })
-        router.push("/dashboard")
-      }
+      await RegisterProfile(profileInfo, session.accessToken);
+      await update({ IsOnboarded: true });
+      router.push("/dashboard");
     } catch(error){
       console.error(`Profile creation failed:`, error);
     }
