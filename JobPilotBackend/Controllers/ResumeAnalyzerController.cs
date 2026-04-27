@@ -78,6 +78,18 @@ public class ResumeAnalyzerController : BaseApiController
         return exists ? Ok() : NotFound();
     }
 
+    [HttpGet("lastanalysisdate")]
+    public async Task<IActionResult> GetLastAnalysisDate()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null) return Unauthorized();
+
+        var result = await _resumeAnalyzerService.GetLastAnalysisDateAsync(int.Parse(userId));
+        return result.Match(
+            Ok,
+            errors => MapErrors(errors));
+    }
+
     [HttpGet("resumeanalysis")]
     public async Task<IActionResult> GetResumeAnalysis()
     {

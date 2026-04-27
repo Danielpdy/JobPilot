@@ -114,3 +114,12 @@ export const existResume = async (accessToken) => {
         method: "GET"
     })
 }
+
+export const getLastAnalysisDate = async (accessToken) => {
+    return apiRequest("/resumeanalyzer/lastanalysisdate", {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        },
+        method: "GET"
+    })
+}

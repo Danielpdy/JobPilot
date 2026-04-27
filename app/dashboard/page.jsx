@@ -9,14 +9,15 @@ import {
   faLayerGroup, faBriefcase, faFile, faFileLines,
   faUser, faGear,
 } from '@fortawesome/free-solid-svg-icons';
-import { GetNewJobs } from '../Services/JobService';
+import { GetNewJobs, GetLikedJobs } from '../Services/JobService';
+import { GetJobRefreshesLeft } from '../Services/UserService';
 import { useSwipeFlush } from '../hooks/useSwipeFlush';
-import { GetLikedJobs } from '../Services/JobService';
 import { useSwipesStore } from '../stores/swipeStore';
 import JobSwipes from './jobswipes/page';
 import JobMatches from './jobmatches/page';
 import ResumeAnalyzer from './resumeAnalyzer/page';
 import ProfilePage from './profile/page';
+import SettingsPage from './settings/page';
 
 const sidebarItems = [
   { label: 'Swipe Jobs',   icon: <FontAwesomeIcon icon={faLayerGroup} style={{ width: 16, height: 16 }} /> },
@@ -49,6 +50,7 @@ export default function DashboardPage() {
   const [settingsIndex, setSettingsIndex] = useState(-1);
   const [jobList, setJobList] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
+  const [refreshesLeft, setRefreshesLeft] = useState(null);
 
   const { flushQueue } = useSwipeFlush(session?.accessToken);
   const hydrateLiked   = useSwipesStore(s => s.hydrateLiked);
@@ -66,7 +68,8 @@ export default function DashboardPage() {
     flushQueue();
 
     GetLikedJobs(session.accessToken).then(jobs => hydrateLiked(jobs));
-    
+    GetJobRefreshesLeft(session.accessToken).then(data => setRefreshesLeft(data.refreshesLeft)).catch(() => {});
+
     getJobListing();
   }, [session?.accessToken]);
 
@@ -171,7 +174,7 @@ export default function DashboardPage() {
 
         {/* Swipe Jobs section */}
         {mainIndex === 0 && (
-          <JobSwipes jobs={jobList} loading={jobsLoading} onRefresh={getJobListing} />
+          <JobSwipes jobs={jobList} loading={jobsLoading} onRefresh={getJobListing} refreshesLeft={refreshesLeft} />
         )}
 
         {/* Job Matches section */}
@@ -192,6 +195,13 @@ export default function DashboardPage() {
         {activeSection === 'settings' && settingsIndex === 0 && (
           <div className={styles.swipeArea}>
             <ProfilePage />
+          </div>
+        )}
+
+        {/* Settings section */}
+        {activeSection === 'settings' && settingsIndex === 1 && (
+          <div className={styles.swipeArea}>
+            <SettingsPage />
           </div>
         )}
 

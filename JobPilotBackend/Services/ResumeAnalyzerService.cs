@@ -125,4 +125,18 @@ public class ResumeAnalyzerService : IResumeAnalyzerService
             return ResumeErrors.AnalysisFailed;
         }
     }
+
+    public async Task<ErrorOr<LastAnalysisDateDto>> GetLastAnalysisDateAsync(int userId)
+    {
+        var lastAnalysis = await _context.ResumeAnalysisResults
+            .Where(a => a.UserId == userId)
+            .OrderByDescending(a => a.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        if (lastAnalysis is null)
+            return new LastAnalysisDateDto(null);
+
+        var formatted = lastAnalysis.CreatedAt.ToString("MMMM d, yyyy");
+        return new LastAnalysisDateDto(formatted);
+    }
 }

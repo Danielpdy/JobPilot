@@ -1,0 +1,159 @@
+/* ── Layout ───────────────────────────────────────────────── */
+.page {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Page header ──────────────────────────────────────────── */
+.heading {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 4px;
+}
+
+.subheading {
+  font-size: 0.9rem;
+  color: #6B7280;
+  margin: 0 0 28px;
+}
+
+/* ── Card ─────────────────────────────────────────────────── */
+.card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(11, 45, 114, 0.07);
+  box-shadow: 0 2px 12px rgba(11, 45, 114, 0.05);
+  padding: 24px 28px;
+  margin-bottom: 16px;
+}
+
+/* ── Section label ────────────────────────────────────────── */
+.sectionLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #374151;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+/* ── Row (email) ──────────────────────────────────────────── */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 20px;
+}
+
+.rowLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rowLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.rowValue {
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.rowRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #9CA3AF;
+}
+
+.rowIcon {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+.rowChevron {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* ── Change password button ───────────────────────────────── */
+.changePwBtn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  background: #0B2D72;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.18s ease, transform 0.15s ease;
+}
+
+.changePwBtn:hover  { opacity: 0.88; }
+.changePwBtn:active { transform: scale(0.98); }
+
+.changePwIcon {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+/* ── Divider ──────────────────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid #F3F4F6;
+  margin: 4px 0;
+}
+
+/* ── Action rows (logout / delete) ───────────────────────── */
+.actionRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.logoutRow {
+  color: #0B2D72;
+}
+.logoutRow:hover { background: #F3F4F6; }
+
+.deleteRow {
+  color: #ef4444;
+}
+.deleteRow:hover { background: rgba(239, 68, 68, 0.05); }
+
+.actionIcon {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* ── Version ──────────────────────────────────────────────── */
+.version {
+  text-align: center;
+  font-size: 0.82rem;
+  color: #9CA3AF;
+  margin-top: 8px;
+}

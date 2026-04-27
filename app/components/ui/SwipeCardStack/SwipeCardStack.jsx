@@ -10,7 +10,10 @@ import {
   faDollarSign,
   faBriefcase,
   faArrowUpRightFromSquare,
+  faRotateRight,
 } from '@fortawesome/free-solid-svg-icons';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import styles from './SwipeCardStack.module.css';
 import { useSwipesStore } from '@/app/stores/swipeStore';
 import { useSwipeFlush } from '@/app/hooks/useSwipeFlush';
@@ -314,7 +317,7 @@ function FlyingCard({ card, x0, y0, direction, onComplete }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function SwipeCardStack({ jobs, loading, onRefresh }) {
+export default function SwipeCardStack({ jobs, loading, onRefresh, refreshesLeft }) {
   const { data: session } = useSession();
   const addSwipe = useSwipesStore(s => s.addSwipe);
   const { flushQueue, scheduleFlush, cancelFlush } = useSwipeFlush(session?.accessToken);
@@ -370,13 +373,75 @@ export default function SwipeCardStack({ jobs, loading, onRefresh }) {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.topHalf}>
-          <div className={styles.stack}>
-            <div className={`${styles.card} ${styles.skeletonCard} ${styles.topCard}`} />
+      <SkeletonTheme baseColor="#F3F4F6" highlightColor="#E5E7EB">
+        <div className={styles.container}>
+
+          {/* Card skeleton */}
+          <div className={styles.topHalf}>
+            <div className={styles.stackWrapper}>
+            <div className={styles.stack}>
+              <div className={`${styles.card} ${styles.topCard}`} style={{ cursor: 'default' }}>
+                {/* Accent bar */}
+                <Skeleton height={4} borderRadius={0} style={{ display: 'block' }} />
+
+                {/* Card content */}
+                <div className={styles.cardContent}>
+
+                  {/* Top row: avatar + company + badge */}
+                  <div className={styles.topRow}>
+                    <Skeleton circle width={46} height={46} />
+                    <div className={styles.companyBlock}>
+                      <Skeleton width={110} height={13} borderRadius={4} />
+                      <Skeleton width={90} height={11} borderRadius={4} style={{ marginTop: 4 }} />
+                    </div>
+                    <Skeleton width={52} height={22} borderRadius={20} />
+                  </div>
+
+                  {/* Job title */}
+                  <div>
+                    <Skeleton width="90%" height={32} borderRadius={6} />
+                    <Skeleton width="60%" height={32} borderRadius={6} style={{ marginTop: 6 }} />
+                  </div>
+
+                  {/* Chips */}
+                  <div className={styles.chipsRow}>
+                    <Skeleton width={100} height={28} borderRadius={20} />
+                    <Skeleton width={88} height={28} borderRadius={20} />
+                    <Skeleton width={76} height={28} borderRadius={20} />
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            </div>
           </div>
+
+          {/* Bottom half skeleton */}
+          <div className={styles.bottomHalf}>
+            {/* Counter */}
+            <Skeleton width={160} height={13} borderRadius={6} />
+
+            {/* Action buttons */}
+            <div className={styles.actions}>
+              <Skeleton circle width={60} height={60} />
+              <Skeleton circle width={60} height={60} />
+            </div>
+
+            {/* Stats row */}
+            <div className={styles.statsRow}>
+              <div className={styles.stat}>
+                <Skeleton width={36} height={28} borderRadius={6} />
+                <Skeleton width={44} height={10} borderRadius={4} style={{ marginTop: 4 }} />
+              </div>
+              <div className={styles.stat}>
+                <Skeleton width={36} height={28} borderRadius={6} />
+                <Skeleton width={52} height={10} borderRadius={4} style={{ marginTop: 4 }} />
+              </div>
+            </div>
+          </div>
+
         </div>
-      </div>
+      </SkeletonTheme>
     );
   }
 
@@ -405,6 +470,15 @@ export default function SwipeCardStack({ jobs, loading, onRefresh }) {
 
         {/* ── Top half: card stack ──────────────────────────────────────── */}
         <div className={styles.topHalf}>
+          <div className={styles.stackWrapper}>
+
+          {refreshesLeft !== null && (
+            <div className={`${styles.refreshBadge} ${refreshesLeft <= 2 ? styles.refreshBadgeLow : ''}`}>
+              <FontAwesomeIcon icon={faRotateRight} />
+              {refreshesLeft} remaining
+            </div>
+          )}
+
           <motion.div variants={sectionVariants} className={styles.stack}>
 
             {visibleCards.map((card, i) => {
@@ -449,6 +523,7 @@ export default function SwipeCardStack({ jobs, loading, onRefresh }) {
               />
             )}
           </motion.div>
+          </div>
         </div>
 
         {/* ── Bottom half: counter + buttons + stats ────────────────────── */}
