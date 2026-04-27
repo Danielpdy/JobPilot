@@ -396,12 +396,12 @@
   position: relative;
   z-index: 10;
   background: #ffffff;
-  padding: 110px 24px 110px;
+  padding: 80px 24px 80px;
 }
 
 .outcomesHeader {
   text-align: center;
-  margin-bottom: 64px;
+  margin-bottom: 30px;
 }
 
 .outcomesHeading {
@@ -409,7 +409,7 @@
   font-weight: 800;
   color: #0B2D72;
   letter-spacing: -0.02em;
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   line-height: 1.1;
 }
 
@@ -417,58 +417,68 @@
   font-size: 1rem;
   color: rgba(11, 45, 114, 0.6);
   line-height: 1.65;
-  max-width: 560px;
-  margin: 0 auto 6px;
+  max-width: 540px;
+  margin: 0 auto 5px;
 }
 
 .outcomesDisclaimer {
-  font-size: 0.78rem;
-  color: rgba(11, 45, 114, 0.35);
+  font-size: 0.76rem;
+  color: rgba(11, 45, 114, 0.32);
   margin: 0;
 }
 
-/* Two-column visual area */
-.outcomesVisuals {
+/* Row 1: rings + job stack */
+.outcomesRow1 {
   display: flex;
   align-items: center;
-  gap: 56px;
+  gap: 2px;
   max-width: 1100px;
-  margin: 0 auto 72px;
+  margin: 0 auto 24px;
 }
 
-/* Left column */
+/* Left column: rings + improvements */
 .outcomesLeft {
-  flex: 5 1 0;
+  flex: 1 1 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Left content wrapper — no visual box */
+.outcomesBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
 }
 
 /* Score flow */
 .scoreFlow {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
 }
 
 .scoreItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .scoreRing {
-  width: 150px;
+  width: 152px;
   height: auto;
-  filter: drop-shadow(0 6px 18px rgba(11, 45, 114, 0.1));
+  filter: drop-shadow(0 6px 18px rgba(11, 45, 114, 0.12));
 }
 
 .scoreLabel {
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 600;
-  color: rgba(11, 45, 114, 0.55);
+  color: rgba(11, 45, 114, 0.5);
   letter-spacing: 0.02em;
 }
 
@@ -478,68 +488,154 @@
 
 .scoreArrow {
   flex-shrink: 0;
-  opacity: 0.6;
-  margin-top: -12px;
+  opacity: 0.4;
+  margin-top: -20px;
 }
 
 /* What improved block */
 .improvedBlock {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
+  max-width: 300px;
 }
 
 .improvedTitle {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(11, 45, 114, 0.4);
+  color: rgba(11, 45, 114, 0.38);
   margin: 0;
 }
 
-.bulletsImg {
-  width: 100%;
-  max-width: 420px;
-  height: auto;
-  border-radius: 12px;
-  filter: drop-shadow(0 4px 14px rgba(11, 45, 114, 0.08));
+.improvedList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
-/* Right column */
+.improvedItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(11, 45, 114, 0.7);
+  line-height: 1.35;
+}
+
+/* Right column: job stack — primary visual */
 .outcomesRight {
-  flex: 4 1 0;
+  flex: 1 1 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 6px;
+  overflow: visible;
 }
 
-.stackWrapper {
+.stackLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(11, 45, 114, 0.38);
+  margin: 0;
+  text-align: center;
+}
+
+.stackVisual {
   position: relative;
   width: 100%;
 }
 
 .stackImg {
+  display: block;
   width: 100%;
   height: auto;
-  display: block;
-  filter: drop-shadow(0 16px 40px rgba(11, 45, 114, 0.14));
+  transform: scale(1.875);
+  transform-origin: center center;
+  mix-blend-mode: multiply;
+}
+
+.stackBadge {
+  position: absolute;
+  top: 38%;
+  right: 3%;
+  background: #0992C2;
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 50px;
+  box-shadow: 0 2px 10px rgba(9, 146, 194, 0.35);
+  white-space: nowrap;
+}
+
+.stackDivider {
+  width: 100%;
+  height: 1px;
+  background: rgba(11, 45, 114, 0.07);
+}
+
+.stackStats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 12px;
+  padding: 0;
+}
+
+.stackStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 0;
+}
+
+.stackStatValue {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0B2D72;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.stackStatLabel {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(11, 45, 114, 0.45);
+  white-space: nowrap;
+}
+
+.stackStatDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(11, 45, 114, 0.2);
+  flex-shrink: 0;
 }
 
 .stackCaption {
-  font-size: 0.8rem;
-  color: rgba(11, 45, 114, 0.4);
+  font-size: 0.76rem;
+  color: rgba(11, 45, 114, 0.38);
   text-align: center;
   margin: 0;
   font-weight: 500;
 }
 
-/* Bottom metric cards */
+/* Metrics row */
 .metricsRow {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -548,43 +644,44 @@
   flex: 1 1 0;
   background: #F8FAFC;
   border: 1px solid rgba(11, 45, 114, 0.06);
-  border-radius: 18px;
-  padding: 24px 22px;
+  border-radius: 14px;
+  padding: 14px 15px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  gap: 3px;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
   cursor: default;
 }
 
 .metricCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(11, 45, 114, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(11, 45, 114, 0.08);
 }
 
 .metricIcon {
-  font-size: 1.2rem;
-  margin-bottom: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+  opacity: 0.75;
 }
 
 .metricValue {
-  font-size: 1.45rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  color: #0B2D72;
+  color: rgba(11, 45, 114, 0.85);
   letter-spacing: -0.02em;
   line-height: 1;
 }
 
 .metricLabel {
-  font-size: 0.875rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: #0B2D72;
+  color: rgba(11, 45, 114, 0.7);
   line-height: 1.3;
 }
 
 .metricNote {
-  font-size: 0.78rem;
-  color: rgba(11, 45, 114, 0.45);
+  font-size: 0.7rem;
+  color: rgba(11, 45, 114, 0.38);
   line-height: 1.4;
 }
 
@@ -805,9 +902,9 @@
     transform: none;
   }
 
-  .outcomesVisuals {
+  .outcomesRow1 {
     flex-direction: column;
-    gap: 40px;
+    gap: 36px;
   }
 
   .outcomesLeft,
@@ -817,7 +914,11 @@
   }
 
   .scoreRing {
-    width: 110px;
+    width: 100px;
+  }
+
+  .improvedBlock {
+    max-width: 100%;
   }
 
   .metricsRow {
@@ -843,4 +944,152 @@
     width: 58%;
     height: 200px;
   }
+
+  .testimonialsGrid {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 12px;
+    padding-bottom: 16px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-bottom: 20px;
+  }
+
+  .testimonialsGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .testimonialCard {
+    flex: 0 0 82vw;
+    scroll-snap-align: start;
+  }
+}
+
+/* ── Reviews section ───────────────────────────────────── */
+.reviewsSection {
+  position: relative;
+  z-index: 10;
+  background: #F3F4F6;
+  padding: 100px 24px 80px;
+}
+
+.reviewsHeader {
+  text-align: center;
+  margin-bottom: 52px;
+}
+
+.reviewsHeading {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 0 0 10px;
+}
+
+.reviewsSubheading {
+  font-size: 1rem;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Equal 2×2 grid */
+.testimonialsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 16px;
+  max-width: 1100px;
+  margin: 0 auto 32px;
+}
+
+/* Uniform card — all 4 identical */
+.testimonialCard {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(11, 45, 114, 0.06);
+  padding: 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 2px 12px rgba(11, 45, 114, 0.07);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.testimonialCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 36px rgba(11, 45, 114, 0.13);
+}
+
+.testimonialQuote {
+  font-size: 0.9rem;
+  color: #1F2937;
+  line-height: 1.65;
+  margin: 0;
+  flex: 1;
+}
+
+/* Reviewer row */
+.reviewerRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: auto;
+}
+
+.reviewerAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.reviewerInitials {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.reviewerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reviewerName {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.reviewerCountry {
+  font-size: 0.72rem;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+/* Stars */
+.reviewStars {
+  display: flex;
+  gap: 2px;
+}
+
+/* Footer */
+.reviewsFooter {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  margin: 0 auto;
+  max-width: 400px;
 }

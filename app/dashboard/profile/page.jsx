@@ -144,16 +144,16 @@ export default function ProfilePage() {
   const { data: session } = useSession();
   const token = session?.accessToken;
 
-  const [profile,          setProfile]          = useState(null);
-  const [resume,           setResume]           = useState(null);
-  const [score,            setScore]            = useState(null);
-  const [hasResume,        setHasResume]        = useState(false);
-  const [analysesLeft,     setAnalysesLeft]     = useState(null);
-  const [refreshesLeft,    setRefreshesLeft]    = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [resume, setResume] = useState(null);
+  const [score, setScore] = useState(null);
+  const [hasResume, setHasResume] = useState(false);
+  const [analysesLeft, setAnalysesLeft] = useState(null);
+  const [refreshesLeft, setRefreshesLeft] = useState(null);
   const [lastAnalysisDate, setLastAnalysisDate] = useState(null);
 
-  const [loadingProfile,  setLoadingProfile]  = useState(true);
-  const [loadingResume,   setLoadingResume]   = useState(true);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [loadingResume, etLoadingResume] = useState(true);
   const [loadingActivity, setLoadingActivity] = useState(true);
 
   useEffect(() => {

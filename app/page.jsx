@@ -299,117 +299,187 @@ export default function HomePage() {
 
       {/* ── Outcomes section ── */}
       <section className={styles.outcomesSection}>
+
         {/* Header */}
         <div className={styles.outcomesHeader}>
           <motion.span
             className={styles.overlineLabel}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.45, ease: 'easeOut' }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
           >Outcomes</motion.span>
           <motion.h2
             className={styles.outcomesHeading}
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.08 }}
+            transition={{ duration: 0.45, ease: 'easeOut', delay: 0.07 }}
           >Better Results, Faster</motion.h2>
           <motion.p
             className={styles.outcomesSubheading}
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.16 }}
+            transition={{ duration: 0.45, ease: 'easeOut', delay: 0.14 }}
           >JobPilot helps you improve your resume and move through the job search process more efficiently.</motion.p>
           <motion.p
             className={styles.outcomesDisclaimer}
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.4, ease: 'easeOut', delay: 0.24 }}
+            transition={{ duration: 0.35, ease: 'easeOut', delay: 0.2 }}
           >Based on typical usage scenarios</motion.p>
         </div>
 
-        {/* Two-column visual area */}
-        <div className={styles.outcomesVisuals}>
+        {/* Row 1: score rings (left) + job stack (right) */}
+        <div className={styles.outcomesRow1}>
 
-          {/* Left: Before → After resume */}
+          {/* Left: rings + improvements */}
           <motion.div
             className={styles.outcomesLeft}
-            initial={{ opacity: 0, x: -28 }}
+            initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+            transition={{ duration: 0.55, ease: 'easeOut', delay: 0.1 }}
           >
-            {/* Score rings */}
             <div className={styles.scoreFlow}>
               <div className={styles.scoreItem}>
                 <img src="/homepageImages/scoreRingBlue.png" alt="Score before" className={styles.scoreRing} />
-                <span className={styles.scoreLabel}>Before JobPilot</span>
+                <span className={styles.scoreLabel}>Before</span>
               </div>
 
               <div className={styles.scoreArrow}>
-                <svg width="32" height="16" viewBox="0 0 32 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 8H28M28 8L21 2M28 8L21 14" stroke="#0992C2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="58" height="26" viewBox="0 0 58 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 13H50M50 13L38 4M50 13L38 22" stroke="#0992C2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
 
               <div className={styles.scoreItem}>
                 <img src="/homepageImages/scoreRing.png" alt="Score after" className={styles.scoreRing} />
-                <span className={`${styles.scoreLabel} ${styles.scoreLabelAfter}`}>After JobPilot</span>
+                <span className={`${styles.scoreLabel} ${styles.scoreLabelAfter}`}>After</span>
               </div>
             </div>
 
-            {/* What improved */}
             <div className={styles.improvedBlock}>
               <p className={styles.improvedTitle}>What improved</p>
-              <img
-                src="/homepageImages/outputBullets.png"
-                alt="Resume improvements"
-                className={styles.bulletsImg}
-              />
+              <ul className={styles.improvedList}>
+                <li className={styles.improvedItem}>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#16a34a"/><path d="M4 7l2 2 4-4" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Resume clarity &amp; structure
+                </li>
+                <li className={styles.improvedItem}>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#16a34a"/><path d="M4 7l2 2 4-4" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Skills &amp; keyword alignment
+                </li>
+              </ul>
             </div>
           </motion.div>
 
-          {/* Right: Swipe card stack */}
+          {/* Right: job card stack — primary visual */}
           <motion.div
             className={styles.outcomesRight}
-            initial={{ opacity: 0, x: 28 }}
+            initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+            transition={{ duration: 0.55, ease: 'easeOut', delay: 0.18 }}
           >
-            <div className={styles.stackWrapper}>
+            <p className={styles.stackLabel}>Better matched roles</p>
+            <div className={styles.stackVisual}>
               <img src="/homepageImages/stackCards.png" alt="Job swipe cards" className={styles.stackImg} />
             </div>
-            <p className={styles.stackCaption}>Swipe through personalized job matches</p>
           </motion.div>
 
         </div>
 
-        {/* Bottom metric cards */}
-        <div className={styles.metricsRow}>
+
+      </section>
+
+      {/* ── Reviews section ── */}
+      <section className={styles.reviewsSection}>
+
+        <motion.div
+          className={styles.reviewsHeader}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          <h2 className={styles.reviewsHeading}>
+            Real people. Real results.
+          </h2>
+          <p className={styles.reviewsSubheading}>
+            Early users are already landing better roles with JobPilot.
+          </p>
+        </motion.div>
+
+        <div className={styles.testimonialsGrid}>
           {[
-            { icon: '📞', value: '+28%', label: 'More interview callbacks', note: 'After improving resume clarity' },
-            { icon: '⚡', value: '2× faster', label: 'Job discovery process', note: 'Browse with swipe-based UI' },
-            { icon: '📈', value: '+18 pts', label: 'Average resume score', note: 'After applying AI feedback' },
-          ].map((m, i) => (
+            {
+              stars: 4.5,
+              quote: <>"<strong>Resume score jumped from 61 to 79</strong> after one round of edits. Suggestions were actually specific, not the usual generic stuff. Got two callbacks that week which hadn't happened in months."</>,
+              img: '/avatars/user2.jpg', name: 'Sofia M.', meta: 'Austin, TX · Mar 2025',
+            },
+            {
+              stars: 4.5,
+              quote: <>"<strong>Job matches that actually fit what I do</strong>, like 8 or 9 out of 10 were things I'd genuinely apply to. Stopped wasting hours on listings that had nothing to do with me."</>,
+              img: '/avatars/user1.jpg', name: 'Marcus T.', meta: 'San Francisco, CA · Feb 2025',
+            },
+            {
+              stars: 4,
+              quote: <>"Applied the rewrites and <strong>my response rate went up within two weeks</strong>. It caught things I wouldn't have noticed on my own. Was skeptical but yeah, real difference."</>,
+              initials: 'JL', color: '#0992C2', name: 'James L.', meta: 'London, UK · Apr 2025',
+            },
+            {
+              stars: 5,
+              quote: <>"<strong>40 applications in one evening</strong> with the swipe feature, which I did not expect to be that fast. Recruiter reached out two days later. Nothing else I've used comes close."</>,
+              img: '/avatars/user3.jpg', name: 'Aisha K.', meta: 'Dubai, UAE · Jan 2025',
+            },
+          ].map((r, i) => (
             <motion.div
-              key={m.label}
-              className={styles.metricCard}
-              initial={{ opacity: 0, y: 20 }}
+              key={r.name}
+              className={styles.testimonialCard}
+              initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 + i * 0.08 }}
+              transition={{ duration: 0.45, ease: 'easeOut', delay: i * 0.08 }}
             >
-              <span className={styles.metricIcon}>{m.icon}</span>
-              <span className={styles.metricValue}>{m.value}</span>
-              <span className={styles.metricLabel}>{m.label}</span>
-              <span className={styles.metricNote}>{m.note}</span>
+              <div className={styles.reviewStars}>
+                {[1,2,3,4,5].map(s => (
+                  <svg key={s} width="15" height="15" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1l1.854 3.756L14 5.528l-3 2.924.708 4.13L8 10.5l-3.708 2.082L5 8.452 2 5.528l4.146-.772L8 1z"
+                      fill="#FBBF24"
+                      opacity={s <= Math.floor(r.stars) ? 1 : r.stars % 1 >= 0.5 && s === Math.ceil(r.stars) ? 0.5 : 0.15}
+                    />
+                  </svg>
+                ))}
+              </div>
+              <p className={styles.testimonialQuote}>{r.quote}</p>
+              <div className={styles.reviewerRow}>
+                {r.img
+                  ? <img src={r.img} alt={r.name} className={styles.reviewerAvatar} />
+                  : <div className={styles.reviewerInitials} style={{ background: r.color }}>{r.initials}</div>
+                }
+                <div className={styles.reviewerInfo}>
+                  <span className={styles.reviewerName}>{r.name}</span>
+                  <span className={styles.reviewerCountry}>{r.meta}</span>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
+
+        <motion.p
+          className={styles.reviewsFooter}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          Based on early user feedback from real usage scenarios
+        </motion.p>
+
       </section>
 
     </div>
