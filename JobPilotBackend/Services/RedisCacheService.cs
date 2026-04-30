@@ -4,21 +4,39 @@ using Microsoft.Extensions.Caching.Distributed;
 public class RedisCacheService : IRedisCacheService
 {
     readonly IDistributedCache _distributedCache;
-    public RedisCacheService(IDistributedCache distributedCache)
+    readonly ILogger<RedisCacheService> _logger;
+    public RedisCacheService(IDistributedCache distributedCache, ILogger<RedisCacheService> logger)
     {
         _distributedCache = distributedCache;
+        _logger = logger;
     }
 
     public async Task<string> AddJobsAsync(RedisRequestDto request)
     {
         var jobs = JsonSerializer.Serialize(request.Jobs);
-        await _distributedCache.SetStringAsync(request.Key, jobs);
+        try
+        {
+            await _distributedCache.SetStringAsync(request.Key, jobs);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Redis unavailable while caching jobs for key {Key}. Continuing without cache.", request.Key);
+        }
         return jobs;
     }
 
     public async Task<List<GroupedJobResultDto>> GetJobsAsync(string key)
     {
-        var json = await _distributedCache.GetStringAsync(key);
+        string? json;
+        try
+        {
+            json = await _distributedCache.GetStringAsync(key);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Redis unavailable while reading jobs for key {Key}. Continuing without cache.", key);
+            return new List<GroupedJobResultDto>();
+        }
 
         if (json is null)
             return new List<GroupedJobResultDto>();
@@ -28,6 +46,13 @@ public class RedisCacheService : IRedisCacheService
 
     public async Task RemoveJobsAsync(string key)
     {
-        await _distributedCache.RemoveAsync(key);
+        try
+        {
+            await _distributedCache.RemoveAsync(key);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Redis unavailable while removing jobs for key {Key}. Continuing without cache.", key);
+        }
     }
 }
