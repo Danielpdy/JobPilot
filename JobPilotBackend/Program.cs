@@ -13,9 +13,16 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Frontend", policy =>
     {
         var origins = builder.Configuration["Cors:AllowedOrigins"]?.Split(",")
+            .Select(origin => origin.Trim())
+            .Where(origin => !string.IsNullOrWhiteSpace(origin))
+            .ToArray()
             ?? ["http://localhost:3000"];
 
-        policy.WithOrigins(origins)
+        policy.SetIsOriginAllowed(origin =>
+              origins.Contains(origin, StringComparer.OrdinalIgnoreCase)
+              || Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+                 && uri.Scheme == Uri.UriSchemeHttps
+                 && uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase))
               .AllowAnyHeader()
               .AllowAnyMethod()
               .WithExposedHeaders("X-File-Size", "X-File-Name");
