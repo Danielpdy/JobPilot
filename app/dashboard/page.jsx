@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { signOut } from 'next-auth/react';
 import styles from './dashboard.module.css';
@@ -47,6 +47,7 @@ export default function DashboardPage() {
 
   const { flushQueue } = useSwipeFlush(session?.accessToken);
   const hydrateLiked   = useSwipesStore(s => s.hydrateLiked);
+  const prevMainIndex  = useRef(mainIndex);
 
 
   useEffect(() => {
@@ -65,6 +66,16 @@ export default function DashboardPage() {
 
     getJobListing();
   }, [session?.accessToken]);
+
+  useEffect(() => {
+    const prev = prevMainIndex.current;
+    prevMainIndex.current = mainIndex;
+    if (mainIndex === 0 && prev !== 0 && session?.accessToken) {
+      GetNewJobs(session.accessToken, false)
+        .then(jobs => setJobList(jobs))
+        .catch(console.error);
+    }
+  }, [mainIndex]);
 
   const handleMainNav = (i) => {
     setActiveSection('main');
