@@ -1,0 +1,63 @@
+services:
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./JobPilotBackend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5100:5100"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5100
+      - ConnectionStrings__ConnectionString=${NEON_CONNECTION_STRING}
+      - Redis__ConnectionString=redis:6379
+      - Cors__AllowedOrigins=http://localhost:3000
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=JobPilotBackend
+      - Jwt__Audience=JobPilotClient
+      - Jwt__ExpiresInMinutes=40
+      - Google__ClientId=${GOOGLE_CLIENT_ID}
+      - Adzuna__AppId=${ADZUNA_APP_ID}
+      - Adzuna__ApiKey=${ADZUNA_API_KEY}
+      - Adzuna__Country=us
+      - Gemini__ApiKey=${GEMINI_API_KEY}
+      - Email__SmtpHost=smtp.gmail.com
+      - Email__SmtpPort=587
+      - Email__SmtpUser=${EMAIL_USER}
+      - Email__SmtpPassword=${EMAIL_PASSWORD}
+      - Email__FromAddress=${EMAIL_USER}
+      - Email__FromName=JobPilot
+      - Frontend__BaseUrl=http://localhost:3000
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:5100/api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - BACKEND_INTERNAL_URL=http://backend:5100/api
+    depends_on:
+      - backend

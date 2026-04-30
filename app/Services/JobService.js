@@ -1,7 +1,7 @@
 import { apiRequest } from "@/lib/httpClient";
 
-export const GetNewJobs = (accessToken) => {
-    return apiRequest("/job/jobs", {
+export const GetNewJobs = (accessToken, forceRefresh = false) => {
+    return apiRequest(`/job/jobs${forceRefresh ? '?forceRefresh=true' : ''}`, {
         headers: {
             "Authorization": `Bearer ${accessToken}`
         },

@@ -16,17 +16,19 @@ export default function HomePage() {
 
   return (
     <div className={styles.page}>
-      {/* ── Full-page background ── */}
-      <div className={styles.bgContainer}>
-        <LiquidChrome
-          baseColor={[0.55, 0.68, 0.96]}
-          speed={0.15}
-          amplitude={0.28}
-          frequencyX={2.0}
-          frequencyY={1.5}
-          interactive={true}
-        />
-      </div>
+
+      {/* ── Hero wrapper (canvas + nav + hero content) ── */}
+      <div className={styles.heroWrapper}>
+        <div className={styles.bgContainer}>
+          <LiquidChrome
+            baseColor={[0.55, 0.68, 0.96]}
+            speed={0.15}
+            amplitude={0.28}
+            frequencyX={2.0}
+            frequencyY={1.5}
+            interactive={true}
+          />
+        </div>
 
       {/* ── Navbar ── */}
       <nav className={styles.navWrapper}>
@@ -184,6 +186,8 @@ export default function HomePage() {
         </TopAnimatedContent>
       </section>
 
+      </div>{/* ── end heroWrapper ── */}
+
       {/* ── Product overview section ── */}
       <section className={styles.productSection}>
 
@@ -267,15 +271,15 @@ export default function HomePage() {
               transition={{ duration: 0.5, ease: 'easeOut' }}
             />
 
-            {/* Output card — slides in from right as resume settles */}
+            {/* Output card — slides in from right on desktop, fades up on mobile */}
             <motion.img
               src="/homepageImages/resumeOutput.png"
               alt="Resume analysis output"
               className={styles.resumeOutputImg}
-              initial={{ opacity: 0, x: 36, filter: 'blur(8px)' }}
-              whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+              initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
+              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               viewport={{ once: true }}
-              transition={{ duration: 0.65, ease: 'easeOut', delay: 0.78 }}
+              transition={{ duration: 0.65, ease: 'easeOut', delay: 0.3 }}
             />
 
           </div>
@@ -481,6 +485,48 @@ export default function HomePage() {
         </motion.p>
 
       </section>
+
+      {/* ── Footer ─────────────────────────────────────────── */}
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+
+          {/* Top row */}
+          <div className={styles.footerTop}>
+            <div className={styles.footerBrand}>
+              <span className={styles.footerLogo}>JobPilot</span>
+              <p className={styles.footerTagline}>AI-powered resume optimization and job discovery</p>
+            </div>
+
+            <div className={styles.footerLinks}>
+              <div className={styles.footerLinkGroup}>
+                <span className={styles.footerGroupLabel}>Product</span>
+                <a href="#" className={styles.footerLink}>Features</a>
+                <a href="#" className={styles.footerLink}>How it works</a>
+              </div>
+              <div className={styles.footerLinkGroup}>
+                <span className={styles.footerGroupLabel}>Company</span>
+                <a href="#" className={styles.footerLink}>About</a>
+                <a href="#" className={styles.footerLink}>Contact</a>
+              </div>
+              <div className={styles.footerLinkGroup}>
+                <span className={styles.footerGroupLabel}>Resources</span>
+                <a href="#" className={styles.footerLink}>FAQ</a>
+                <a href="#" className={styles.footerLink}>Support</a>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom row */}
+          <div className={styles.footerBottom}>
+            <span className={styles.footerCopy}>© 2025 JobPilot. All rights reserved.</span>
+            <div className={styles.footerLegal}>
+              <a href="#" className={styles.footerLegalLink}>Privacy Policy</a>
+              <a href="#" className={styles.footerLegalLink}>Terms</a>
+            </div>
+          </div>
+
+        </div>
+      </footer>
 
     </div>
   );

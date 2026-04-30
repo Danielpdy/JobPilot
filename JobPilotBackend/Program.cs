@@ -52,10 +52,17 @@ builder.Services.AddScoped<IJobsService, JobsService>();
 builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IResumeAnalyzerService, ResumeAnalyzerService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<JobPilotDbContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

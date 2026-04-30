@@ -21,7 +21,7 @@ public class JobsService : IJobsService
         _context = context;
     }
 
-    public async Task<ErrorOr<List<GroupedJobResultDto>>> JobSearchAsync(int userId)
+    public async Task<ErrorOr<List<GroupedJobResultDto>>> JobSearchAsync(int userId, bool forceRefresh = false)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
@@ -37,11 +37,17 @@ public class JobsService : IJobsService
             await _context.SaveChangesAsync();
         }
 
-        var cacheResults = await CachedResults(userId);
+        var key = $"Jobs:User:{userId}";
 
-        if (cacheResults is not null)
+        if (forceRefresh)
         {
-           return cacheResults;
+            await _redisCacheService.RemoveJobsAsync(key);
+        }
+        else
+        {
+            var cacheResults = await CachedResults(userId);
+            if (cacheResults is not null)
+                return cacheResults;
         }
 
         if(user.UsedRefreshes >= 10)
@@ -67,9 +73,12 @@ public class JobsService : IJobsService
 
         var what = userProfile.JobTitle;
         var where = userProfile.PreferredLocation;
-        var page = user.UsedRefreshes + 1;
+        var page1 = user.UsedRefreshes * 2 + 1;
+        var page2 = user.UsedRefreshes * 2 + 2;
 
-        var url =
+        var client = _httpClientFactory.CreateClient();
+
+        string BuildUrl(int page) =>
             $"https://api.adzuna.com/v1/api/jobs/{country}/search/{page}" +
             $"?app_id={Uri.EscapeDataString(appId)}" +
             $"&app_key={Uri.EscapeDataString(appKey)}" +
@@ -77,26 +86,33 @@ public class JobsService : IJobsService
             (string.IsNullOrWhiteSpace(where) ? "" : $"&where={Uri.EscapeDataString(where)}") +
             $"&results_per_page=50";
 
-        var client = _httpClientFactory.CreateClient();
-        var response = await client.GetAsync(url);
+        var task1 = client.GetAsync(BuildUrl(page1));
+        var task2 = client.GetAsync(BuildUrl(page2));
+        await Task.WhenAll(task1, task2);
+        var response1 = task1.Result;
+        var response2 = task2.Result;
 
-        if (!response.IsSuccessStatusCode)
+        if (!response1.IsSuccessStatusCode)
         {
-            var errorText = await response.Content.ReadAsStringAsync();
+            var errorText = await response1.Content.ReadAsStringAsync();
             throw new Exception($"Adzuna request failed: {errorText}");
         }
 
-        var bytes = await response.Content.ReadAsByteArrayAsync();
-        var json = System.Text.Encoding.UTF8.GetString(bytes);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-        var options = new JsonSerializerOptions
+        var json1 = System.Text.Encoding.UTF8.GetString(await response1.Content.ReadAsByteArrayAsync());
+        var results1 = JsonSerializer.Deserialize<AdzunaResponseDto>(json1, options)?.Results ?? new();
+
+        List<AdzunaJobDto> results2 = new();
+        if (response2.IsSuccessStatusCode)
         {
-            PropertyNameCaseInsensitive = true
-        };
+            var json2 = System.Text.Encoding.UTF8.GetString(await response2.Content.ReadAsByteArrayAsync());
+            results2 = JsonSerializer.Deserialize<AdzunaResponseDto>(json2, options)?.Results ?? new();
+        }
 
-        var adzunaResponse = JsonSerializer.Deserialize<AdzunaResponseDto>(json, options);
+        var combined = results1.Concat(results2).ToList();
 
-        if (adzunaResponse?.Results == null)
+        if (combined.Count == 0)
         {
             return new List<GroupedJobResultDto>();
         }
@@ -107,13 +123,12 @@ public class JobsService : IJobsService
             .Select(s => s.Job.ExternalId)
             .ToHashSetAsync();
 
-        var unseenJobs = adzunaResponse.Results
-            .Where(j => !swipeIds.Contains(j.Id))
+        var unseenJobs = combined
+            .Where(j => j.Id != null && !swipeIds.Contains(j.Id))
             .ToList();
 
         var result = GroupJobs(unseenJobs);
 
-        var key = $"Jobs:User:{userId}";
         await _redisCacheService.AddJobsAsync(new RedisRequestDto(key, result));
 
         user.UsedRefreshes++;

@@ -38,22 +38,35 @@ public class ResumeAnalyzerService : IResumeAnalyzerService
         if (userProfile is null)
             return UserErrors.NotFound;
 
+        if (userProfile.ResumeAnalyses <= 0)
+            return ResumeErrors.NoAnalysesLeft;
 
         //byte[] pdfBytes;
         await using var memoryStream = new MemoryStream();
         await resume.File.CopyToAsync(memoryStream);
         var pdfBytes = memoryStream.ToArray();
 
-        var userResume = new UserResume
-        {
-            UserId = userId,
-            FileName = resume.File.FileName,
-            FileSizeBytes = resume.File.Length,
-            PdfData = pdfBytes,
-            UpdatedAt = DateTime.UtcNow
-        };
+        var userResume = await _context.UserResumes.FirstOrDefaultAsync(r => r.UserId == userId);
 
-        _context.UserResumes.Add(userResume);
+        if (userResume is not null)
+        {
+            userResume.FileName      = resume.File.FileName;
+            userResume.FileSizeBytes = resume.File.Length;
+            userResume.PdfData       = pdfBytes;
+            userResume.UpdatedAt     = DateTime.UtcNow;
+        }
+        else
+        {
+            _context.UserResumes.Add(new UserResume
+            {
+                UserId        = userId,
+                FileName      = resume.File.FileName,
+                FileSizeBytes = resume.File.Length,
+                PdfData       = pdfBytes,
+                UpdatedAt     = DateTime.UtcNow
+            });
+        }
+
         await _context.SaveChangesAsync();
 
         var base64Pdf = Convert.ToBase64String(pdfBytes);
@@ -116,6 +129,7 @@ public class ResumeAnalyzerService : IResumeAnalyzerService
             };
 
             _context.ResumeAnalysisResults.Add(analysis);
+            userProfile.ResumeAnalyses--;
             await _context.SaveChangesAsync();
 
             return Result.Success;

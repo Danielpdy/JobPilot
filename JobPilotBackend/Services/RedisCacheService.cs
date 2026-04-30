@@ -12,26 +12,22 @@ public class RedisCacheService : IRedisCacheService
     public async Task<string> AddJobsAsync(RedisRequestDto request)
     {
         var jobs = JsonSerializer.Serialize(request.Jobs);
-
-        await _distributedCache.SetStringAsync(request.Key, jobs, new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(20)
-        });
-
+        await _distributedCache.SetStringAsync(request.Key, jobs);
         return jobs;
     }
 
     public async Task<List<GroupedJobResultDto>> GetJobsAsync(string key)
     {
         var json = await _distributedCache.GetStringAsync(key);
-        
+
         if (json is null)
-        {
             return new List<GroupedJobResultDto>();
-        }
 
-        var jobs = JsonSerializer.Deserialize<List<GroupedJobResultDto>>(json);
+        return JsonSerializer.Deserialize<List<GroupedJobResultDto>>(json) ?? new();
+    }
 
-        return jobs;
+    public async Task RemoveJobsAsync(string key)
+    {
+        await _distributedCache.RemoveAsync(key);
     }
 }

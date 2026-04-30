@@ -21,4 +21,9 @@ public static class UserErrors
         code: "User.NotRefreshesLeft",
         description: "No Refreshes token Left. Refreshesh reset at 12:00am"
     );
+
+    public static readonly Error InvalidResetToken = Error.Validation(
+        code: "User.InvalidResetToken",
+        description: "This reset link is invalid or has expired."
+    );
 }

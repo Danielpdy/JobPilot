@@ -9,7 +9,7 @@ import {
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { getResume, getAnalysis, existResume, getLastAnalysisDate } from '@/app/Services/ResumeService';
-import { GetUserProfile, GetAnalysesUsed, GetJobRefreshesLeft } from '@/app/Services/UserService';
+import { GetUserProfile, GetAnalysesUsed } from '@/app/Services/UserService';
 import styles from './page.module.css';
 
 // ── Animation variants ────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ function ActivitySkeleton() {
 
 /* Page */
 
-export default function ProfilePage() {
+export default function ProfilePage({ refreshesLeft: refreshesLeftProp = null }) {
   const { data: session } = useSession();
   const token = session?.accessToken;
 
@@ -149,11 +149,11 @@ export default function ProfilePage() {
   const [score, setScore] = useState(null);
   const [hasResume, setHasResume] = useState(false);
   const [analysesLeft, setAnalysesLeft] = useState(null);
-  const [refreshesLeft, setRefreshesLeft] = useState(null);
+  const refreshesLeft = refreshesLeftProp;
   const [lastAnalysisDate, setLastAnalysisDate] = useState(null);
 
   const [loadingProfile, setLoadingProfile] = useState(true);
-  const [loadingResume, etLoadingResume] = useState(true);
+  const [loadingResume, setLoadingResume] = useState(true);
   const [loadingActivity, setLoadingActivity] = useState(true);
 
   useEffect(() => {
@@ -166,7 +166,6 @@ export default function ProfilePage() {
 
     Promise.all([
       GetAnalysesUsed(token).then(data => setAnalysesLeft(data.resumeAnalyses)).catch(() => {}),
-      GetJobRefreshesLeft(token).then(data => setRefreshesLeft(data.refreshesLeft)).catch(() => {}),
       getLastAnalysisDate(token).then(data => setLastAnalysisDate(data.lastAnalysisDate)).catch(() => {}),
     ]).finally(() => setLoadingActivity(false));
 

@@ -24,4 +24,9 @@ public static class ResumeErrors
         code: "UserProfile.InvalidResume",
         description: "No valid resume file was provided."
     );
+
+    public static readonly Error NoAnalysesLeft = Error.Conflict(
+        code: "Resume.NoAnalysesLeft",
+        description: "You have no resume analyses remaining."
+    );
 }

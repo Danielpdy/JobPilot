@@ -12,4 +12,5 @@ public class JobPilotDbContext : DbContext
     public DbSet<UserJobSwipe> UserJobSwipes { get; set; }
     public DbSet<UserResume> UserResumes { get; set; }
     public DbSet<ResumeAnalysisResult> ResumeAnalysisResults { get; set; }
+    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 }

@@ -21,7 +21,7 @@ public class JobController : BaseApiController
     }
 
     [HttpGet("jobs")]
-    public async Task<IActionResult> GetJobListing()
+    public async Task<IActionResult> GetJobListing([FromQuery] bool forceRefresh = false)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -32,7 +32,7 @@ public class JobController : BaseApiController
 
         int id = int.Parse(userId);
 
-        var jobs = await _jobsService.JobSearchAsync(id);
+        var jobs = await _jobsService.JobSearchAsync(id, forceRefresh);
 
         return jobs.Match(
             result => Ok(result),

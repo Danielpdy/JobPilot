@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import styles from './login.module.css';
 import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBriefcase } from '@fortawesome/free-solid-svg-icons';
 
 
-export default function LoginPage() {
+function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +19,8 @@ export default function LoginPage() {
   };
 
   const params = useSearchParams();
-  const next = safeNext(params.get("next"));
+  const next  = safeNext(params.get("next"));
+  const error = params.get("error");
 
   async function handleSubmit(e){
     e.preventDefault();
@@ -63,6 +64,13 @@ export default function LoginPage() {
             <p className={styles.subtitle}>
               Enter your credentials to access your personalized job dashboard.
             </p>
+            {error && (
+              <div className={styles.errorBanner}>
+                {error === 'CredentialsSignin'
+                  ? 'Invalid email or password.'
+                  : 'Something went wrong. Please try again.'}
+              </div>
+            )}
             <form onSubmit={handleSubmit}>
               {/* Email */}
               <div className={styles.fieldGroup}>
@@ -119,7 +127,7 @@ export default function LoginPage() {
                   <input type="checkbox" className={styles.checkbox} />
                   <span>Remember me</span>
                 </label>
-                <a href="#" className={styles.forgotLink}>Forgot password?</a>
+                <a href="/forgot-password" className={styles.forgotLink}>Forgot password?</a>
               </div>
 
               {/* Submit */}
@@ -287,5 +295,13 @@ export default function LoginPage() {
       </div>
       </AnimatedContent>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

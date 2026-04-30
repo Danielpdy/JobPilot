@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useRef, useCallback } from 'react';
 import styles from './onboard.module.css';
 import AnimatedContent from '../components/ui/AnimatedContent/AnimatedContent';
 import { RegisterProfile } from '../Services/UserService';
+import { analyzeResume } from '../Services/ResumeService';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-const STEPS = ['Your Role', 'Your Skills', 'Preferences'];
+const STEPS = ['Your Role', 'Your Skills', 'Preferences', 'Resume'];
 const EXPERIENCE_LEVELS = ['Entry Level', 'Mid-Level', 'Senior', 'Lead / Manager'];
 const WORK_TYPES = ['Remote', 'Hybrid', 'On-site'];
 const SALARY_RANGES = ['< $40k', '$40k–$70k', '$70k–$100k', '$100k–$150k', '$150k+'];
@@ -20,6 +21,7 @@ const CheckIcon = () => (
 
 export default function OnboardPage() {
   const [step, setStep] = useState(0);
+  const [finishing, setFinishing] = useState(false);
 
   const { data: session, update } = useSession();
   const router = useRouter();
@@ -31,6 +33,32 @@ export default function OnboardPage() {
   const [workType, setWorkType] = useState('');
   const [salary, setSalary] = useState('');
   const [location, setLocation] = useState('');
+
+  const [resumeFile, setResumeFile] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const ACCEPTED = ['application/pdf'];
+  const MAX_MB   = 5;
+
+  const handleFileDrop = useCallback((e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file && ACCEPTED.includes(file.type) && file.size <= MAX_MB * 1024 * 1024) {
+      setResumeFile(file);
+    }
+  }, []);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) setResumeFile(file);
+  };
+
+  function formatBytes(bytes) {
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
 
   function addSkill(e) {
     if ((e.key === 'Enter' || e.key === ',') && skillInput.trim()) {
@@ -49,25 +77,31 @@ export default function OnboardPage() {
     if (step === 0) return jobTitle.trim() && experience;
     if (step === 1) return skills.length > 0;
     if (step === 2) return workType && salary;
+    if (step === 3) return true; // resume is optional
     return false;
   }
 
   async function handleFinish() {
+    setFinishing(true);
     const profileInfo = {
       JobTitle: jobTitle,
       ExperienceLevel: experience,
       Skills: skills,
       WorkType: workType,
       SalaryRange: salary,
-      PreferredLocation: location ? location : ""
-    }
+      PreferredLocation: location || ""
+    };
 
-    try{
+    try {
       await RegisterProfile(profileInfo, session.accessToken);
+      if (resumeFile) {
+        await analyzeResume(resumeFile, session.accessToken);
+      }
       await update({ IsOnboarded: true });
       router.push("/dashboard");
-    } catch(error){
-      console.error(`Profile creation failed:`, error);
+    } catch (error) {
+      console.error('Profile creation failed:', error);
+      setFinishing(false);
     }
   }
 
@@ -253,6 +287,71 @@ export default function OnboardPage() {
             </div>
           )}
 
+          {/* ── Step 4: Resume Upload ── */}
+          {step === 3 && (
+            <div className={styles.stepContent}>
+              <h2 className={styles.cardTitle}>Upload your resume</h2>
+              <p className={styles.cardSubtitle}>
+                Optional — you can always add it later from your profile.
+              </p>
+
+              {!resumeFile ? (
+                <div
+                  className={`${styles.dropZone} ${dragOver ? styles.dropZoneActive : ''}`}
+                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleFileDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className={styles.dropIcon}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#0992C2" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                      <polyline points="14 2 14 8 20 8" stroke="#0992C2" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                      <line x1="12" y1="18" x2="12" y2="12" stroke="#0992C2" strokeWidth="1.7" strokeLinecap="round"/>
+                      <polyline points="9 15 12 12 15 15" stroke="#0992C2" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <p className={styles.dropTitle}>
+                    {dragOver ? 'Drop it here' : 'Drag & drop your resume'}
+                  </p>
+                  <p className={styles.dropSub}>or <span className={styles.dropLink}>browse files</span></p>
+                  <p className={styles.dropHint}>PDF only · max 5 MB</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf"
+                    className={styles.hiddenInput}
+                    onChange={handleFileChange}
+                  />
+                </div>
+              ) : (
+                <div className={styles.fileCard}>
+                  <div className={styles.fileIcon}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#0B2D72" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      <polyline points="14 2 14 8 20 8" stroke="#0B2D72" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div className={styles.fileMeta}>
+                    <p className={styles.fileName}>{resumeFile.name}</p>
+                    <p className={styles.fileSize}>{formatBytes(resumeFile.size)}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.fileRemove}
+                    onClick={() => { setResumeFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                    title="Remove"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <line x1="18" y1="6" x2="6" y2="18" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"/>
+                      <line x1="6" y1="6" x2="18" y2="18" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ── Navigation ── */}
           <div className={styles.navRow}>
             {step > 0 && (
@@ -262,11 +361,17 @@ export default function OnboardPage() {
             )}
             <button
               className={styles.continueBtn}
-              disabled={!canProceed()}
+              disabled={!canProceed() || finishing}
               onClick={() => step < STEPS.length - 1 ? setStep(s => s + 1) : handleFinish()}
               style={step === 0 ? { marginLeft: 'auto' } : {}}
             >
-              {step < STEPS.length - 1 ? 'Continue →' : 'Start Exploring →'}
+              {finishing
+                ? <span className={styles.spinner} />
+                : step < STEPS.length - 1
+                  ? 'Continue →'
+                  : resumeFile
+                    ? 'Start Exploring →'
+                    : 'Skip & Explore →'}
             </button>
           </div>
 

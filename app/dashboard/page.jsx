@@ -6,7 +6,7 @@ import styles from './dashboard.module.css';
 import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faLayerGroup, faBriefcase, faFile, faFileLines,
+  faLayerGroup, faBriefcase, faFileLines,
   faUser, faGear,
 } from '@fortawesome/free-solid-svg-icons';
 import { GetNewJobs, GetLikedJobs } from '../Services/JobService';
@@ -22,7 +22,6 @@ import SettingsPage from './settings/page';
 const sidebarItems = [
   { label: 'Swipe Jobs',   icon: <FontAwesomeIcon icon={faLayerGroup} style={{ width: 16, height: 16 }} /> },
   { label: 'Job Matches',  icon: <FontAwesomeIcon icon={faBriefcase}  style={{ width: 16, height: 16 }} /> },
-  { label: 'Applications', icon: <FontAwesomeIcon icon={faFile}       style={{ width: 16, height: 16 }} /> },
   { label: 'Resume Analyzer', icon: <FontAwesomeIcon icon={faFileLines}  style={{ width: 16, height: 16 }} /> },
 ];
 
@@ -31,19 +30,13 @@ const settingsItems = [
   { label: 'Settings', icon: <FontAwesomeIcon icon={faGear} style={{ width: 16, height: 16 }} /> },
 ];
 
-const contentTabs = [
-  { label: 'All Jobs' },
-  { label: 'Best Match' },
-  { label: 'Recent' },
-];
 
-const pageMap        = ['Swipe Jobs', 'Job Matches', 'Applications', 'Resume Analyzer'];
+const pageMap        = ['Swipe Jobs', 'Job Matches', 'Resume Analyzer'];
 const settingsMap    = ['Profile', 'Settings'];
 
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [activePage, setActivePage] = useState(0);
-  const [activeTab, setActiveTab] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('main');
   const [mainIndex, setMainIndex] = useState(0);
@@ -88,10 +81,10 @@ export default function DashboardPage() {
     setSidebarOpen(false);
   };
 
-  const getJobListing = async () => {
+  const getJobListing = async (forceRefresh = false) => {
     setJobsLoading(true);
     try{
-      const jobs = await GetNewJobs(session.accessToken);
+      const jobs = await GetNewJobs(session.accessToken, forceRefresh);
       setJobList(jobs);
     }catch(error){
       console.error(error);
@@ -155,26 +148,12 @@ export default function DashboardPage() {
               {activeSection === 'settings' ? settingsMap[settingsIndex] : pageMap[activePage]}
             </h1>
           </div>
-          <div className={styles.topBarRight}>
-            <div className={styles.avatar}>DP</div>
-          </div>
         </div>
 
-        {/* Horizontal tab bar — Job Matches section */}
-        {mainIndex === 1 && (
-          <div className={styles.tabBarWrapper}>
-            <GlassBubbleNav
-              items={contentTabs}
-              defaultIndex={0}
-              orientation="horizontal"
-              onChange={(i) => setActiveTab(i)}
-            />
-          </div>
-        )}
 
         {/* Swipe Jobs section */}
         {mainIndex === 0 && (
-          <JobSwipes jobs={jobList} loading={jobsLoading} onRefresh={getJobListing} refreshesLeft={refreshesLeft} />
+          <JobSwipes jobs={jobList} loading={jobsLoading} onRefresh={() => getJobListing(true)} refreshesLeft={refreshesLeft} />
         )}
 
         {/* Job Matches section */}
@@ -185,7 +164,7 @@ export default function DashboardPage() {
         )}
 
         {/* Resume Builder section */}
-        {mainIndex === 3 && (
+        {mainIndex === 2 && (
           <div className={styles.swipeArea}>
             <ResumeAnalyzer />
           </div>
@@ -194,7 +173,7 @@ export default function DashboardPage() {
         {/* Profile section */}
         {activeSection === 'settings' && settingsIndex === 0 && (
           <div className={styles.swipeArea}>
-            <ProfilePage />
+            <ProfilePage refreshesLeft={refreshesLeft} />
           </div>
         )}
 

@@ -1,0 +1,201 @@
+/* ── Page ────────────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  box-sizing: border-box;
+}
+
+.bgContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ── Card ────────────────────────────────────────────────── */
+.card {
+  position: relative;
+  z-index: 1;
+  background: white;
+  border-radius: 20px;
+  padding: 2.6rem 2.4rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 12px 48px rgba(11, 45, 114, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Icon bubbles ────────────────────────────────────────── */
+.iconBubble {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  background: rgba(11, 45, 114, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.3rem;
+}
+
+.successIconBubble {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  background: rgba(10, 196, 224, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.3rem;
+}
+
+/* ── Text ────────────────────────────────────────────────── */
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0B2D72;
+  margin: 0 0 0.45rem;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #6B7280;
+  line-height: 1.6;
+  margin: 0 0 1.7rem;
+}
+
+.emailHighlight {
+  color: #0B2D72;
+  font-weight: 600;
+}
+
+/* ── Field ───────────────────────────────────────────────── */
+.fieldGroup {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #0992C2;
+  margin-bottom: 0.4rem;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  padding: 0.72rem 2.4rem 0.72rem 0.95rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #374151;
+  background: white;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.input::placeholder { color: #C4C9D4; }
+.input:focus        { border-color: #0AC4E0; }
+
+.inputIcon {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+}
+
+/* ── Submit button ───────────────────────────────────────── */
+.submitBtn {
+  width: 100%;
+  padding: 0.85rem;
+  background: #0B2D72;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.93rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submitBtn:hover:not(:disabled) { background: #0a2460; }
+
+.submitBtn:disabled {
+  background: #9CA3AF;
+  cursor: not-allowed;
+}
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.spinner {
+  width: 17px;
+  height: 17px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Back link ───────────────────────────────────────────── */
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1.2rem;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #9CA3AF;
+  text-decoration: none;
+  transition: color 0.15s;
+  align-self: center;
+}
+
+.backLink:hover { color: #0B2D72; }
+
+/* ── Resend ──────────────────────────────────────────────── */
+.resendText {
+  font-size: 0.84rem;
+  color: #9CA3AF;
+  margin: 0 0 1.1rem;
+  text-align: center;
+}
+
+.resendBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #0992C2;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.resendBtn:hover { color: #0B2D72; }
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .card {
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+  }
+}

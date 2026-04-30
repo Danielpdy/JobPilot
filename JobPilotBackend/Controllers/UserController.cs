@@ -67,6 +67,28 @@ public class UserController : BaseApiController
         );
     }
 
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordDto request)
+    {
+        var result = await _userService.ForgotPasswordAsync(request.Email);
+        return result.Match(
+            _ => Ok(),
+            errors => MapErrors(errors)
+        );
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordDto request)
+    {
+        var result = await _userService.ResetPasswordAsync(request.Token, request.NewPassword);
+        return result.Match(
+            _ => Ok(),
+            errors => MapErrors(errors)
+        );
+    }
+
     [HttpGet("userprofile")]
     public async Task<IActionResult> GetUserProfile()
     {
@@ -87,23 +109,16 @@ public class UserController : BaseApiController
         );
     }
 
-    /*[HttpPost("uploadresume")]
-    public async Task<IActionResult> UploadAnalyze([FromForm] UploadResumeRequestDto request)
+    [HttpPost("uploadresume")]
+    public async Task<IActionResult> UploadResume([FromForm] UploadResumeRequestDto request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null) return Unauthorized();
 
-        if (userId is null)
-        {
-            return Unauthorized();
-        }
-        
-        int id = int.Parse(userId);
-
-        var result = await _userService.UploadResumeAsync(request, id);
-
+        var result = await _userService.UploadResumeAsync(request, int.Parse(userId));
         return result.Match(
             _ => NoContent(),
             errors => MapErrors(errors)
         );
-    }*/
+    }
 }

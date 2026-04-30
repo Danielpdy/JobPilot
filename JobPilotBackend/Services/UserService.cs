@@ -1,52 +1,62 @@
 
+using System.Security.Cryptography;
 using ErrorOr;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 public class UserService : IUserService
 {
     private readonly JobPilotDbContext _context;
+    private readonly IEmailService _emailService;
+    private readonly IConfiguration _configuration;
 
-    public UserService(JobPilotDbContext context)
+    public UserService(JobPilotDbContext context, IEmailService emailService, IConfiguration configuration)
     {
         _context = context;
+        _emailService = emailService;
+        _configuration = configuration;
     }
 
-    /*public async Task<ErrorOr<Success>> UploadResumeAsync(UploadResumeRequestDto request, int userId)
+    public async Task<ErrorOr<Success>> UploadResumeAsync(UploadResumeRequestDto request, int userId)
     {
         var file = request.File;
 
         if (file is null || file.Length == 0)
-        {
             return ResumeErrors.InvalidResume;
-        }
 
         var maxFileSizeBytes = 5 * 1024 * 1024;
 
         if (file.Length > maxFileSizeBytes)
-        {
             return ResumeErrors.ExceededSizeAllowed;
-        }
 
         await using var memoryStream = new MemoryStream();
-
         await file.CopyToAsync(memoryStream);
-
         var pdfBytes = memoryStream.ToArray();
 
-        var userResume = new UserResume
+        var existing = await _context.UserResumes.FirstOrDefaultAsync(r => r.UserId == userId);
+
+        if (existing is not null)
         {
-            UserId = userId,
-            FileName = file.FileName,
-            FileSizeBytes = file.Length,
-            PdfData = pdfBytes,
-            UpdatedAt = DateTime.UtcNow
-        };
+            existing.FileName      = file.FileName;
+            existing.FileSizeBytes = file.Length;
+            existing.PdfData       = pdfBytes;
+            existing.UpdatedAt     = DateTime.UtcNow;
+        }
+        else
+        {
+            _context.UserResumes.Add(new UserResume
+            {
+                UserId        = userId,
+                FileName      = file.FileName,
+                FileSizeBytes = file.Length,
+                PdfData       = pdfBytes,
+                UpdatedAt     = DateTime.UtcNow
+            });
+        }
 
-        _context.UserResumes.Add(userResume);
         await _context.SaveChangesAsync();
-
         return Result.Success;
-    }*/
+    }
 
     public async Task<ErrorOr<Success>> RegisterProfileAsync(RegisterProfileDto request, int userId)
     {
@@ -112,6 +122,59 @@ public class UserService : IUserService
         var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
 
         return new ResumeAnalysesDto(userProfile?.ResumeAnalyses ?? 3);
+    }
+
+    public async Task<ErrorOr<Success>> ForgotPasswordAsync(string email)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+        // Return success even if email not found to avoid user enumeration
+        if (user is null)
+            return Result.Success;
+
+        // Invalidate any existing unused tokens for this user
+        var existing = await _context.PasswordResetTokens
+            .Where(t => t.UserId == user.UserId && !t.IsUsed)
+            .ToListAsync();
+        existing.ForEach(t => t.IsUsed = true);
+
+        var rawToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+        var token = new PasswordResetToken
+        {
+            UserId    = user.UserId,
+            Token     = rawToken,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+            IsUsed    = false
+        };
+
+        _context.PasswordResetTokens.Add(token);
+        await _context.SaveChangesAsync();
+
+        var frontendUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:3000";
+        var resetLink   = $"{frontendUrl}/reset-password/confirm?token={Uri.EscapeDataString(rawToken)}";
+
+        await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink);
+
+        return Result.Success;
+    }
+
+    public async Task<ErrorOr<Success>> ResetPasswordAsync(string token, string newPassword)
+    {
+        var resetToken = await _context.PasswordResetTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Token == token && !t.IsUsed);
+
+        if (resetToken is null || resetToken.ExpiresAt < DateTime.UtcNow)
+            return UserErrors.InvalidResetToken;
+
+        resetToken.User.PasswordHashed = new PasswordHasher<User>()
+            .HashPassword(resetToken.User, newPassword);
+
+        resetToken.IsUsed = true;
+
+        await _context.SaveChangesAsync();
+
+        return Result.Success;
     }
 
     public async Task<ErrorOr<UserProfileDto>> GetUserProfileAsync(int userId)

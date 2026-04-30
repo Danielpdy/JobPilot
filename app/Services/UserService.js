@@ -64,3 +64,27 @@ export const GetAnalysesUsed = (accessToken) => {
     });
 };
 
+export const UploadResume = (file, accessToken) => {
+    const form = new FormData();
+    form.append('file', file);
+    return apiRequest("/user/uploadresume", {
+        headers: { "Authorization": `Bearer ${accessToken}` },
+        method: "POST",
+        body: form
+    });
+};
+
+export const ForgotPassword = (email) => {
+    return apiRequest("/user/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email })
+    });
+};
+
+export const ResetPassword = (token, newPassword) => {
+    return apiRequest("/user/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ token, newPassword })
+    });
+};
+

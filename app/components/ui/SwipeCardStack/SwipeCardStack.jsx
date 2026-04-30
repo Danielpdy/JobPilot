@@ -570,12 +570,12 @@ function StatsRow({ stats }) {
   return (
     <div className={styles.statsRow}>
       <div className={styles.stat}>
-        <span className={`${styles.statCount} ${styles.likedCount}`}>{stats.liked}</span>
-        <span className={styles.statLabel}>LIKED</span>
-      </div>
-      <div className={styles.stat}>
         <span className={`${styles.statCount} ${styles.passedCount}`}>{stats.passed}</span>
         <span className={styles.statLabel}>PASSED</span>
+      </div>
+      <div className={styles.stat}>
+        <span className={`${styles.statCount} ${styles.likedCount}`}>{stats.liked}</span>
+        <span className={styles.statLabel}>LIKED</span>
       </div>
     </div>
   );

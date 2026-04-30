@@ -73,6 +73,34 @@ namespace JobPilotBackend.Migrations
                     b.ToTable("Jobs");
                 });
 
+            modelBuilder.Entity("PasswordResetToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PasswordResetTokens");
+                });
+
             modelBuilder.Entity("ResumeAnalysisResult", b =>
                 {
                     b.Property<int>("Id")
@@ -248,6 +276,17 @@ namespace JobPilotBackend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserResumes");
+                });
+
+            modelBuilder.Entity("PasswordResetToken", b =>
+                {
+                    b.HasOne("User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("UserJobSwipe", b =>

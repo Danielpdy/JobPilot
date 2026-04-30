@@ -65,6 +65,8 @@ public record ResumeAnalysisDto(
 public record ResumeAnalysesDto(int ResumeAnalyses);
 public record JobRefreshesDto(int RefreshesLeft);
 public record LastAnalysisDateDto(string? LastAnalysisDate);
+public record ForgotPasswordDto(string Email);
+public record ResetPasswordDto(string Token, string NewPassword);
 public record UserProfileDto(
     string UserFirstName,
     string UserLastName,
