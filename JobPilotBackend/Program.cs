@@ -12,7 +12,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        var origins = builder.Configuration["Cors:AllowedOrigins"]?.Split(",")
+            ?? ["http://localhost:3000"];
+
+        policy.WithOrigins(origins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .WithExposedHeaders("X-File-Size", "X-File-Name");
