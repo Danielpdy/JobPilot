@@ -2,7 +2,7 @@
 .wrapper {
   display: flex;
   gap: 20px;
-  align-items: flex-start;
+  align-items: stretch;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -10,7 +10,7 @@
 
 /* ══ LEFT COLUMN ════════════════════════════════════════════ */
 .leftCol {
-  flex: 0 0 340px;
+  flex: 0 0 420px;
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(11, 45, 114, 0.08);
@@ -424,10 +424,16 @@
 @media (max-width: 768px) {
   .wrapper {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .leftCol {
     flex: unset;
     width: 100%;
+    min-height: 520px;
+  }
+
+  .previewArea {
+    min-height: 400px;
   }
 }

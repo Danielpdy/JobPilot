@@ -65,7 +65,8 @@ export default function Preview({ onUploadNew, token }) {
   const [fileName, setFileName] = useState('');
   const [fileSize, setFileSize] = useState('');
   const [numPages, setNumPages] = useState(null);
-  const [pageWidth, setPageWidth] = useState(300);
+  const [pageWidth, setPageWidth]   = useState(300);
+  const [pageHeight, setPageHeight] = useState(0);
   const [resumeAnalysis, setResumeAnalysis] = useState({});
 
   useEffect(() => {
@@ -116,7 +117,11 @@ export default function Preview({ onUploadNew, token }) {
         {/* PDF preview */}
         <div
           className={styles.previewArea}
-          ref={el => { if (el) setPageWidth(el.clientWidth - 32); }}
+          ref={el => {
+            if (!el) return;
+            setPageWidth(el.clientWidth - 32);
+            setPageHeight(el.clientHeight - 32);
+          }}
         >
           {pdfUrl && (
             <Document
@@ -129,7 +134,9 @@ export default function Preview({ onUploadNew, token }) {
                 <Page
                   key={i + 1}
                   pageNumber={i + 1}
-                  width={pageWidth}
+                  {...(numPages === 1 && pageHeight > 200
+                    ? { height: pageHeight }
+                    : { width: pageWidth })}
                   className={styles.pdfPage}
                 />
               ))}

@@ -7,7 +7,7 @@ import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faLayerGroup, faBriefcase, faFileLines,
-  faUser, faGear,
+  faUser, faGear, faEnvelopeOpenText,
 } from '@fortawesome/free-solid-svg-icons';
 import { GetNewJobs, GetLikedJobs } from '../Services/JobService';
 import { GetJobRefreshesLeft } from '../Services/UserService';
@@ -16,13 +16,15 @@ import { useSwipesStore } from '../stores/swipeStore';
 import JobSwipes from './jobswipes/page';
 import JobMatches from './jobmatches/page';
 import ResumeAnalyzer from './resumeAnalyzer/page';
+import CoverLetterPage from './coverLetter/page';
 import ProfilePage from './profile/page';
 import SettingsPage from './settings/page';
 
 const sidebarItems = [
-  { label: 'Swipe Jobs',   icon: <FontAwesomeIcon icon={faLayerGroup} style={{ width: 16, height: 16 }} /> },
-  { label: 'Job Matches',  icon: <FontAwesomeIcon icon={faBriefcase}  style={{ width: 16, height: 16 }} /> },
-  { label: 'Resume Analyzer', icon: <FontAwesomeIcon icon={faFileLines}  style={{ width: 16, height: 16 }} /> },
+  { label: 'Swipe Jobs',      icon: <FontAwesomeIcon icon={faLayerGroup}        style={{ width: 16, height: 16 }} /> },
+  { label: 'Job Matches',     icon: <FontAwesomeIcon icon={faBriefcase}         style={{ width: 16, height: 16 }} /> },
+  { label: 'Resume Analyzer', icon: <FontAwesomeIcon icon={faFileLines}         style={{ width: 16, height: 16 }} /> },
+  { label: 'Cover Letter',    icon: <FontAwesomeIcon icon={faEnvelopeOpenText}  style={{ width: 16, height: 16 }} /> },
 ];
 
 const settingsItems = [
@@ -31,7 +33,7 @@ const settingsItems = [
 ];
 
 
-const pageMap        = ['Swipe Jobs', 'Job Matches', 'Resume Analyzer'];
+const pageMap        = ['Swipe Jobs', 'Job Matches', 'Resume Analyzer', 'Cover Letter'];
 const settingsMap    = ['Profile', 'Settings'];
 
 export default function DashboardPage() {
@@ -178,6 +180,13 @@ export default function DashboardPage() {
         {mainIndex === 2 && (
           <div className={styles.swipeArea}>
             <ResumeAnalyzer />
+          </div>
+        )}
+
+        {/* Cover Letter section */}
+        {mainIndex === 3 && (
+          <div className={styles.swipeArea}>
+            <CoverLetterPage />
           </div>
         )}
 

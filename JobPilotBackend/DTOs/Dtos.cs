@@ -78,6 +78,9 @@ public record UserProfileDto(
     List<string> UserSkills
 );
 
+public record CoverLetterInputDto(IFormFile? File, int? resumeId, string Company, string JobTitle, string JobDescription, string Tone);
+public record CoverLetterOutputDto(string CoverLetterText);
+
 
 
 
