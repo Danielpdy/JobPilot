@@ -106,6 +106,15 @@ export const getAnalysis = async (accessToken) => {
     return await res.json();
 } 
 
+export const getResumeInfo = async (accessToken) => {
+    return apiRequest("/resumeanalyzer/resumeinfo", {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        },
+        method: "GET"
+    });
+}
+
 export const existResume = async (accessToken) => {
     return apiRequest("/resumeanalyzer/existsresume", {
         headers: {

@@ -3,6 +3,7 @@ using ErrorOr;
 using Microsoft.EntityFrameworkCore;
 using Google.GenAI.Types;
 using Mscc.GenerativeAI.Types;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 
 public class CoverLetterService : ICoverLetterService
@@ -20,18 +21,21 @@ public class CoverLetterService : ICoverLetterService
     public async Task<ErrorOr<CoverLetterOutputDto>> GenerateCoverLetterAsync(CoverLetterInputDto request, int userId)
     {
         var coverLettersleft = await _context.UserProfiles
-            .Where(cl => cl.UserId == userId)
-            .Select(cl => cl.CoverLetterGenerations)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cl => cl.UserId == userId);
+        
+        if (coverLettersleft is null)
+        {
+            return CoverLetterErrors.GenerationFailed;
+        }
+
+        if (coverLettersleft.CoverLetterGenerations <= 0)
+        {
+            return CoverLetterErrors.OutOfGenerations;
+        }
 
         if (request.Company is null || request.JobDescription is null || request.JobTitle is null || request.Tone is null)
         {
             return CoverLetterErrors.EmptyInputFields;
-        }
-
-        if (request.File is null && request.resumeId is null)
-        {
-            return CoverLetterErrors.EmptyFile;
         }
 
         byte[] resumeBytes;
@@ -45,7 +49,7 @@ public class CoverLetterService : ICoverLetterService
         else
         {
             var storedResume = await _context.UserResumes
-                .FirstOrDefaultAsync(r => r.Id == request.resumeId && r.UserId == userId);
+                .FirstOrDefaultAsync(r => r.UserId == userId);
 
             if (storedResume is null)
                 return CoverLetterErrors.EmptyFile;
@@ -111,6 +115,7 @@ public class CoverLetterService : ICoverLetterService
             };
 
             _context.CoverLetters.Add(newCoverLetter);
+            coverLettersleft.CoverLetterGenerations -= 1;
             await _context.SaveChangesAsync();
         }
         catch

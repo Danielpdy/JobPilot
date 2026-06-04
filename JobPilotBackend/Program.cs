@@ -63,6 +63,7 @@ builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IResumeAnalyzerService, ResumeAnalyzerService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ICoverLetterService, CoverLetterService>();
 builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 

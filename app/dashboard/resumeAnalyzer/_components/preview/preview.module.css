@@ -4,13 +4,13 @@
   gap: 20px;
   align-items: stretch;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  height: 100%;
 }
 
 /* ══ LEFT COLUMN ════════════════════════════════════════════ */
 .leftCol {
-  flex: 0 0 420px;
+  flex: 0 0 38%;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(11, 45, 114, 0.08);
@@ -107,6 +107,7 @@
   flex: 1;
   background: #F9FAFB;
   overflow-y: auto;
+  padding: 16px;
 }
 
 .skeletonPage {
@@ -117,6 +118,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  height: 100%;
 }
 
 .skLine {
@@ -421,19 +423,26 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .leftCol {
+    flex: 0 0 45%;
+    max-width: unset;
+  }
+}
+
 @media (max-width: 768px) {
   .wrapper {
     flex-direction: column;
-    align-items: stretch;
+    height: auto;
   }
 
   .leftCol {
     flex: unset;
     width: 100%;
-    min-height: 520px;
+    min-height: 420px;
   }
 
   .previewArea {
-    min-height: 400px;
+    min-height: 320px;
   }
 }

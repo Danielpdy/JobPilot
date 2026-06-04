@@ -33,12 +33,8 @@ const settingsItems = [
 ];
 
 
-const pageMap        = ['Swipe Jobs', 'Job Matches', 'Resume Analyzer', 'Cover Letter'];
-const settingsMap    = ['Profile', 'Settings'];
-
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const [activePage, setActivePage] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('main');
   const [mainIndex, setMainIndex] = useState(0);
@@ -83,7 +79,6 @@ export default function DashboardPage() {
     setActiveSection('main');
     setMainIndex(i);
     setSettingsIndex(-1);
-    setActivePage(i);
     setSidebarOpen(false);
   };
 
@@ -157,9 +152,6 @@ export default function DashboardPage() {
               <span className={`${styles.menuLine} ${sidebarOpen ? styles.menuLine2Open : ''}`} />
               <span className={`${styles.menuLine} ${sidebarOpen ? styles.menuLine3Open : ''}`} />
             </button>
-            <h1 className={styles.pageTitle}>
-              {activeSection === 'settings' ? settingsMap[settingsIndex] : pageMap[activePage]}
-            </h1>
           </div>
         </div>
 
@@ -186,7 +178,7 @@ export default function DashboardPage() {
         {/* Cover Letter section */}
         {mainIndex === 3 && (
           <div className={styles.swipeArea}>
-            <CoverLetterPage />
+            <CoverLetterPage accessToken={session.accessToken} />
           </div>
         )}
 

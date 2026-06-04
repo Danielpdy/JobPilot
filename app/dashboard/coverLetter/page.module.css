@@ -30,11 +30,35 @@
   margin: 0;
 }
 
+/* ── Error toast ─────────────────────────────────────────── */
+.errorToast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  z-index: 100;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #B91C1C;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(185, 28, 28, 0.12);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── Tab toggle row ──────────────────────────────────────── */
+.tabRow {
+  display: flex;
+  justify-content: flex-start;
+}
+
 /* ── Two-column workspace ────────────────────────────────── */
 .workspace {
   display: flex;
   gap: 20px;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 /* ── Left column ─────────────────────────────────────────── */
@@ -422,6 +446,8 @@
 .outputColumn {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Output card ─────────────────────────────────────────── */
@@ -430,7 +456,7 @@
   border: 1px solid rgba(11, 45, 114, 0.08);
   border-radius: 16px;
   box-shadow: 0 2px 16px rgba(11, 45, 114, 0.06);
-  min-height: 640px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;

@@ -22,4 +22,9 @@ public static class CoverLetterErrors
         description: "Cover letter not found"
     );
 
+    public static readonly Error OutOfGenerations = Error.Validation(
+        code: "CoverLetter.OutOfGeneration",
+        description: "Cover Generation tokens have ran out"
+    );
+
 }

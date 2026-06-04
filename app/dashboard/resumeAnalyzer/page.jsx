@@ -29,17 +29,21 @@ function ResumeAnalyzerSkeleton() {
           </div>
 
           {/* Preview area */}
-          <div className={skStyles.previewArea} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Skeleton width="55%" height={14} borderRadius={6} />
-            <Skeleton width="75%" height={10} borderRadius={6} />
-            <Skeleton width="90%" height={10} borderRadius={6} />
-            <Skeleton width="45%" height={10} borderRadius={6} />
-            <Skeleton width="90%" height={10} borderRadius={6} style={{ marginTop: 8 }} />
-            <Skeleton width="75%" height={10} borderRadius={6} />
-            <Skeleton width="45%" height={10} borderRadius={6} />
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <Skeleton width={60} height={10} borderRadius={999} />
-              <Skeleton width={60} height={10} borderRadius={999} />
+          <div className={skStyles.previewArea}>
+            <div className={skStyles.skeletonPage}>
+              <Skeleton width="55%" height={14} borderRadius={6} />
+              <Skeleton width="75%" height={10} borderRadius={6} />
+              <Skeleton width="90%" height={10} borderRadius={6} />
+              <Skeleton width="45%" height={10} borderRadius={6} />
+              <Skeleton width="90%" height={10} borderRadius={6} />
+              <Skeleton width="75%" height={10} borderRadius={6} />
+              <Skeleton width="60%" height={10} borderRadius={6} />
+              <Skeleton width="85%" height={10} borderRadius={6} />
+              <Skeleton width="45%" height={10} borderRadius={6} />
+              <div className={skStyles.skChipsRow}>
+                <Skeleton width={60} height={10} borderRadius={999} />
+                <Skeleton width={60} height={10} borderRadius={999} />
+              </div>
             </div>
           </div>
 
@@ -59,23 +63,23 @@ function ResumeAnalyzerSkeleton() {
               <Skeleton circle width={120} height={120} />
               <div className={skStyles.scoreInfo}>
                 <Skeleton width={90} height={11} borderRadius={4} />
-                <Skeleton width={150} height={26} borderRadius={6} style={{ marginTop: 4 }} />
-                <Skeleton width={200} height={13} borderRadius={4} style={{ marginTop: 4 }} />
-                <Skeleton width={200} height={13} borderRadius={4} style={{ marginTop: 2 }} />
-                <Skeleton width={120} height={12} borderRadius={4} style={{ marginTop: 14 }} />
+                <Skeleton width={150} height={26} borderRadius={6} />
+                <Skeleton width="90%" height={13} borderRadius={4} />
+                <Skeleton width="80%" height={13} borderRadius={4} />
+                <Skeleton width={120} height={12} borderRadius={4} />
               </div>
             </div>
           </div>
 
           {/* Improvements card */}
           <div className={skStyles.card}>
-            <div className={skStyles.sectionHeader} style={{ marginBottom: 14 }}>
+            <div className={skStyles.sectionHeader}>
               <Skeleton circle width={20} height={20} />
               <Skeleton width={110} height={16} borderRadius={6} />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className={skStyles.section}>
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div key={i} className={skStyles.bulletItem}>
                   <Skeleton circle width={8} height={8} />
                   <Skeleton width={`${[85, 72, 90, 65][i]}%`} height={13} borderRadius={4} />
                 </div>
