@@ -17,3 +17,21 @@ export const CreateCoverLetter = async ({ company, jobTitle, jobDescription, ton
         body: formData,
     });
 };
+
+export const GetCoverLetterHistory = async (accessToken) => {
+    return apiRequest("/coverletter/history", {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        },
+        method: "GET",
+    });
+};
+
+export const DeleteCoverLetter = async (id, accessToken) => {
+    return apiRequest(`/coverletter/${id}`, {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        },
+        method: "DELETE",
+    });
+};

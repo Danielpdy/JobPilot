@@ -338,108 +338,177 @@
   height: 16px !important;
 }
 
-/* ── Recent cover letters — horizontal strip ─────────────── */
-.recentSection {
+/* ── History tab ─────────────────────────────────────────── */
+.historySection {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-.recentHeader {
+.historyHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
-.recentTitle {
+.historyTitle {
   font-size: 0.88rem;
   font-weight: 700;
   color: #111827;
 }
 
-.viewAllBtn {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #0992C2;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  white-space: nowrap;
-  font-family: inherit;
+/* ── Document grid ───────────────────────────────────────── */
+.historyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 200px));
+  gap: 24px;
 }
 
-.viewAllBtn:hover { opacity: 0.75; }
-
-.recentStrip {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-
-.recentStrip::-webkit-scrollbar { display: none; }
-
-.recentCard {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: #ffffff;
-  border: 1px solid rgba(11, 45, 114, 0.08);
-  border-radius: 12px;
-  box-shadow: 0 1px 6px rgba(11, 45, 114, 0.04);
-  cursor: pointer;
-  text-align: left;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
-  font-family: inherit;
-}
-
-.recentCard:hover {
-  border-color: rgba(11, 45, 114, 0.2);
-  box-shadow: 0 4px 14px rgba(11, 45, 114, 0.1);
-  transform: translateY(-1px);
-}
-
-.recentAvatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(9, 146, 194, 0.1);
-  color: #0B2D72;
-  font-size: 0.7rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.recentInfo {
+/* ── Individual doc card ─────────────────────────────────── */
+.docCard {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 10px;
+  cursor: pointer;
 }
 
-.recentCompany {
-  font-size: 0.85rem;
+/* ── Thumbnail preview ───────────────────────────────────── */
+.docPreviewWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.414;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.docCard:hover .docPreviewWrap {
+  border-color: #4B87F5;
+  box-shadow: 0 2px 10px rgba(75, 135, 245, 0.22), 0 0 0 1px rgba(75, 135, 245, 0.18);
+}
+
+/* ── Scaled document content ─────────────────────────────── */
+.docPreviewInner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 595px;
+  padding: 48px 52px;
+  background: #ffffff;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #111;
+}
+
+.docPreviewRole {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.docPreviewCompany {
+  font-size: 11px;
+  color: #6B7280;
+  margin: 0;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.docPreviewDivider {
+  border-top: 1px solid #E5E7EB;
+  margin: 14px 0;
+}
+
+.docPreviewBody {
+  font-size: 11px;
+  line-height: 1.75;
+  color: #374151;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ── Card metadata (below thumbnail) ────────────────────── */
+.docCardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.docCardTitle {
+  font-size: 0.82rem;
   font-weight: 600;
   color: #111827;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.recentRole {
-  font-size: 0.78rem;
-  color: #6B7280;
+.docCardFooter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.recentDate {
-  font-size: 0.75rem;
-  color: #9CA3AF;
-  margin-left: 8px;
+.docCardFileIcon {
+  width: 13px !important;
+  height: 13px !important;
+  color: #4B87F5;
   flex-shrink: 0;
+}
+
+.docCardDate {
+  font-size: 0.76rem;
+  color: #9CA3AF;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.docCardDownloadBtn {
+  display: flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.docCardDownloadIcon {
+  width: 15px !important;
+  height: 15px !important;
+  color: #9CA3AF;
+  transition: color 0.15s;
+}
+
+.docCardDownloadBtn:hover .docCardDownloadIcon {
+  color: #0B2D72;
+}
+
+.docCardDeleteBtn {
+  display: flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.docCardDeleteIcon {
+  width: 15px !important;
+  height: 15px !important;
+  color: #9CA3AF;
+  transition: color 0.15s;
+}
+
+.docCardDeleteBtn:hover .docCardDeleteIcon {
+  color: #DC2626;
 }
 
 /* ── Right column ────────────────────────────────────────── */
@@ -580,6 +649,273 @@
   margin: 0;
 }
 
+/* ── Letter detail modal ─────────────────────────────────── */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.52);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modalContainer {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28), 0 4px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 18px 24px;
+  border-bottom: 1px solid #F3F4F6;
+  flex-shrink: 0;
+}
+
+.modalTitleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.modalTitleCompany {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modalTitleRole {
+  font-size: 0.82rem;
+  color: #6B7280;
+}
+
+.modalHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.modalDownloadBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #0B2D72 0%, #0992C2 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.modalDownloadBtn:hover { opacity: 0.88; }
+
+.modalDownloadIcon {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+.modalCloseBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.modalCloseBtn:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+.modalCloseIcon {
+  width: 15px !important;
+  height: 15px !important;
+  color: #6B7280;
+}
+
+.modalBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #F3F4F6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.modalPdfLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 32px;
+  font-size: 0.85rem;
+  color: #9CA3AF;
+  width: 100%;
+}
+
+.modalFooter {
+  padding: 12px 24px;
+  border-top: 1px solid #F3F4F6;
+  flex-shrink: 0;
+}
+
+.modalFooterDate {
+  font-size: 0.76rem;
+  color: #9CA3AF;
+}
+
+/* ── Generating loading state ───────────────────────────── */
+.generatingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 48px 32px;
+  width: 100%;
+  flex: 1;
+  background: linear-gradient(160deg, rgba(10, 196, 224, 0.04) 0%, transparent 55%);
+}
+
+.generatingTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+}
+
+/* ── Horizontal step row ─────────────────────────────────── */
+.hStepRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.hStepGroup {
+  display: flex;
+  align-items: center;
+}
+
+.hStepItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hStepIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.hStepIconDone    { background: rgba(9, 146, 194, 0.10); }
+.hStepIconPending { background: #F3F4F6; }
+.hStepIconActive  {
+  background: rgba(9, 146, 194, 0.16);
+  box-shadow: 0 0 0 5px rgba(9, 146, 194, 0.08), 0 0 16px rgba(9, 146, 194, 0.16);
+}
+
+.hStepCheck {
+  width: 16px !important;
+  height: 16px !important;
+  color: #0992C2;
+  stroke-width: 2;
+}
+
+.hStepActiveIcon {
+  width: 16px !important;
+  height: 16px !important;
+  color: #0992C2;
+  display: block;
+  stroke-width: 2;
+}
+
+.hStepPendingIcon {
+  width: 14px !important;
+  height: 14px !important;
+  color: #D1D5DB;
+  display: block;
+  stroke-width: 1.75;
+}
+
+.hConnectorWrapper {
+  position: relative;
+  width: 40px;
+  height: 2px;
+  margin: 0 6px;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.hConnectorTrack {
+  position: absolute;
+  inset: 0;
+  background: #E5E7EB;
+  border-radius: 2px;
+}
+
+.hConnectorFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: #0992C2;
+  border-radius: 2px;
+}
+
+.hStepLabel        { font-size: 0.75rem; }
+.hStepLabelDone    { color: #9CA3AF; font-weight: 400; }
+.hStepLabelActive  { color: #0992C2; font-weight: 700; }
+.hStepLabelPending { color: #D1D5DB; font-weight: 400; }
+
+.activeSubtext {
+  font-size: 0.85rem;
+  color: #6B7280;
+  text-align: center;
+  min-height: 1.25em;
+}
+
+.stepCount {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+}
+
 /* ── Responsive — 900px ──────────────────────────────────── */
 @media (max-width: 900px) {
   .formColumn {
@@ -647,7 +983,7 @@
     padding: 18px 16px;
   }
 
-  .recentSection {
+  .historySection {
     padding: 14px 14px;
   }
 

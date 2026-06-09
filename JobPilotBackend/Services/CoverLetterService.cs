@@ -117,24 +117,43 @@ public class CoverLetterService : ICoverLetterService
             _context.CoverLetters.Add(newCoverLetter);
             coverLettersleft.CoverLetterGenerations -= 1;
             await _context.SaveChangesAsync();
+
+            return new CoverLetterOutputDto(CoverLetterText: coverLetterPlainText);
         }
         catch
         {
             return CoverLetterErrors.GenerationFailed;
         }
+    }
 
-        var plainText = await _context.CoverLetters
+    public async Task<ErrorOr<CoverLetterHistoryDto>> GetCoverLetterHistoryAsync(int userId)
+    {
+        var coverLetters = await _context.CoverLetters
             .Where(cl => cl.UserId == userId)
-            .Select(cl => cl.CoverLetterText)
-            .FirstOrDefaultAsync();
+            .OrderByDescending(cl => cl.CreatedAt)
+            .Select(cl => new CoverLetterHistoryItemDto(
+                cl.Id,
+                cl.Company,
+                cl.JobTitle,
+                cl.CoverLetterText,
+                cl.CreatedAt
+            ))
+            .ToListAsync();
 
-        if (plainText is null)
-        {
+        return new CoverLetterHistoryDto(coverLetters);
+    }
+
+    public async Task<ErrorOr<Deleted>> DeleteCoverLetterAsync(int coverLetterId, int userId)
+    {
+        var coverLetter = await _context.CoverLetters
+            .FirstOrDefaultAsync(cl => cl.Id == coverLetterId && cl.UserId == userId);
+
+        if (coverLetter is null)
             return CoverLetterErrors.LetterNotFound;
-        }
 
-        return new CoverLetterOutputDto(
-            CoverLetterText: plainText
-        );
+        _context.CoverLetters.Remove(coverLetter);
+        await _context.SaveChangesAsync();
+
+        return Result.Deleted;
     }
 }
