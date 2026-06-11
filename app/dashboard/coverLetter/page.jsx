@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Sparkles, FileText, Building2, Briefcase,
-  Upload, Download, ChevronDown,
+  Upload, ChevronDown,
   CheckCircle, PenLine,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -41,71 +41,6 @@ const GENERATING_STEPS = [
 ];
 const GENERATING_TIMINGS = [0, 5000];
 
-const pdfStyles = StyleSheet.create({
-  page:   { padding: 48, fontFamily: 'Helvetica', backgroundColor: '#fff' },
-  header: { marginBottom: 24 },
-  title:  { fontSize: 18, fontWeight: 'bold', color: '#111' },
-  sub:    { fontSize: 10, color: '#888', marginTop: 4 },
-  divider:{ borderBottomWidth: 1, borderBottomColor: '#e5e7eb', marginVertical: 16 },
-  body:   { fontSize: 11, lineHeight: 1.8, color: '#222' },
-});
-
-function CoverLetterDocument({ text, company, jobTitle }) {
-  return (
-    <Document>
-      <Page size="A4" style={pdfStyles.page}>
-        <View style={pdfStyles.header}>
-          <Text style={pdfStyles.title}>{jobTitle}</Text>
-          <Text style={pdfStyles.sub}>{company}</Text>
-        </View>
-        <View style={pdfStyles.divider} />
-        <Text style={pdfStyles.body}>{text}</Text>
-      </Page>
-    </Document>
-  );
-}
-
-function GeneratedLetterDownloadBtn({ text, company, jobTitle }) {
-  const [instance] = usePDF({
-    document: <CoverLetterDocument text={text} company={company} jobTitle={jobTitle} />,
-  });
-  return (
-    <a
-      className={styles.actionBtn}
-      href={instance.url ?? '#'}
-      download={`${company} - ${jobTitle}.pdf`}
-      onClick={e => !instance.url && e.preventDefault()}
-    >
-      <Download className={styles.actionIcon} />
-      {instance.loading ? 'Preparing…' : 'Download PDF'}
-    </a>
-  );
-}
-
-function PdfPreview({ text, company, jobTitle }) {
-  const [numPages, setNumPages] = useState(null);
-  const [instance] = usePDF({
-    document: <CoverLetterDocument text={text} company={company} jobTitle={jobTitle} />,
-  });
-
-  if (instance.loading || !instance.url) return null;
-
-  return (
-    <div style={{ flex: 1, overflow: 'auto', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0' }}>
-      <PdfDoc file={instance.url} onLoadSuccess={({ numPages }) => setNumPages(numPages)}>
-        {Array.from({ length: numPages ?? 1 }, (_, i) => (
-          <PdfPage
-            key={i + 1}
-            pageNumber={i + 1}
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-            width={560}
-          />
-        ))}
-      </PdfDoc>
-    </div>
-  );
-}
 
 const TONES = ['Professional', 'Confident', 'Friendly', 'Formal', 'Concise'];
 
