@@ -4,15 +4,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   Sparkles, FileText, Building2, Briefcase,
   Upload, Download, ChevronDown,
-  CheckCircle, PenLine, X, Trash2,
+  CheckCircle, PenLine,
 } from 'lucide-react';
-import { Document, Page, Text, View, StyleSheet, usePDF } from '@react-pdf/renderer';
-import { Document as PdfDoc, Page as PdfPage, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
-
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+import dynamic from 'next/dynamic';
 import styles from './page.module.css';
+
+const GeneratedLetterDownloadBtn = dynamic(() => import('./CoverLetterPdf').then(m => ({ default: m.GeneratedLetterDownloadBtn })), { ssr: false });
+const PdfPreview                 = dynamic(() => import('./CoverLetterPdf').then(m => ({ default: m.PdfPreview })),                 { ssr: false });
+const LetterModal                = dynamic(() => import('./CoverLetterPdf').then(m => ({ default: m.LetterModal })),                { ssr: false });
+const LetterPreviewCard          = dynamic(() => import('./CoverLetterPdf').then(m => ({ default: m.LetterPreviewCard })),          { ssr: false });
 import { CreateCoverLetter, GetCoverLetterHistory, DeleteCoverLetter } from '@/app/Services/CoverLetterService';
 import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
 import { getResumeInfo } from '@/app/Services/ResumeService';
@@ -110,144 +110,6 @@ function PdfPreview({ text, company, jobTitle }) {
 const TONES = ['Professional', 'Confident', 'Friendly', 'Formal', 'Concise'];
 
 
-const DOC_INNER_WIDTH = 595;
-
-function PdfPreviewFromUrl({ url }) {
-  const [numPages, setNumPages] = useState(null);
-  return (
-    <PdfDoc file={url} onLoadSuccess={({ numPages }) => setNumPages(numPages)}>
-      {Array.from({ length: numPages ?? 1 }, (_, i) => (
-        <PdfPage
-          key={i + 1}
-          pageNumber={i + 1}
-          renderTextLayer={false}
-          renderAnnotationLayer={false}
-          width={580}
-        />
-      ))}
-    </PdfDoc>
-  );
-}
-
-function LetterModal({ letter, onClose }) {
-  const [instance] = usePDF({
-    document: <CoverLetterDocument text={letter.content} company={letter.company} jobTitle={letter.role} />,
-  });
-
-  useEffect(() => {
-    const handler = e => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  return (
-    <motion.div
-      className={styles.modalBackdrop}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.18 }}
-      onClick={onClose}
-    >
-      <motion.div
-        className={styles.modalContainer}
-        initial={{ opacity: 0, scale: 0.96, y: 14 }}
-        animate={{ opacity: 1, scale: 1,    y: 0  }}
-        exit={{    opacity: 0, scale: 0.96, y: 14 }}
-        transition={{ type: 'spring', stiffness: 340, damping: 28 }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div className={styles.modalHeader}>
-          <div className={styles.modalTitleGroup}>
-            <span className={styles.modalTitleCompany}>{letter.company}</span>
-            <span className={styles.modalTitleRole}>{letter.role}</span>
-          </div>
-          <div className={styles.modalHeaderActions}>
-            <a
-              className={styles.modalDownloadBtn}
-              href={instance.url ?? '#'}
-              download={`${letter.company} - ${letter.role}.pdf`}
-              onClick={e => !instance.url && e.preventDefault()}
-            >
-              <Download className={styles.modalDownloadIcon} />
-              {instance.loading ? 'Preparing…' : 'Download PDF'}
-            </a>
-            <button className={styles.modalCloseBtn} onClick={onClose}>
-              <X className={styles.modalCloseIcon} />
-            </button>
-          </div>
-        </div>
-
-        <div className={styles.modalBody}>
-          {instance.loading || !instance.url ? (
-            <div className={styles.modalPdfLoading}>Preparing preview…</div>
-          ) : (
-            <PdfPreviewFromUrl url={instance.url} />
-          )}
-        </div>
-
-        <div className={styles.modalFooter}>
-          <span className={styles.modalFooterDate}>Created {letter.date}</span>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-function CardDownloadBtn({ letter }) {
-  const [instance] = usePDF({
-    document: <CoverLetterDocument text={letter.content} company={letter.company} jobTitle={letter.role} />,
-  });
-  return (
-    <a
-      className={styles.docCardDownloadBtn}
-      href={instance.url ?? '#'}
-      download={`${letter.company} - ${letter.role}.pdf`}
-      onClick={e => { e.stopPropagation(); if (!instance.url) e.preventDefault(); }}
-      title="Download PDF"
-    >
-      <Download className={styles.docCardDownloadIcon} />
-    </a>
-  );
-}
-
-function LetterPreviewCard({ letter, onClick, onDelete }) {
-  const wrapRef = useRef(null);
-  const [scale, setScale] = useState(0.36);
-
-  useEffect(() => {
-    if (!wrapRef.current) return;
-    setScale(wrapRef.current.offsetWidth / DOC_INNER_WIDTH);
-  }, []);
-
-  return (
-    <div className={styles.docCard} onClick={onClick}>
-      <div className={styles.docPreviewWrap} ref={wrapRef}>
-        <div className={styles.docPreviewInner} style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-          <p className={styles.docPreviewRole}>{letter.role}</p>
-          <p className={styles.docPreviewCompany}>{letter.company}</p>
-          <div className={styles.docPreviewDivider} />
-          <p className={styles.docPreviewBody}>{letter.content}</p>
-        </div>
-      </div>
-      <div className={styles.docCardMeta}>
-        <p className={styles.docCardTitle}>{letter.company} — {letter.role}</p>
-        <div className={styles.docCardFooter}>
-          <FileText className={styles.docCardFileIcon} />
-          <span className={styles.docCardDate}>Created {letter.date}</span>
-          <CardDownloadBtn letter={letter} />
-          <button
-            className={styles.docCardDeleteBtn}
-            onClick={e => { e.stopPropagation(); onDelete(letter.id); }}
-            title="Delete"
-          >
-            <Trash2 className={styles.docCardDeleteIcon} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const formVariants   = {
   hidden:  { opacity: 0, y: 20 },
