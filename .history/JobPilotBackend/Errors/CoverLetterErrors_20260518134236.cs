@@ -1,0 +1,6 @@
+using ErrorOr;
+
+public static class CoverLetterErrors
+{
+    public static readonly Error EmptyIn
+}

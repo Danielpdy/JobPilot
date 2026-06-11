@@ -1,0 +1,19 @@
+using Mscc.GenerativeAI;
+using ErrorOr;
+
+public class CoverLetterService : ICoverLetterService
+{
+    private readonly GoogleAI _googleAI;
+    private readonly JobPilotDbContext _context;
+
+    public CoverLetterService (GoogleAI googleAI, JobPilotDbContext context)
+    {
+        _googleAI = googleAI;
+        _context = context;
+    }
+
+    public async Task<ErrorOr<CoverLetterOutputDto>> GenerateCoverLetterAsync()
+    {
+        
+    }
+}

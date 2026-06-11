@@ -77,6 +77,11 @@
   text-align: center;
 }
 
+.dropSubLoaded {
+  color: #16a34a;
+  font-weight: 500;
+}
+
 /* ── Steps row ───────────────────────────────────────────── */
 .stepsRow {
   display: flex;

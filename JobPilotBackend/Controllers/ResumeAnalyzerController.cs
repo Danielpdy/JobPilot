@@ -61,6 +61,24 @@ public class ResumeAnalyzerController : BaseApiController
         return File(resume.PdfData, "application/pdf");
     }
 
+    [HttpGet("resumeinfo")]
+    public async Task<IActionResult> GetResumeInfo()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null) return Unauthorized();
+
+        int id = int.Parse(userId);
+
+        var resume = await _context.UserResumes
+            .Where(r => r.UserId == id)
+            .Select(r => new ResumeInfoDto(r.Id, r.FileName))
+            .FirstOrDefaultAsync();
+
+        if (resume is null) return NotFound();
+
+        return Ok(resume);
+    }
+
     [HttpGet("existsresume")]
     public async Task<IActionResult> IsResume()
     {
