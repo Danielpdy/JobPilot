@@ -16,7 +16,8 @@ import { useSwipesStore } from '../stores/swipeStore';
 import JobSwipes from './jobswipes/page';
 import JobMatches from './jobmatches/page';
 import ResumeAnalyzer from './resumeAnalyzer/page';
-import CoverLetterPage from './coverLetter/page';
+import dynamic from 'next/dynamic';
+const CoverLetterPage = dynamic(() => import('./coverLetter/page'), { ssr: false });
 import ProfilePage from './profile/page';
 import SettingsPage from './settings/page';
 
