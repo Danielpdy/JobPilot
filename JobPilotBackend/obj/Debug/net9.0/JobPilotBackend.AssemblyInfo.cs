@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("JobPilotBackend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+541f88f095b7b55c62998e1211f7954c4acd9c8c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b329b9e6715a06adf72f1b753dbd9fd20a69924c")]
 [assembly: System.Reflection.AssemblyProductAttribute("JobPilotBackend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("JobPilotBackend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

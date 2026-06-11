@@ -246,13 +246,13 @@ export default function EmptyState({ token, onAnalyzed }) {
         onClick={() => inputRef.current?.click()}
       >
         <div className={`${styles.iconBubble} ${file ? styles.iconBubbleLoaded : ''}`}>
-          <Upload className={styles.dropIcon} />
+          {file ? <FileText className={styles.dropIcon} /> : <Upload className={styles.dropIcon} />}
         </div>
         <p className={styles.dropTitle}>
           {file ? file.name : 'Upload your resume'}
         </p>
-        <p className={styles.dropSub}>
-          {file ? 'PDF ready — click to replace' : 'Drag & drop a PDF or click to browse'}
+        <p className={`${styles.dropSub} ${file ? styles.dropSubLoaded : ''}`}>
+          {file ? '✓ PDF ready — click to replace' : 'Drag & drop a PDF or click to browse'}
         </p>
       </div>
 

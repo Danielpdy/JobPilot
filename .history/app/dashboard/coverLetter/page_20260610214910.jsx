@@ -376,6 +376,7 @@ export default function CoverLetterPage({ accessToken }) {
   }, [isGenerating, stepIndex]);
 
   const handleGenerate = async () => {
+    
     setIsGenerating(true);
     setResultReady(false);
     try {

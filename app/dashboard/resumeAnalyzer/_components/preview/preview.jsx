@@ -1,6 +1,6 @@
 'use client';
 import { motion, useMotionValue, useTransform, animate } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FileText, Upload, Download, Lightbulb, RotateCcw, Zap, X, Sparkles } from 'lucide-react';
 import { getAnalysis, getResume } from '@/app/Services/ResumeService';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -67,6 +67,7 @@ export default function Preview({ onUploadNew, token }) {
   const [numPages, setNumPages] = useState(null);
   const [pageWidth, setPageWidth]   = useState(300);
   const [pageHeight, setPageHeight] = useState(0);
+  const previewRef = useRef(null);
   const [resumeAnalysis, setResumeAnalysis] = useState({});
 
   useEffect(() => {
@@ -84,6 +85,16 @@ export default function Preview({ onUploadNew, token }) {
 
     return () => URL.revokeObjectURL(pdfUrl);
   }, [token]);
+
+  useEffect(() => {
+    if (!previewRef.current) return;
+    const ro = new ResizeObserver(([entry]) => {
+      setPageWidth(entry.contentRect.width - 80);
+      setPageHeight(entry.contentRect.height - 32);
+    });
+    ro.observe(previewRef.current);
+    return () => ro.disconnect();
+  }, []);
 
   const analysis = async () => {
     try{
@@ -117,11 +128,7 @@ export default function Preview({ onUploadNew, token }) {
         {/* PDF preview */}
         <div
           className={styles.previewArea}
-          ref={el => {
-            if (!el) return;
-            setPageWidth(el.clientWidth - 32);
-            setPageHeight(el.clientHeight - 32);
-          }}
+          ref={previewRef}
         >
           {pdfUrl && (
             <Document
@@ -134,9 +141,7 @@ export default function Preview({ onUploadNew, token }) {
                 <Page
                   key={i + 1}
                   pageNumber={i + 1}
-                  {...(numPages === 1 && pageHeight > 200
-                    ? { height: pageHeight }
-                    : { width: pageWidth })}
+                  width={pageWidth}
                   className={styles.pdfPage}
                 />
               ))}
