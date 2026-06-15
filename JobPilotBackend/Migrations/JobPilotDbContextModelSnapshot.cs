@@ -213,6 +213,37 @@ namespace JobPilotBackend.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("UserInterview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("DifficultyType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InterviewType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("JobTitle")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("QuestionCount")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserInterviews");
+                });
+
             modelBuilder.Entity("UserJobSwipe", b =>
                 {
                     b.Property<int>("Id")
@@ -255,6 +286,9 @@ namespace JobPilotBackend.Migrations
                     b.Property<string>("ExperienceLevel")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("InterviewSessions")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsPremium")
                         .HasColumnType("boolean");

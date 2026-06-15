@@ -7,7 +7,7 @@ import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faLayerGroup, faBriefcase, faFileLines,
-  faUser, faGear, faEnvelopeOpenText,
+  faUser, faGear, faEnvelopeOpenText, faComments,
 } from '@fortawesome/free-solid-svg-icons';
 import { GetNewJobs, GetLikedJobs } from '../Services/JobService';
 import { GetJobRefreshesLeft } from '../Services/UserService';
@@ -20,12 +20,14 @@ import dynamic from 'next/dynamic';
 const CoverLetterPage = dynamic(() => import('./coverLetter/page'), { ssr: false });
 import ProfilePage from './profile/page';
 import SettingsPage from './settings/page';
+import MockInterviewPage from './interview/page';
 
 const sidebarItems = [
   { label: 'Swipe Jobs',      icon: <FontAwesomeIcon icon={faLayerGroup}        style={{ width: 16, height: 16 }} /> },
   { label: 'Job Matches',     icon: <FontAwesomeIcon icon={faBriefcase}         style={{ width: 16, height: 16 }} /> },
   { label: 'Resume Analyzer', icon: <FontAwesomeIcon icon={faFileLines}         style={{ width: 16, height: 16 }} /> },
   { label: 'Cover Letter',    icon: <FontAwesomeIcon icon={faEnvelopeOpenText}  style={{ width: 16, height: 16 }} /> },
+  { label: 'Mock Interview',  icon: <FontAwesomeIcon icon={faComments}          style={{ width: 16, height: 16 }} /> },
 ];
 
 const settingsItems = [
@@ -180,6 +182,13 @@ export default function DashboardPage() {
         {mainIndex === 3 && (
           <div className={styles.swipeArea}>
             <CoverLetterPage accessToken={session.accessToken} />
+          </div>
+        )}
+
+        {/* Mock Interview section */}
+        {mainIndex === 4 && (
+          <div className={styles.swipeArea}>
+            <MockInterviewPage accessToken={session.accessToken} />
           </div>
         )}
 
