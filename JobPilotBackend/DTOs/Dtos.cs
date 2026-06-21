@@ -83,8 +83,10 @@ public record CoverLetterOutputDto(string CoverLetterText);
 public record CoverLetterHistoryItemDto(int Id, string Company, string JobTitle, string CoverLetterText, DateTime CreatedAt);
 public record CoverLetterHistoryDto(List<CoverLetterHistoryItemDto> CoverLetters);
 public record ResumeInfoDto(int Id, string FileName);
-public record InterviewConfigDto(string JobTitle, string InterviewType, string DifficultyType, string QuestionCount);
-public record InterviewQuestionDto(string Question);
+public record InterviewConfigDto(string JobTitle, string InterviewType, string Difficulty, int QuestionCount, string? ResumeText, string? JobDescriptionText);
+public record InterviewStartDto(Guid InterviewId, int QuestionNumber, string QuestionText, string Status);
+public record SubmitAnswerRequestDto(Guid InterviewId, int QuestionNumber, string AnswerText, int DurationSeconds);
+public record SubmitAnswerResponseDto(Guid InterviewId, bool IsComplete, string Acknowledgment, int? NextQuestionNumber, string? NextQuestionText, string Status);
 
 
 

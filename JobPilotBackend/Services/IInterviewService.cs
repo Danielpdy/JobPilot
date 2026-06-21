@@ -2,5 +2,6 @@ using ErrorOr;
 
 public interface IInterviewService
 {
-    Task<ErrorOr<Success>> StartInterviewAsync(InterviewConfigDto request, int userId);
+    Task<ErrorOr<InterviewStartDto>> StartInterviewAsync(InterviewConfigDto request, int userId);
+    Task<ErrorOr<SubmitAnswerResponseDto>> SubmitAnswerAndGetNextQuestionAsync(SubmitAnswerRequestDto request, int userId);
 }

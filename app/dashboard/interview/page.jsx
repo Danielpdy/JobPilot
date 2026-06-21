@@ -2,6 +2,8 @@
 import { useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faUpload, faPlay, faFile, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { startInterview } from '@/app/Services/InterviewService';
+import InterviewSession from './InterviewSession';
 import {
   Mic, LayoutDashboard, Code2, Server, Briefcase, BarChart2, Headphones,
   Calendar, Clock, HelpCircle, Search, Filter, ChevronDown, ChevronRight,
@@ -459,7 +461,10 @@ export default function MockInterviewPage({ accessToken }) {
     jobRole: '', interviewType: 'Mixed', difficulty: 'Entry Level',
     questionCount: 10, jobDescription: '',
   });
-  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeFile, setResumeFile]   = useState(null);
+  const [session, setSession]         = useState(null); // { interviewId, questionNumber, questionText }
+  const [starting, setStarting]       = useState(false);
+  const [startError, setStartError]   = useState('');
   const fileInputRef = useRef(null);
 
   const set = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
@@ -469,6 +474,58 @@ export default function MockInterviewPage({ accessToken }) {
     if (file) setResumeFile(file);
     e.target.value = '';
   };
+
+  const handleStart = async () => {
+    if (!form.jobRole.trim()) { setStartError('Please enter a job role.'); return; }
+    setStartError('');
+    setStarting(true);
+    try {
+      const res = await startInterview({
+        jobTitle:           form.jobRole.trim(),
+        interviewType:      form.interviewType,
+        difficulty:         form.difficulty,
+        questionCount:      parseInt(form.questionCount, 10),
+        resumeText:         null,
+        jobDescriptionText: form.jobDescription || null,
+        accessToken,
+      });
+      setSession({
+        interviewId:    res.interviewId,
+        questionNumber: res.questionNumber,
+        questionText:   res.questionText,
+        totalQuestions: parseInt(form.questionCount, 10),
+        jobTitle:       form.jobRole.trim(),
+        interviewType:  form.interviewType,
+      });
+    } catch (err) {
+      setStartError(err.message || 'Failed to start interview. Please try again.');
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  const handleComplete = () => {
+    setSession(null);
+    setActiveTab(1);
+  };
+
+  // Active session — hide toggle and show session UI
+  if (session) {
+    return (
+      <div className={styles.page}>
+        <InterviewSession
+          interviewId={session.interviewId}
+          questionNumber={session.questionNumber}
+          questionText={session.questionText}
+          totalQuestions={session.totalQuestions}
+          jobTitle={session.jobTitle}
+          interviewType={session.interviewType}
+          accessToken={accessToken}
+          onComplete={handleComplete}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -562,9 +619,11 @@ export default function MockInterviewPage({ accessToken }) {
               className={styles.hiddenInput} onChange={handleFileChange} />
           </div>
 
-          <button type="button" className={styles.startBtn}>
+          {startError && <p className={styles.errorMsg}>{startError}</p>}
+
+          <button type="button" className={styles.startBtn} onClick={handleStart} disabled={starting}>
             <FontAwesomeIcon icon={faPlay} />
-            Start Interview
+            {starting ? 'Starting…' : 'Start Interview'}
           </button>
         </div>
       )}
