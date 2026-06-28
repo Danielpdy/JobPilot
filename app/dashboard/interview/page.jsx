@@ -1,8 +1,9 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faUpload, faPlay, faFile, faXmark } from '@fortawesome/free-solid-svg-icons';
-import { startInterview } from '@/app/Services/InterviewService';
+import { startInterview, getInterviewHistory } from '@/app/Services/InterviewService';
 import InterviewSession from './InterviewSession';
 import {
   Mic, LayoutDashboard, Code2, Server, Briefcase, BarChart2, Headphones,
@@ -24,8 +25,7 @@ const DIFFICULTIES    = ['Entry Level', 'Mid Level', 'Senior Level'];
 const QUESTION_COUNTS = [5, 10, 15, 20];
 
 // ═══════════════════════════════════════════════════════════
-// OVERVIEW — sample data & sub-components
-// (all kept here so it's easy to remove later)
+// OVERVIEW — sub-components
 // ═══════════════════════════════════════════════════════════
 
 const TYPE_COLOR = { Mixed: '#3B82F6', Technical: '#10B981', Behavioral: '#8B5CF6' };
@@ -40,138 +40,90 @@ const DIFF_TAG = {
   'Senior Level': { bg: '#FFF1F2', color: '#9F1239' },
 };
 
-const SAMPLE_INTERVIEWS = [
-  {
-    id: 1, role: 'Software Engineer', type: 'Mixed', difficulty: 'Mid Level',
-    date: 'May 20, 2025', questions: 10, duration: 22, score: 84,
-    topItems: [
-      { label: 'Problem Solving',     weak: false },
-      { label: 'Technical Knowledge', weak: false },
-      { label: 'Communication',       weak: false },
-    ],
-    performance: [
-      { label: 'Communication',       score: 88 },
-      { label: 'Technical Knowledge', score: 82 },
-      { label: 'Problem Solving',     score: 85 },
-      { label: 'Confidence',          score: 80 },
-    ],
-    strengths:    ['Clear communication with good examples', 'Strong problem-solving approach', 'Good technical explanations'],
-    improvements: ['Go deeper in system design', 'More specific metrics in answers', 'Improve confidence in responses'],
-    breakdown: [
-      { id: 1, q: 'Tell me about yourself.',                              score: 8.5, answer: null, feedback: null, improvement: null },
-      { id: 2, q: 'Why do you want to work at our company?',             score: 8.0, answer: null, feedback: null, improvement: null },
-      { id: 3, q: 'Tell me about a challenging technical problem you solved.', score: 7.5,
-        answer:      'You described a deployment pipeline issue and how you identified the root cause…',
-        feedback:    'Good explanation of the problem and your approach. Consider adding more details about the impact and metrics.',
-        improvement: 'Try to quantify the impact and results. For example, how much time or resources were saved?' },
-      { id: 4, q: 'How do you approach debugging a complex issue?',      score: 8.0, answer: null, feedback: null, improvement: null },
-      { id: 5, q: 'Describe your experience with databases.',            score: 8.5, answer: null, feedback: null, improvement: null },
-    ],
-  },
-  {
-    id: 2, role: 'Backend Developer', type: 'Technical', difficulty: 'Entry Level',
-    date: 'May 18, 2025', questions: 8, duration: 18, score: 76,
-    topItems: [
-      { label: 'System Design', weak: false },
-      { label: 'Code Quality',  weak: false },
-      { label: 'Optimization',  weak: true  },
-    ],
-    performance: [
-      { label: 'System Design',   score: 80 },
-      { label: 'Code Quality',    score: 78 },
-      { label: 'Problem Solving', score: 72 },
-      { label: 'Confidence',      score: 74 },
-    ],
-    strengths:    ['Strong system design thinking', 'Clean code practices', 'Good understanding of APIs'],
-    improvements: ['Optimize time complexity', 'Deepen knowledge of databases', 'Practice more whiteboard problems'],
-    breakdown: [
-      { id: 1, q: 'Explain the difference between SQL and NoSQL.',  score: 8.0, answer: null, feedback: null, improvement: null },
-      { id: 2, q: 'Design a REST API for a blog platform.',         score: 7.5,
-        answer:      'You described a basic CRUD structure with user endpoints…',
-        feedback:    'Good basic structure. Consider adding authentication and rate limiting.',
-        improvement: 'Add error handling and API versioning to your design.' },
-      { id: 3, q: 'What is indexing in databases?',                score: 7.8, answer: null, feedback: null, improvement: null },
-      { id: 4, q: 'How does caching improve performance?',         score: 7.0, answer: null, feedback: null, improvement: null },
-    ],
-  },
-  {
-    id: 3, role: 'Product Manager', type: 'Behavioral', difficulty: 'Mid Level',
-    date: 'May 15, 2025', questions: 10, duration: 21, score: 82,
-    topItems: [
-      { label: 'Leadership',             weak: false },
-      { label: 'Stakeholder Management', weak: false },
-      { label: 'Data-Driven Decisions',  weak: true  },
-    ],
-    performance: [
-      { label: 'Leadership',             score: 85 },
-      { label: 'Stakeholder Management', score: 88 },
-      { label: 'Data-Driven Decisions',  score: 78 },
-      { label: 'Communication',          score: 77 },
-    ],
-    strengths:    ['Excellent leadership examples', 'Clear stakeholder communication', 'Good use of data in decisions'],
-    improvements: ['More quantifiable outcomes', 'Deeper conflict resolution examples', 'Stronger roadmap prioritization'],
-    breakdown: [
-      { id: 1, q: 'Tell me about a product you launched.',              score: 8.5, answer: null, feedback: null, improvement: null },
-      { id: 2, q: 'How do you prioritize features?',                   score: 8.0,
-        answer:      'You described using a RICE scoring model for prioritization…',
-        feedback:    'Great framework usage. Add more stakeholder input discussion.',
-        improvement: 'Mention how you handle conflicting priorities from different teams.' },
-      { id: 3, q: 'Describe a time you dealt with a difficult stakeholder.', score: 7.8, answer: null, feedback: null, improvement: null },
-    ],
-  },
-  {
-    id: 4, role: 'Data Analyst', type: 'Mixed', difficulty: 'Entry Level',
-    date: 'May 12, 2025', questions: 10, duration: 20, score: 71,
-    topItems: [
-      { label: 'Data Analysis',    weak: false },
-      { label: 'SQL Queries',      weak: false },
-      { label: 'Business Insights', weak: true  },
-    ],
-    performance: [
-      { label: 'Data Analysis',    score: 75 },
-      { label: 'SQL Queries',      score: 72 },
-      { label: 'Business Insights', score: 68 },
-      { label: 'Visualization',    score: 69 },
-    ],
-    strengths:    ['Good SQL knowledge', 'Clear data storytelling', 'Analytical thinking'],
-    improvements: ['Improve data visualization skills', 'Deepen statistical knowledge', 'Practice more complex queries'],
-    breakdown: [
-      { id: 1, q: 'How would you analyze a drop in revenue?',         score: 7.5, answer: null, feedback: null, improvement: null },
-      { id: 2, q: 'Write a SQL query to find duplicate records.',     score: 6.8,
-        answer:      'You wrote a GROUP BY query with a HAVING clause…',
-        feedback:    'Correct approach but missed some edge cases.',
-        improvement: 'Consider NULL values and use window functions for better efficiency.' },
-      { id: 3, q: 'What metrics would you track for an e-commerce site?', score: 7.0, answer: null, feedback: null, improvement: null },
-    ],
-  },
-  {
-    id: 5, role: 'IT Support Specialist', type: 'Behavioral', difficulty: 'Entry Level',
-    date: 'May 10, 2025', questions: 8, duration: 16, score: 68,
-    topItems: [
-      { label: 'Customer Focus',  weak: false },
-      { label: 'Troubleshooting', weak: false },
-      { label: 'Technical Depth', weak: true  },
-    ],
-    performance: [
-      { label: 'Customer Focus',  score: 75 },
-      { label: 'Troubleshooting', score: 70 },
-      { label: 'Technical Depth', score: 65 },
-      { label: 'Communication',   score: 62 },
-    ],
-    strengths:    ['Strong customer empathy', 'Systematic troubleshooting', 'Good patience under pressure'],
-    improvements: ['Deepen technical knowledge', 'Improve escalation processes', 'Work on time management'],
-    breakdown: [
-      { id: 1, q: 'Describe a time you helped a frustrated customer.',  score: 7.5, answer: null, feedback: null, improvement: null },
-      { id: 2, q: 'How do you troubleshoot a network issue?',          score: 6.5,
-        answer:      'You described a step-by-step approach starting from hardware checks…',
-        feedback:    'Good process but missed some key diagnostic steps.',
-        improvement: 'Include network layer analysis and always document the resolution.' },
-      { id: 3, q: 'How do you handle multiple critical tickets at once?', score: 6.8, answer: null, feedback: null, improvement: null },
-    ],
-  },
-];
+// ─── Animation variants ────────────────────────────────────
+const tabEnter = {
+  initial: { opacity: 0, y: 14 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.28, ease: 'easeOut' } },
+  exit:    { opacity: 0, y: -8, transition: { duration: 0.16, ease: 'easeIn' } },
+};
 
-// ─── Score ring ────────────────────────────────────────────
+const listVariants = {
+  hidden: {},
+  show:   { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 18 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+};
+
+// ─── Empty state ───────────────────────────────────────────
+function EmptyInterviewState() {
+  return (
+    <motion.div
+      className={styles.emptyState}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }}
+    >
+      <div className={styles.emptyRings}>
+        <div className={styles.emptyRing1} />
+        <div className={styles.emptyRing2} />
+        <div className={styles.emptyIconWrap}>
+          <Mic size={26} className={styles.emptyIconSvg} />
+        </div>
+      </div>
+      <p className={styles.emptyTitle}>No interviews yet</p>
+      <p className={styles.emptyText}>
+        Start your first mock interview from the <strong>New Interview</strong> tab.<br />
+        Your sessions and scores will appear here.
+      </p>
+    </motion.div>
+  );
+}
+
+function mapApiToSession(interview) {
+  const qs     = interview.questionsBreakdown ?? [];
+  const scored = qs.filter(q => q.score > 0);
+  const sBullets = interview.strengthBullets    ?? [];
+  const iBullets = interview.improvementBullets ?? [];
+  const topItems = sBullets.length > 0 || iBullets.length > 0
+    ? [
+        ...sBullets.slice(0, 2).map(b => ({ label: b, weak: false })),
+        ...iBullets.slice(0, 1).map(b => ({ label: b, weak: true  })),
+      ].slice(0, 3)
+    : [];
+
+  const strengths    = interview.strengthBullets    ?? [];
+  const improvements = interview.improvementBullets ?? [];
+  const performance  = qs.map(q => ({ label: `Q${q.questionNumber}`, score: q.score * 10 }));
+
+  const breakdown = qs.map(q => ({
+    id:          q.questionNumber,
+    q:           q.questionText,
+    score:       q.score,
+    answer:      null,
+    feedback:    q.feedback || null,
+    improvement: null,
+  }));
+
+  return {
+    id:           interview.id,
+    role:         interview.role,
+    type:         interview.type,
+    difficulty:   interview.difficulty,
+    date:         interview.date,
+    questions:    interview.questions,
+    duration:     interview.durationMinutes,
+    score:        interview.score,
+    topItems,
+    performance,
+    strengths,
+    improvements,
+    breakdown,
+  };
+}
+
+// ─── Score ring (session cards) ────────────────────────────
 function ScoreRing({ score, size = 90 }) {
   const ringColor = score >= 80 ? '#22c55e' : score >= 60 ? '#0992C2' : '#ef4444';
   const sw   = 7;
@@ -190,6 +142,17 @@ function ScoreRing({ score, size = 90 }) {
       <text x={cx} y={cx + size * 0.16} textAnchor="middle" dominantBaseline="central"
         fontSize={size * 0.12} fill="#9CA3AF">/100</text>
     </svg>
+  );
+}
+
+// ─── Score badge (detail panel) ────────────────────────────
+function ScoreBadge({ score }) {
+  return (
+    <div className={styles.scoreBadge}>
+      <span className={styles.scoreBadgeLabel}>Score</span>
+      <span className={styles.scoreBadgeNum}>{score}</span>
+      <span className={styles.scoreBadgeDenom}>/100</span>
+    </div>
   );
 }
 
@@ -239,14 +202,13 @@ function QuestionItem({ index, item }) {
 }
 
 // ─── Session card ──────────────────────────────────────────
-function SessionCard({ session, isActive, onClick }) {
-  const color  = TYPE_COLOR[session.type]   ?? '#3B82F6';
-  const typTag = TYPE_TAG[session.type]     ?? TYPE_TAG.Mixed;
+function SessionCard({ session, isActive, panelOpen, onClick }) {
+  const typTag = TYPE_TAG[session.type]       ?? TYPE_TAG.Mixed;
   const difTag = DIFF_TAG[session.difficulty] ?? DIFF_TAG['Entry Level'];
 
   return (
     <button
-      className={`${styles.sessionCard} ${isActive ? styles.sessionCardActive : ''}`}
+      className={`${styles.sessionCard} ${isActive ? styles.sessionCardActive : ''} ${panelOpen ? styles.sessionCardCompact : ''}`}
       onClick={onClick}
     >
       {/* Left: info */}
@@ -270,20 +232,20 @@ function SessionCard({ session, isActive, onClick }) {
         <ScoreRing score={session.score} size={80} />
       </div>
 
-      {/* Right: strengths */}
-      <div className={styles.cardRight}>
-        <span className={styles.colLabel}>Top Strengths</span>
-        <ul className={styles.topList}>
-          {session.topItems.map((item, i) => (
-            <li key={i} className={styles.topItem}>
-              {item.weak
-                ? <AlertCircle  size={13} style={{ color: '#F59E0B', flexShrink: 0 }} />
-                : <CheckCircle2 size={13} style={{ color: '#16a34a', flexShrink: 0 }} />}
-              <span style={{ color: item.weak ? '#F59E0B' : '#374151' }}>{item.label}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Right: insights — hidden when panel is open or no bullets yet */}
+      {!panelOpen && session.topItems.length > 0 && (
+        <div className={styles.cardRight}>
+          <span className={styles.colLabel}>Insights</span>
+          <ul className={styles.topList}>
+            {session.topItems.map((item, i) => (
+              <li key={i} className={styles.topItem}>
+                <span className={styles.insightDot} style={{ background: item.weak ? '#F59E0B' : '#16a34a' }} />
+                <span style={{ color: '#374151' }}>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <ChevronRight size={15} className={styles.cardArrow} />
     </button>
@@ -321,17 +283,28 @@ function DetailPanel({ session, onClose }) {
       <div className={styles.panelSection}>
         <div className={styles.panelSectionTitle}>Overall Performance</div>
         <div className={styles.perfRow}>
-          <ScoreRing score={session.score} size={100} />
-          <div className={styles.perfBars}>
-            {session.performance.map(p => (
-              <div key={p.label} className={styles.perfBar}>
-                <span className={styles.perfLabel}>{p.label}</span>
-                <div className={styles.perfTrack}>
-                  <div className={styles.perfFill} style={{ width: `${p.score}%` }} />
-                </div>
-                <span className={styles.perfScore}>{p.score}/100</span>
-              </div>
-            ))}
+          <ScoreBadge score={session.score} />
+          <div className={styles.statGrid}>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Type</span>
+              <span className={styles.statValue} style={{ color: TYPE_COLOR[session.type] ?? '#374151' }}>
+                {session.type}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Difficulty</span>
+              <span className={styles.statValue} style={{ color: (DIFF_TAG[session.difficulty] ?? DIFF_TAG['Entry Level']).color }}>
+                {session.difficulty}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Questions</span>
+              <span className={styles.statValue}>{session.questions}</span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Duration</span>
+              <span className={styles.statValue}>{session.duration} min</span>
+            </div>
           </div>
         </div>
       </div>
@@ -339,28 +312,36 @@ function DetailPanel({ session, onClose }) {
       <div className={styles.panelDivider} />
 
       {/* Strengths / improvements */}
-      <div className={styles.strGrid}>
-        <div className={styles.strBox}>
-          <div className={styles.strBoxTitle} style={{ color: '#16a34a' }}>Strengths</div>
-          {session.strengths.map((s, i) => (
-            <div key={i} className={styles.strItem}>
-              <CheckCircle2 size={13} style={{ color: '#16a34a', flexShrink: 0 }} />
-              <span>{s}</span>
-            </div>
-          ))}
-        </div>
-        <div className={styles.strBox}>
-          <div className={styles.strBoxTitle} style={{ color: '#F59E0B' }}>Areas to Improve</div>
-          {session.improvements.map((s, i) => (
-            <div key={i} className={styles.strItem}>
-              <AlertCircle size={13} style={{ color: '#F59E0B', flexShrink: 0 }} />
-              <span>{s}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      {(session.strengths.length > 0 || session.improvements.length > 0) && (
+        <>
+          <div className={`${styles.strGrid} ${(!session.strengths.length || !session.improvements.length) ? styles.strGridSingle : ''}`}>
+            {session.strengths.length > 0 && (
+              <div className={styles.strBox}>
+                <div className={styles.strBoxTitle} style={{ color: '#16a34a' }}>Strengths</div>
+                {session.strengths.map((s, i) => (
+                  <div key={i} className={styles.strItem}>
+                    <CheckCircle2 size={13} style={{ color: '#16a34a', flexShrink: 0 }} />
+                    <span>{s}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {session.improvements.length > 0 && (
+              <div className={styles.strBox}>
+                <div className={styles.strBoxTitle} style={{ color: '#F59E0B' }}>Areas to Improve</div>
+                {session.improvements.map((s, i) => (
+                  <div key={i} className={styles.strItem}>
+                    <AlertCircle size={13} style={{ color: '#F59E0B', flexShrink: 0 }} />
+                    <span>{s}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-      <div className={styles.panelDivider} />
+          <div className={styles.panelDivider} />
+        </>
+      )}
 
       {/* Question breakdown */}
       <div className={styles.panelSection}>
@@ -385,67 +366,86 @@ function DetailPanel({ session, onClose }) {
 }
 
 // ─── Interview overview ────────────────────────────────────
-function InterviewOverview() {
+function InterviewOverview({ accessToken }) {
+  const [sessions, setSessions]           = useState([]);
+  const [loading, setLoading]             = useState(true);
+  const [fetchError, setFetchError]       = useState('');
   const [selectedSession, setSelectedSession] = useState(null);
   const [panelOpen, setPanelOpen]             = useState(false);
   const [search, setSearch]                   = useState('');
+
+  useEffect(() => {
+    getInterviewHistory({ accessToken })
+      .then(data => setSessions(data.map(mapApiToSession)))
+      .catch(err => setFetchError(err.message || 'Failed to load interview history.'))
+      .finally(() => setLoading(false));
+  }, [accessToken]);
 
   const handleCardClick = (session) => {
     setSelectedSession(session);
     setPanelOpen(true);
   };
 
-  const filtered = SAMPLE_INTERVIEWS.filter(s =>
+  const filtered = sessions.filter(s =>
     s.role.toLowerCase().includes(search.toLowerCase()) ||
     s.type.toLowerCase().includes(search.toLowerCase())
   );
 
+  const isEmpty = !loading && !fetchError && sessions.length === 0;
+
   return (
     <div className={styles.ovWrapper}>
-
-      {/* Header */}
-      <div className={styles.ovHeader}>
-        <div>
-          <h2 className={styles.ovTitle}>Interview Overview</h2>
-          <p className={styles.ovSub}>View recent interviews and track your progress over time.</p>
-        </div>
-        <div className={styles.ovControls}>
-          <div className={styles.ovSearch}>
-            <Search size={14} className={styles.ovSearchIcon} />
-            <input
-              className={styles.ovSearchInput}
-              placeholder="Search interviews..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          <button className={styles.ovFilterBtn}>
-            <Filter size={14} />
-            Filter
-            <ChevronDown size={12} />
-          </button>
-        </div>
-      </div>
-
-      {/* Content */}
       <div className={styles.ovContent}>
 
-        <div className={styles.ovList}>
-          {filtered.map(session => (
-            <SessionCard
-              key={session.id}
-              session={session}
-              isActive={panelOpen && selectedSession?.id === session.id}
-              onClick={() => handleCardClick(session)}
-            />
-          ))}
-        </div>
+        {/* Header — spans the full width of cards + panel */}
+        {!isEmpty && (
+          <div className={styles.ovHeader}>
+            <div className={styles.ovSearch}>
+              <Search size={14} className={styles.ovSearchIcon} />
+              <input
+                className={styles.ovSearchInput}
+                placeholder="Search interviews..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+            <button className={styles.ovFilterBtn}>
+              <Filter size={14} />
+              Filter
+              <ChevronDown size={12} />
+            </button>
+          </div>
+        )}
 
-        <aside className={`${styles.ovPanel} ${panelOpen ? styles.ovPanelOpen : ''}`}>
-          {selectedSession && (
-            <DetailPanel session={selectedSession} onClose={() => setPanelOpen(false)} />
-          )}
-        </aside>
+        {/* Cards + panel row */}
+        <div className={styles.ovBody}>
+          <motion.div
+            className={styles.ovList}
+            variants={listVariants}
+            initial="hidden"
+            animate="show"
+          >
+            {loading && <p className={styles.ovEmpty}>Loading interviews…</p>}
+            {!loading && fetchError && <p className={styles.ovEmpty}>{fetchError}</p>}
+            {!loading && !fetchError && filtered.length === 0 && <EmptyInterviewState />}
+            {!loading && !fetchError && filtered.map(session => (
+              <motion.div key={session.id} variants={cardVariants}>
+                <SessionCard
+                  session={session}
+                  isActive={panelOpen && selectedSession?.id === session.id}
+                  panelOpen={panelOpen}
+                  onClick={() => handleCardClick(session)}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <aside className={`${styles.ovPanel} ${panelOpen ? styles.ovPanelOpen : ''}`}>
+            {selectedSession && (
+              <DetailPanel session={selectedSession} onClose={() => setPanelOpen(false)} />
+            )}
+          </aside>
+        </div>
 
       </div>
     </div>
@@ -539,96 +539,104 @@ export default function MockInterviewPage({ accessToken }) {
         />
       </div>
 
-      {activeTab === 0 && (
-        <div className={styles.card}>
-          <div className={styles.header}>
-            <h1 className={styles.title}>Configure your interview</h1>
-            <p className={styles.subtitle}>
-              Choose your preferences and <span className={styles.accent}>we'll</span> create a realistic interview.
-            </p>
-          </div>
-
-          <div className={styles.grid}>
-            <div className={styles.field}>
-              <label className={styles.label}>Job Role</label>
-              <input type="text" className={styles.input} placeholder="e.g. Software Engineer"
-                value={form.jobRole} onChange={set('jobRole')} />
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label}>Interview Type</label>
-              <div className={styles.selectWrap}>
-                <select className={styles.select} value={form.interviewType} onChange={set('interviewType')}>
-                  {INTERVIEW_TYPES.map(t => <option key={t}>{t}</option>)}
-                </select>
-                <FontAwesomeIcon icon={faChevronDown} className={styles.chevron} />
+      <AnimatePresence mode="wait">
+        {activeTab === 0 && (
+          <motion.div key="new-interview" {...tabEnter} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <div className={styles.card}>
+              <div className={styles.header}>
+                <h1 className={styles.title}>Configure your interview</h1>
+                <p className={styles.subtitle}>
+                  Choose your preferences and <span className={styles.accent}>we'll</span> create a realistic interview.
+                </p>
               </div>
-            </div>
 
-            <div className={styles.field}>
-              <label className={styles.label}>Difficulty</label>
-              <div className={styles.selectWrap}>
-                <select className={styles.select} value={form.difficulty} onChange={set('difficulty')}>
-                  {DIFFICULTIES.map(d => <option key={d}>{d}</option>)}
-                </select>
-                <FontAwesomeIcon icon={faChevronDown} className={styles.chevron} />
+              <div className={styles.grid}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Job Role</label>
+                  <input type="text" className={styles.input} placeholder="e.g. Software Engineer"
+                    value={form.jobRole} onChange={set('jobRole')} />
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>Interview Type</label>
+                  <div className={styles.selectWrap}>
+                    <select className={styles.select} value={form.interviewType} onChange={set('interviewType')}>
+                      {INTERVIEW_TYPES.map(t => <option key={t}>{t}</option>)}
+                    </select>
+                    <FontAwesomeIcon icon={faChevronDown} className={styles.chevron} />
+                  </div>
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>Difficulty</label>
+                  <div className={styles.selectWrap}>
+                    <select className={styles.select} value={form.difficulty} onChange={set('difficulty')}>
+                      {DIFFICULTIES.map(d => <option key={d}>{d}</option>)}
+                    </select>
+                    <FontAwesomeIcon icon={faChevronDown} className={styles.chevron} />
+                  </div>
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>Question Count</label>
+                  <div className={styles.selectWrap}>
+                    <select className={styles.select} value={form.questionCount} onChange={set('questionCount')}>
+                      {QUESTION_COUNTS.map(n => <option key={n} value={n}>{n} Questions</option>)}
+                    </select>
+                    <FontAwesomeIcon icon={faChevronDown} className={styles.chevron} />
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div className={styles.field}>
-              <label className={styles.label}>Question Count</label>
-              <div className={styles.selectWrap}>
-                <select className={styles.select} value={form.questionCount} onChange={set('questionCount')}>
-                  {QUESTION_COUNTS.map(n => <option key={n} value={n}>{n} Questions</option>)}
-                </select>
-                <FontAwesomeIcon icon={faChevronDown} className={styles.chevron} />
+              <div className={styles.field}>
+                <label className={styles.label}>
+                  Paste Job Description <span className={styles.optional}>(optional)</span>
+                </label>
+                <textarea className={styles.textarea} rows={4}
+                  placeholder="Paste the job description to tailor your questions..."
+                  value={form.jobDescription} onChange={set('jobDescription')} />
               </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>
+                  Upload Resume <span className={styles.optional}>(optional)</span>
+                </label>
+                <button type="button" className={styles.uploadBtn} onClick={() => fileInputRef.current?.click()}>
+                  {resumeFile ? (
+                    <>
+                      <FontAwesomeIcon icon={faFile} className={styles.uploadIcon} />
+                      <span className={styles.uploadFileName}>{resumeFile.name}</span>
+                      <span className={styles.clearBtn} onClick={e => { e.stopPropagation(); setResumeFile(null); }}>
+                        <FontAwesomeIcon icon={faXmark} />
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <FontAwesomeIcon icon={faUpload} className={styles.uploadIcon} />
+                      <span>Choose PDF or DOCX</span>
+                    </>
+                  )}
+                </button>
+                <input ref={fileInputRef} type="file" accept=".pdf,.docx"
+                  className={styles.hiddenInput} onChange={handleFileChange} />
+              </div>
+
+              {startError && <p className={styles.errorMsg}>{startError}</p>}
+
+              <button type="button" className={styles.startBtn} onClick={handleStart} disabled={starting}>
+                <FontAwesomeIcon icon={faPlay} />
+                {starting ? 'Starting…' : 'Start Interview'}
+              </button>
             </div>
-          </div>
+          </motion.div>
+        )}
 
-          <div className={styles.field}>
-            <label className={styles.label}>
-              Paste Job Description <span className={styles.optional}>(optional)</span>
-            </label>
-            <textarea className={styles.textarea} rows={4}
-              placeholder="Paste the job description to tailor your questions..."
-              value={form.jobDescription} onChange={set('jobDescription')} />
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label}>
-              Upload Resume <span className={styles.optional}>(optional)</span>
-            </label>
-            <button type="button" className={styles.uploadBtn} onClick={() => fileInputRef.current?.click()}>
-              {resumeFile ? (
-                <>
-                  <FontAwesomeIcon icon={faFile} className={styles.uploadIcon} />
-                  <span className={styles.uploadFileName}>{resumeFile.name}</span>
-                  <span className={styles.clearBtn} onClick={e => { e.stopPropagation(); setResumeFile(null); }}>
-                    <FontAwesomeIcon icon={faXmark} />
-                  </span>
-                </>
-              ) : (
-                <>
-                  <FontAwesomeIcon icon={faUpload} className={styles.uploadIcon} />
-                  <span>Choose PDF or DOCX</span>
-                </>
-              )}
-            </button>
-            <input ref={fileInputRef} type="file" accept=".pdf,.docx"
-              className={styles.hiddenInput} onChange={handleFileChange} />
-          </div>
-
-          {startError && <p className={styles.errorMsg}>{startError}</p>}
-
-          <button type="button" className={styles.startBtn} onClick={handleStart} disabled={starting}>
-            <FontAwesomeIcon icon={faPlay} />
-            {starting ? 'Starting…' : 'Start Interview'}
-          </button>
-        </div>
-      )}
-
-      {activeTab === 1 && <InterviewOverview />}
+        {activeTab === 1 && (
+          <motion.div key="overview" {...tabEnter}>
+            <InterviewOverview accessToken={accessToken} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

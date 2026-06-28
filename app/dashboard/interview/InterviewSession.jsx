@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Mic, Square, Volume2, ChevronRight, RotateCcw, LogOut, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { submitAnswer } from '@/app/Services/InterviewService';
+import { submitAnswer, synthesizeSpeech } from '@/app/Services/InterviewService';
 import styles from './InterviewSession.module.css';
 
 // ── State machine ───────────────────────────────────────────
@@ -60,6 +60,8 @@ export default function InterviewSession({
   const [error, setError]         = useState('');
 
   const recRef       = useRef(null);
+  const audioRef     = useRef(null);
+  const speakCallRef = useRef(0);
   const startTime    = useRef(null);
   const transcriptR  = useRef('');
   const phaseR       = useRef(S.AI_SPEAKING);
@@ -70,17 +72,42 @@ export default function InterviewSession({
   useEffect(() => { transcriptR.current = transcript; }, [transcript]);
 
   // ── TTS ─────────────────────────────────────────────────
-  const speak = useCallback((text, onDone) => {
-    if (typeof window === 'undefined') return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.92;
-    u.pitch = 1;
-    u.onend = () => onDone?.();
-    window.speechSynthesis.speak(u);
+  const stopSpeaking = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current = null;
+    }
   }, []);
 
-  const stopSpeaking = useCallback(() => window.speechSynthesis?.cancel(), []);
+  const speak = useCallback(async (text, onDone) => {
+    const callId = ++speakCallRef.current;
+    stopSpeaking();
+    try {
+      const res   = await synthesizeSpeech({ text, accessToken });
+      if (callId !== speakCallRef.current) return;
+
+      const bytes       = Uint8Array.from(atob(res.audioContent), c => c.charCodeAt(0));
+      const actx        = new AudioContext();
+      const decoded     = await actx.decodeAudioData(bytes.buffer);
+      if (callId !== speakCallRef.current) { actx.close(); return; }
+
+      const source      = actx.createBufferSource();
+      source.buffer     = decoded;
+      source.connect(actx.destination);
+      source.onended    = () => { actx.close(); audioRef.current = null; onDone?.(); };
+      audioRef.current  = { pause: () => { source.stop(); actx.close(); }, src: '' };
+      await actx.resume();
+      source.start(0);
+    } catch {
+      if (typeof window === 'undefined') return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.92;
+      u.onend = () => onDone?.();
+      window.speechSynthesis.speak(u);
+    }
+  }, [accessToken, stopSpeaking]);
 
   // ── STT ─────────────────────────────────────────────────
   const startRecording = useCallback(() => {

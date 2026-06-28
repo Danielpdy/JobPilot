@@ -33,4 +33,14 @@ public class InterviewController : BaseApiController
         var result = await _interviewService.SubmitAnswerAndGetNextQuestionAsync(request, int.Parse(userId));
         return result.Match(Ok, errors => MapErrors(errors));
     }
+
+    [HttpGet("history")]
+    public async Task<IActionResult> GetHistory()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null) return Unauthorized();
+
+        var result = await _interviewService.GetUserInterviewsAsync(int.Parse(userId));
+        return result.Match(Ok, errors => MapErrors(errors));
+    }
 }

@@ -22,7 +22,7 @@
   box-shadow: 0 4px 24px rgba(11, 45, 114, 0.08), 0 1px 4px rgba(11, 45, 114, 0.04);
   padding: 32px;
   width: calc(100% - 32px);
-  max-width: 560px;
+  max-width: 535px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -173,9 +173,6 @@
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
   padding: 0 16px;
   box-sizing: border-box;
 }
@@ -183,10 +180,10 @@
 /* ── Header ───────────────────────────────────────────────── */
 .ovHeader {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  flex-wrap: wrap;
+  min-height: 40px;
 }
 
 .ovTitle {
@@ -213,6 +210,8 @@
   position: relative;
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .ovSearchIcon {
@@ -231,7 +230,7 @@
   font-size: 0.875rem;
   font-family: inherit;
   outline: none;
-  width: 210px;
+  width: 100%;
   transition: border-color 0.15s;
 }
 .ovSearchInput:focus { border-color: #0B2D72; }
@@ -256,7 +255,12 @@
 /* ── Content layout ───────────────────────────────────────── */
 .ovContent {
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ovBody {
+  display: flex;
   align-items: flex-start;
 }
 
@@ -268,10 +272,84 @@
   gap: 12px;
 }
 
+.ovEmpty {
+  padding: 40px 0;
+  text-align: center;
+  color: #9CA3AF;
+  font-size: 14px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 24px 72px;
+  text-align: center;
+  gap: 0;
+}
+
+.emptyRings {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.emptyRing1 {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(9, 146, 194, 0.14);
+  background: rgba(9, 146, 194, 0.04);
+}
+
+.emptyRing2 {
+  position: absolute;
+  inset: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(9, 146, 194, 0.2);
+  background: rgba(9, 146, 194, 0.06);
+}
+
+.emptyIconWrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0992C2 0%, #0b4fa6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(9, 146, 194, 0.3);
+}
+
+.emptyIconSvg {
+  color: #ffffff;
+}
+
+.emptyTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 10px;
+  letter-spacing: -0.01em;
+}
+
+.emptyText {
+  font-size: 13.5px;
+  color: #9CA3AF;
+  max-width: 280px;
+  line-height: 1.6;
+  margin: 0;
+}
+
 /* ── Session card ─────────────────────────────────────────── */
 .sessionCard {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 20px;
   background: #ffffff;
   border: 1px solid #E5E7EB;
@@ -290,6 +368,12 @@
 .sessionCardActive {
   border-color: #4B87F5;
   box-shadow: 0 2px 10px rgba(75,135,245,0.18);
+}
+
+/* Panel open — tighter card layout */
+.sessionCardCompact {
+  gap: 14px;
+  padding: 16px 16px 16px 18px;
 }
 
 .cardLeft {
@@ -396,9 +480,17 @@
   font-size: 0.8125rem;
 }
 
+.insightDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .cardArrow {
   color: #9CA3AF;
   flex-shrink: 0;
+  align-self: center;
 }
 
 /* ── Detail panel wrapper (animated) ─────────────────────── */
@@ -406,17 +498,20 @@
   flex-shrink: 0;
   width: 0;
   overflow: hidden;
-  transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 0;
+  transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+              margin-left 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ovPanelOpen {
-  width: 420px;
+  width: 480px;
+  margin-left: 20px;
 }
 
 /* ── Panel inner ──────────────────────────────────────────── */
 .panelInner {
-  width: 420px;
-  min-width: 420px;
+  width: 480px;
+  min-width: 480px;
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #E5E7EB;
@@ -425,6 +520,11 @@
   flex-direction: column;
   max-height: calc(100vh - 90px);
   overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.panelInner::-webkit-scrollbar {
+  display: none;
 }
 
 .panelHeader {
@@ -509,43 +609,76 @@
   color: #111827;
 }
 
-/* ── Performance bars ─────────────────────────────────────── */
-.perfRow  { display: flex; align-items: center; gap: 16px; }
-.perfBars { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-
-.perfBar {
+/* ── Score badge (detail panel) ───────────────────────────── */
+.scoreBadge {
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 96px;
+  border-radius: 14px;
+  border: 1px solid #E5E7EB;
+  background: #F9FAFB;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 12px 8px;
+}
+
+.scoreBadgeNum {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #111827;
+}
+
+.scoreBadgeDenom {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.scoreBadgeLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Performance row + stat cards ─────────────────────────── */
+.perfRow { display: flex; align-items: center; gap: 16px; }
+
+.statGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
-.perfLabel {
-  font-size: 0.8rem;
-  color: #374151;
-  width: 126px;
-  flex-shrink: 0;
+.statCard {
+  background: #F9FAFB;
+  border: 1px solid #F3F4F6;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.perfTrack {
-  flex: 1;
-  height: 6px;
-  background: #E5E7EB;
-  border-radius: 999px;
-  overflow: hidden;
+.statLabel {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.perfFill {
-  height: 100%;
-  border-radius: 999px;
-  background: #6366F1;
-}
-
-.perfScore {
-  font-size: 0.75rem;
-  color: #6B7280;
-  width: 44px;
-  text-align: right;
-  flex-shrink: 0;
+.statValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
 }
 
 /* ── Strengths / improvements grid ───────────────────────── */
@@ -554,6 +687,10 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   padding: 0 20px 16px;
+}
+
+.strGridSingle {
+  grid-template-columns: 1fr;
 }
 
 .strBox {
@@ -577,6 +714,11 @@
   font-size: 0.8rem;
   color: #374151;
   line-height: 1.4;
+}
+
+.strItem svg {
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 
 /* ── Question accordion ───────────────────────────────────── */
@@ -648,37 +790,41 @@
 .downloadBtn:hover { border-color: #0B2D72; color: #0B2D72; }
 
 /* ── 1200px — hide Top Strengths column ──────────────────── */
+/* ── 1200px — hide Top Strengths on narrower viewports ──────── */
 @media (max-width: 1200px) {
   .cardRight { display: none; }
 }
 
-/* ── 1000px — compact card padding & text ────────────────── */
+/* ── 1000px — compact card text ─────────────────────────── */
 @media (max-width: 1000px) {
-  .sessionCard { padding: 14px 16px 14px 18px; gap: 12px; }
-  .cardMeta    { font-size: 0.75rem; gap: 3px; }
-  .tag         { font-size: 0.7rem; padding: 2px 8px; }
+  .cardMeta { font-size: 0.75rem; gap: 3px; }
+  .tag      { font-size: 0.7rem; padding: 2px 8px; }
 }
 
 /* ── 900px — stack overview header ───────────────────────── */
 @media (max-width: 900px) {
-  .ovHeader     { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .ovControls   { width: 100%; }
-  .ovSearch     { flex: 1; }
+  .ovHeader      { flex-wrap: wrap; }
+  .ovSearch      { flex: 1; }
   .ovSearchInput { width: 100%; }
 }
 
 /* ── 768px — stack detail panel below list ───────────────── */
 @media (max-width: 768px) {
-  .ovContent  { flex-direction: column; }
+  .ovBody     { flex-direction: column; }
   .ovPanel    { width: 100% !important; overflow: visible; }
-  .panelInner { width: 100%; min-width: unset; max-height: none; }
+  .panelInner { width: 100%; min-width: unset; max-height: none; scrollbar-width: none; }
   .strGrid    { grid-template-columns: 1fr; }
-  .perfLabel  { width: 110px; }
+  .sessionCardCompact { gap: 20px; padding: 20px 20px 20px 24px; }
 }
 
-/* ── 600px — hide score ring (too wide for narrow cards) ─── */
+/* ── 600px — hide score ring on very narrow cards ────────── */
 @media (max-width: 600px) {
   .cardMiddle { display: none; }
+}
+
+/* ── 560px — collapse form grid on narrow screens ─────────── */
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr; }
 }
 
 /* ── 480px — phone ───────────────────────────────────────── */
@@ -686,13 +832,9 @@
   /* Form */
   .page  { padding: 12px 0 32px; }
   .card  { padding: 20px 16px; gap: 16px; }
-  .grid  { grid-template-columns: 1fr; }
 
   /* Overview shell */
   .ovWrapper     { padding: 0 12px; }
-  .ovTitle       { font-size: 1.2rem; }
-  .ovSub         { font-size: 0.8125rem; }
-  .ovControls    { flex-direction: row; gap: 8px; width: 100%; }
   .ovSearch      { flex: 1; }
   .ovSearchInput { width: 100%; }
   .ovFilterBtn   { flex-shrink: 0; }
@@ -705,7 +847,6 @@
   /* Detail panel */
   .panelSummary      { gap: 10px; }
   .panelSummaryTitle { font-size: 0.875rem; }
-  .perfRow           { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .perfBars          { width: 100%; }
-  .perfLabel         { width: auto; min-width: 100px; }
+  .perfRow  { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .statGrid { width: 100%; }
 }

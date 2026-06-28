@@ -65,6 +65,7 @@ builder.Services.AddScoped<IResumeAnalyzerService, ResumeAnalyzerService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ICoverLetterService, CoverLetterService>();
 builder.Services.AddScoped<IInterviewService, InterviewService>();
+builder.Services.AddScoped<ITtsService, TtsService>();
 builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 

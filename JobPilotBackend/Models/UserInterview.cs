@@ -12,6 +12,8 @@ public class UserInterview
     public string InterviewSummary {  get; set; } = string.Empty;
     public int CurrentQuestionNumber { get; set; } 
     public string Status { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; } 
-    public DateTime?  CompletedAt { get; set; } 
+    public DateTime CreatedAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
+    public string? StrengthBullets { get; set; }
+    public string? ImprovementBullets { get; set; }
 }

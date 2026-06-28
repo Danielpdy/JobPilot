@@ -13,3 +13,16 @@ export const submitAnswer = ({ interviewId, questionNumber, answerText, duration
         method: "POST",
         body: JSON.stringify({ interviewId, questionNumber, answerText, durationSeconds }),
     });
+
+export const synthesizeSpeech = ({ text, accessToken }) =>
+    apiRequest("/tts/synthesize", {
+        headers: { "Authorization": `Bearer ${accessToken}` },
+        method: "POST",
+        body: JSON.stringify({ text }),
+    });
+
+export const getInterviewHistory = ({ accessToken }) =>
+    apiRequest("/interview/history", {
+        headers: { "Authorization": `Bearer ${accessToken}` },
+        method: "GET",
+    });
