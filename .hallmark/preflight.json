@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-02",
+  "design_md": "design.md (project root) — system-managed project",
+  "framework": "Next.js 16.2.1, App Router (package.json L27); Tailwind v4 via @import \"tailwindcss\" (app/globals.css L1)",
+  "fonts": "System stack -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif (app/dashboard/dashboard.module.css L6); no next/font or webfont loaded",
+  "palette": "shadcn neutral OKLCH tokens in app/globals.css :root (L76); product UI uses hard-coded hex in CSS modules (navy #0B2D72, ocean #0992C2, cyan #0AC4E0, canvas #EBF0FA)",
+  "motion": "motion-on — motion ^12.38.0 (package.json L26), gsap ^3.14.2 (package.json L22)",
+  "spacing": "No spacing tokens; 4px-grid values hard-coded in CSS modules",
+  "conflicts": [
+    "globals.css OKLCH tokens are defined but product CSS modules bypass them with raw hex",
+    "README mentions next/font Geist, but app/layout.jsx loads no font"
+  ]
+}

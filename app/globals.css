@@ -150,3 +150,10 @@ a {
     @apply bg-background text-foreground;
   }
 }
+
+/* Hallmark · clip horizontal overflow without creating a scroll container
+   (keeps position: sticky working). Overrides `hidden` above. */
+html,
+body {
+  overflow-x: clip;
+}

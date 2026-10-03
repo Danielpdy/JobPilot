@@ -1,3 +1,4 @@
+import '../tokens.css';
 import './globals.css';
 import Provider from './providers';
 

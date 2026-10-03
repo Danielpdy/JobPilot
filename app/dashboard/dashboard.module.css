@@ -181,6 +181,10 @@
   overflow-x: hidden;
 }
 
+/* ── Focus mode (live interview round) ─────────────────── */
+.sidebarHidden,
+.topBarHidden { display: none !important; }
+
 /* ── Mobile ────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .main {
