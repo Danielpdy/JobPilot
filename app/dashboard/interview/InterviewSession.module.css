@@ -189,6 +189,7 @@
 .question {
   display: grid;
   margin: 0;
+  font-family: var(--font-body); /* reading text, not a title */
   font-size: var(--text-xl);
   font-weight: 800;
   line-height: 1.25;

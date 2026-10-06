@@ -4,7 +4,7 @@
   background: #e8f4ff;
   position: relative;
   overflow-x: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
 }
 
 /* ── Hero wrapper ─────────────────────────────────────── */

@@ -55,7 +55,7 @@ Pill tags use a soft background with a darker text of the same hue:
 
 ## Typography
 
-- **Family**: system stack `-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`. Form controls use `font-family: inherit`. PDF output (resume and cover letter) uses Helvetica/Arial or Georgia/Times separately.
+- **Family**: chosen in one file, [app/fonts.js](app/fonts.js). It defines a primary font (Supreme, body text) and an accent font (Chubbo Bold, titles and figures), loaded with `next/font/local` from `app/fonts/` and applied to `<html>`. `tokens.css` maps them to `--font-body` and `--font-display` with system fallbacks, and `body` uses `--font-body`. `globals.css` also gives every `h1`–`h3` `--font-display`. The exceptions are a few small label-style headings on the interview page and the live interview question, which stay in the body font. Component CSS uses `var(--font-body)`, `var(--font-display)` or `inherit`, never a hardcoded family. Form controls use `font-family: inherit`. PDF output (resume and cover letter) uses Helvetica/Arial or Georgia/Times separately.
 - **Rendering**: `-webkit-font-smoothing: antialiased`.
 - **Scale** (rem, base 16px):
   - Hero headline: `clamp(2.8rem, 6vw, 5rem)`, weight 800, line-height 1.08, letter-spacing `-0.03em`
@@ -202,6 +202,16 @@ New work should add finer-grained breakpoints and fluid sizing per the CLAUDE.md
 - **The setup panel appears only after "Get started"**, with a "How it works" back link. The Overview empty state's "Set up a round" jumps straight to setup.
 - **Spiral adaptations (marked `JobPilot:` in the source):** items may render `content` instead of an image, and the fit-to-width scale accounts for the helix radius so text cards stay readable on phones. Steps are also listed in order for screen readers; the spiral itself is `aria-hidden`.
 - **Copy stays honest:** the steps don't claim resume tailoring, because the resume upload isn't sent to the backend yet.
+
+### Amendments — stats dashboard (2026-10-05)
+
+Supersedes the New Interview intro above and an interim one-view bento. Layout reference: a quiet catalogue page with one title, one toolbar, one banner, then small sections of outlined cards.
+- **Order:** page title "Mock interviews", then the toolbar, score banner, Overview, By interview type, Recent rounds and Coaching notes. The column is capped at 60rem and left aligned. No photos, no shadows on cards, and 1px `--color-rule-2` outlines at `--radius-btn`.
+- **Toolbar:** type tabs on the left. Search, a sort toggle and a navy "New interview" button sit on the right. The type and search filters apply to every section, so the numbers always describe the listed rounds. Clicking a type card sets that filter.
+- **The navy score banner is the only filled surface.** It shows the average with a count-up, a sentence on the latest change, the next focus in cyan, and one bar per graded round with the latest one lit in cyan.
+- **The setup form lives in a native `<dialog>`** opened by "New interview". The dialog gives Esc to close, focus trapping and an inert page. A fixed header and footer frame a scrolling body. The footer shows the round length. The global reset zeroes margins, so the dialog sets `margin: auto` to centre itself.
+- **Empty history:** the banner becomes "No rounds yet" with a "Start your first round" button, and the stats sections are hidden.
+- **Type pair:** the interview page applies `--font-display` (Chubbo Bold) to its title, section headings, dialog and modal titles, and every figure. Supreme covers everything else at 500 for labels and 600 for names. Both fonts are global now, set in `app/fonts.js`. Selected tabs, "Show all" and "Next focus" are marked with an accent underline rather than a box or colour.
 
 ## Exports
 

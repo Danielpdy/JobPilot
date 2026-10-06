@@ -11,8 +11,16 @@ body {
 }
 
 body {
+  font-family: var(--font-body); /* set in tokens.css, chosen in app/fonts.js */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings use the accent font (global). Both fonts are chosen in app/fonts.js */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
 }
 
 * {

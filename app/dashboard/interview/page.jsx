@@ -1,25 +1,15 @@
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, MotionConfig } from 'motion/react';
 import { startInterview, getInterviewHistory } from '@/app/Services/InterviewService';
 import InterviewSession from './InterviewSession';
 import {
-  Mic, LayoutDashboard, Code2, Server, Briefcase, BarChart2, Headphones,
-  Calendar, Clock, HelpCircle, Search, ChevronRight, RotateCw,
+  Mic, Code2, Server, Briefcase, BarChart2, Headphones, Layers, Users,
+  Calendar, Search, RotateCw, ArrowDownUp, Plus,
   CheckCircle2, AlertCircle, X, Download, Upload, FileText, Play, Loader2,
-  ListChecks, ClipboardCheck, Sparkles, ArrowLeft,
 } from 'lucide-react';
-import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
 import FlipCard from '@/components/FlipCard';
-import InfiniteSpiral from '@/components/InfiniteSpiral';
-import SpecularButton from '@/components/SpecularButton';
 import styles from './page.module.css';
-
-// ─── Nav tabs ─────────────────────────────────────────────
-const VIEW_TABS = [
-  { label: 'New Interview', icon: <Mic size={14} /> },
-  { label: 'Overview',      icon: <LayoutDashboard size={14} /> },
-];
 
 // ─── Form constants ────────────────────────────────────────
 const INTERVIEW_TYPES = ['Mixed', 'Technical', 'Behavioral'];
@@ -33,12 +23,6 @@ const TYPE_COACHING = {
   Technical:  'Questions about how you’d build, debug and explain things. Think out loud — the reasoning counts.',
   Behavioral: 'Questions about situations you’ve handled. Answer with the situation, what you did, and the result.',
 };
-const DIFF_COACHING = {
-  'Entry Level':  'Expect fundamentals and motivation. Clear, honest answers beat buzzwords.',
-  'Mid Level':    'Expect follow-ups on trade-offs and the work you owned.',
-  'Senior Level': 'Expect scope, judgment and influence — how you decided, not just what you did.',
-};
-
 // ─── Category + score tones (all colours are tokens) ───────
 const TYPE_TAG = {
   Mixed:      { bg: 'var(--color-type-mixed-soft)',      color: 'var(--color-type-mixed)' },
@@ -65,13 +49,6 @@ function questionTone(score) {
   if (score >= 4) return 'var(--color-warning)';
   return 'var(--color-error)';
 }
-
-// ─── View transitions: crossfade only ──────────────────────
-const fade = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } },
-  exit:    { opacity: 0, transition: { duration: 0.15, ease: [0.7, 0, 0.84, 0] } },
-};
 
 // ─── Count-up for the headline figure ──────────────────────
 function useCountUp(target, duration = 520) {
@@ -137,7 +114,7 @@ function ScoreRing({ score, size = 90 }) {
         strokeDasharray={`${circ} ${circ}`} strokeDashoffset={off}
         strokeLinecap="round" transform={`rotate(-90 ${cx} ${cx})`} />
       <text x={cx} y={cx} textAnchor="middle" dominantBaseline="central"
-        fontSize={size * 0.3} fontWeight="800" style={{ fill: 'var(--color-ink)' }}>{score}</text>
+        fontSize={size * 0.3} fontWeight="700" style={{ fill: 'var(--color-ink)', fontFamily: 'var(--font-display)' }}>{score}</text>
     </svg>
   );
 }
@@ -180,119 +157,6 @@ function OptionGroup({ label, options, value, onChange, format = o => o }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// OVERVIEW
-// ═══════════════════════════════════════════════════════════
-
-// ─── Stat-led hero: your average, with a coaching read ─────
-function ProgressHero({ sessions }) {
-  const graded = sessions.filter(s => s.scored);
-  const avg    = graded.length ? Math.round(graded.reduce((a, s) => a + s.score, 0) / graded.length) : null;
-  const shown  = useCountUp(avg);
-
-  const latest = graded[0];
-  const prev   = graded[1];
-  let trend = null;
-  if (latest && prev) {
-    const diff = latest.score - prev.score;
-    trend = diff > 0 ? `Your latest round scored ${latest.score}, up ${diff} from the one before.`
-          : diff < 0 ? `Your latest round scored ${latest.score}, down ${-diff} from the one before.`
-          : `Your latest round scored ${latest.score}, level with the one before.`;
-  } else if (latest) {
-    trend = `Your first graded round is on the board at ${latest.score}.`;
-  }
-  const focus = sessions[0]?.improvements?.[0];
-
-  // Chronological strip — oldest on the left, newest on the right
-  const strip = [...sessions].slice(0, 12).reverse();
-
-  return (
-    <div className={styles.cq}>
-    <section className={styles.hero} aria-labelledby="progress-heading">
-      <div className={styles.heroFigureCol}>
-        <div className={styles.figure} style={{ color: avg == null ? 'var(--color-muted)' : 'var(--color-navy)' }}>
-          {avg == null ? '—' : <><span aria-hidden="true">{shown}</span><span className={styles.srOnly}>{avg}</span></>}
-        </div>
-        <h2 id="progress-heading" className={styles.heroHeadline}>
-          {avg == null
-            ? 'No graded rounds yet.'
-            : <>average across {graded.length} graded {graded.length === 1 ? 'round' : 'rounds'}.</>}
-        </h2>
-        {trend && <p className={styles.heroTrend}>{trend}</p>}
-        {avg == null && <p className={styles.heroTrend}>Scores show up here once a round has been graded.</p>}
-      </div>
-
-      <div className={styles.heroSide}>
-        {focus && (
-          <div className={styles.focus}>
-            <span className={styles.focusLabel}>Focus for your next round</span>
-            <p className={styles.focusText}>{focus}</p>
-          </div>
-        )}
-        {strip.length > 1 && (
-          <div className={styles.strip} role="img" aria-label={`Scores for your last ${strip.length} rounds, oldest to newest: ${strip.map(s => s.scored ? s.score : 'not graded').join(', ')}`}>
-            {strip.map(s => (
-              <span key={s.id} className={styles.stripCol}>
-                <span className={styles.stripTrack}>
-                  <span
-                    className={`${styles.stripBar} ${s.scored ? '' : styles.stripBarEmpty}`}
-                    style={s.scored ? { height: `${Math.max(6, s.score)}%`, background: scoreTone(s.score).color } : undefined}
-                  />
-                </span>
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-    </div>
-  );
-}
-
-// ─── Empty state ───────────────────────────────────────────
-function EmptyInterviewState({ onStart }) {
-  return (
-    <div className={styles.empty}>
-      <span className={styles.emptyIcon}><Mic size={22} /></span>
-      <h2 className={styles.emptyTitle}>No rounds yet.</h2>
-      <p className={styles.emptyText}>Each practice round you finish lands here with a score and notes on what to work on.</p>
-      <button type="button" className={styles.btnPrimary} onClick={onStart}>
-        <Play size={15} /> Set up a round
-      </button>
-    </div>
-  );
-}
-
-// ─── Session row ───────────────────────────────────────────
-function SessionRow({ session, isActive, onClick }) {
-  const tone = session.scored ? scoreTone(session.score) : null;
-  return (
-    <button type="button" className={styles.row} aria-pressed={isActive} onClick={onClick}>
-      <span className={styles.rowIcon} style={{ background: typeTag(session.type).bg, color: typeTag(session.type).color }}>
-        <RoleIcon role={session.role} size={17} />
-      </span>
-      <span className={styles.rowMain}>
-        <span className={styles.rowRole}>{session.role}</span>
-        <span className={styles.rowTags}>
-          <Tag tone={typeTag(session.type)}>{session.type}</Tag>
-          <Tag tone={diffTag(session.difficulty)}>{session.difficulty}</Tag>
-        </span>
-      </span>
-      <span className={styles.rowMeta}>
-        <span className={styles.metaItem}><Calendar size={12} />{session.date}</span>
-        <span className={styles.metaItem}><HelpCircle size={12} />{session.questions} questions</span>
-        <span className={styles.metaItem}><Clock size={12} />{session.duration} min</span>
-      </span>
-      <span className={styles.rowScore}>
-        {tone
-          ? <><span className={styles.scoreDot} style={{ background: tone.color }} />{session.score}</>
-          : <span className={styles.rowUngraded}>Not graded</span>}
-      </span>
-      <ChevronRight size={16} className={styles.rowArrow} aria-hidden="true" />
-    </button>
-  );
-}
-
 function Bullets({ strengths, improvements }) {
   if (!strengths.length && !improvements.length) return null;
   return (
@@ -318,128 +182,6 @@ function Bullets({ strengths, improvements }) {
         </div>
       )}
     </div>
-  );
-}
-
-// ─── How it works — the four steps travel an infinite spiral ──
-const HOW_STEPS = [
-  { icon: <ListChecks size={18} />,     tone: 'paper', title: 'Set up your round',
-    text: 'Pick the role, interview type, level and number of questions. Paste a job description to tailor them.' },
-  { icon: <Mic size={18} />,            tone: 'cyan',  title: 'Answer out loud',
-    text: 'The interviewer reads each question aloud. You answer with your microphone, one question at a time.' },
-  { icon: <ClipboardCheck size={18} />, tone: 'ocean', title: 'Review your feedback',
-    text: 'Get a score, what worked, what to work on next, and feedback on every answer.' },
-  { icon: <Sparkles size={18} />,       tone: 'navy',  title: 'Practice again',
-    text: 'Run another round and follow your average score in Overview.' },
-];
-const SPIRAL_COPIES = 3; // the helix needs enough cards to loop; copies stay out of the a11y tree
-
-function StepCard({ step, n }) {
-  return (
-    <div className={styles.stepCard} data-tone={step.tone}>
-      <div className={styles.stepCardHead}>
-        <span className={styles.stepIcon} aria-hidden="true">{step.icon}</span>
-        <span className={styles.stepNum}>Step {n}</span>
-      </div>
-      <h3 className={styles.stepCardTitle}>{step.title}</h3>
-      <p className={styles.stepCardText}>{step.text}</p>
-    </div>
-  );
-}
-
-// Card + helix sizing tracks the viewport (the spiral takes px)
-function useSpiralSize() {
-  const [size, setSize] = useState(null);
-  useEffect(() => {
-    const measure = () => {
-      const w = window.innerWidth;
-      if (w < 480)       setSize({ cardWidth: 250, cardHeight: 168, radius: 44 });
-      else if (w < 900)  setSize({ cardWidth: 280, cardHeight: 172, radius: 110 });
-      else               setSize({ cardWidth: 300, cardHeight: 176, radius: 170 });
-    };
-    const id = requestAnimationFrame(measure);
-    window.addEventListener('resize', measure);
-    return () => { cancelAnimationFrame(id); window.removeEventListener('resize', measure); };
-  }, []);
-  return size;
-}
-
-function HowItWorks({ onStart }) {
-  const size = useSpiralSize();
-  const [shine, setShine] = useState(null);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      const css = getComputedStyle(document.documentElement);
-      setShine({ line: css.getPropertyValue('--specular-line').trim(), base: css.getPropertyValue('--specular-base').trim() });
-    });
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  const items = useMemo(() => Array.from({ length: SPIRAL_COPIES }).flatMap((_, copy) =>
-    HOW_STEPS.map((step, i) => ({
-      id: `${copy}-${i}`,
-      hidden: copy > 0,
-      content: <StepCard step={step} n={i + 1} />,
-    }))
-  ), []);
-
-  return (
-    <section className={styles.how} aria-labelledby="how-title">
-      <h1 id="how-title" className={styles.howTitle}>How a practice round works</h1>
-
-      {/* Screen readers get the steps in order; the spiral is the visual telling */}
-      <ol className={styles.srOnly}>
-        {HOW_STEPS.map((s, i) => <li key={s.title}>Step {i + 1}: {s.title}. {s.text}</li>)}
-      </ol>
-
-      <div className={styles.howSpiral} aria-hidden="true">
-        {size && (
-          <InfiniteSpiral
-            items={items}
-            animationMode="all"
-            speed={0.55}
-            radius={size.radius}
-            cardWidth={size.cardWidth}
-            cardHeight={size.cardHeight}
-            verticalSpacing={Math.round(size.cardHeight * 0.6)}
-            perspective={1000}
-            cardRadius={16}
-            centerScale={1.2}
-            edgeBlur={6}
-            cardsPerTurn={7}
-            pauseOnHover
-          />
-        )}
-      </div>
-
-      <div className={styles.howCta}>
-        {shine && (
-          <SpecularButton
-            size="lg"
-            radius={18}
-            tint="var(--color-navy)"
-            tintOpacity={1}
-            blur={0}
-            textColor="var(--color-navy-ink)"
-            lineColor={shine.line}
-            baseColor={shine.base}
-            intensity={1}
-            shineSize={10}
-            shineFade={40}
-            thickness={1}
-            speed={0.35}
-            followMouse
-            proximity={250}
-            autoAnimate={false}
-            onClick={onStart}
-            className={styles.howButton}
-          >
-            Get started
-          </SpecularButton>
-        )}
-      </div>
-    </section>
   );
 }
 
@@ -721,111 +463,216 @@ function SummaryModal({ session, onClose }) {
   );
 }
 
-// ─── Overview ──────────────────────────────────────────────
-function InterviewOverview({ accessToken, onStart }) {
-  const [sessions, setSessions]               = useState([]);
-  const [loading, setLoading]                 = useState(true);
-  const [fetchError, setFetchError]           = useState('');
-  const [selectedSession, setSelectedSession] = useState(null);
-  const [search, setSearch]                   = useState('');
-  const [typeFilter, setTypeFilter]           = useState('All');
-  const [attempt, setAttempt]                 = useState(0);
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD — stats first; the setup form lives in a dialog
+// ═══════════════════════════════════════════════════════════
+const TYPE_ICON = {
+  Mixed:      <Layers size={17} />,
+  Technical:  <Code2 size={17} />,
+  Behavioral: <Users size={17} />,
+};
+const RECENT_LIMIT = 6;
+const NOTES_LIMIT  = 4;
 
-  useEffect(() => {
-    getInterviewHistory({ accessToken })
-      .then(data => setSessions(data.map(mapApiToSession)))
-      .catch(() => setFetchError('We couldn’t load your rounds. Check your connection, then try again.'))
-      .finally(() => setLoading(false));
-  }, [accessToken, attempt]);
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
-  const retry = () => { setFetchError(''); setLoading(true); setAttempt(a => a + 1); };
+function formatMinutes(m) {
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return r ? `${h} h ${r} min` : `${h} h`;
+}
 
-  const handleRowClick = (session) => setSelectedSession(session);
+function summarize(list) {
+  const graded  = list.filter(s => s.scored);
+  const avg     = graded.length ? Math.round(graded.reduce((a, s) => a + s.score, 0) / graded.length) : null;
+  const best    = graded.reduce((b, s) => (!b || s.score > b.score ? s : b), null);
+  const minutes = list.reduce((a, s) => a + (s.duration || 0), 0);
+  const questions = list.reduce((a, s) => a + (s.questions || 0), 0);
+  return { graded, avg, best, minutes, questions };
+}
 
-  const query    = search.trim().toLowerCase();
-  const filtered = sessions.filter(s =>
-    (typeFilter === 'All' || s.type === typeFilter) &&
-    (s.role.toLowerCase().includes(query) || s.type.toLowerCase().includes(query))
-  );
-
-  const isEmpty = !loading && !fetchError && sessions.length === 0;
-
-  if (loading) {
-    return (
-      <div className={styles.ovWrapper} aria-busy="true">
-        <div className={`${styles.skeleton} ${styles.skeletonHero}`} />
-        {[0, 1, 2].map(i => <div key={i} className={`${styles.skeleton} ${styles.skeletonRow}`} />)}
-      </div>
-    );
+// Most recent first, one line each, no repeats
+function collectNotes(list, key) {
+  const seen = new Set();
+  const out = [];
+  for (const s of list) {
+    for (const text of s[key]) {
+      const k = text.trim().toLowerCase();
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push({ text, role: s.role, date: s.date, id: `${s.id}-${out.length}` });
+      if (out.length === NOTES_LIMIT) return out;
+    }
   }
+  return out;
+}
 
-  if (fetchError) {
-    return (
-      <div className={styles.ovWrapper}>
-        <div className={`${styles.notice} ${styles.noticeAction}`} role="alert">
-          <AlertCircle size={16} />
-          <span>{fetchError}</span>
-          <button type="button" className={styles.btnSecondary} onClick={retry}>Try again</button>
-        </div>
-      </div>
-    );
-  }
+// ─── Score banner: the average and how it has moved ────────
+function ScoreBanner({ list, stats }) {
+  const shown  = useCountUp(stats.avg);
+  const latest = stats.graded[0];
+  const prev   = stats.graded[1];
+  const bars   = stats.graded.slice(0, 16).reverse(); // oldest left, newest right
+  const focus  = list.find(s => s.improvements.length)?.improvements[0];
 
-  if (isEmpty) {
-    return <div className={styles.ovWrapper}><EmptyInterviewState onStart={onStart} /></div>;
+  let sub = stats.graded.length
+    ? `Across ${plural(stats.graded.length, 'graded round')}.`
+    : 'Scores appear once a round has been graded.';
+  if (latest && prev) {
+    const d = latest.score - prev.score;
+    sub += ` Your latest scored ${latest.score}, ${d > 0 ? `up ${d}` : d < 0 ? `down ${-d}` : 'level'} from the one before.`;
   }
 
   return (
-    <div className={styles.ovWrapper}>
-      <ProgressHero sessions={sessions} />
-
-      <div className={styles.ovBody}>
-        <section className={styles.ovList} aria-label="Your rounds">
-          <div className={styles.ovToolbar}>
-            <label className={styles.ovSearch}>
-              <Search size={15} className={styles.ovSearchIcon} aria-hidden="true" />
-              <input
-                className={styles.input}
-                type="search"
-                placeholder="Search role or type"
-                aria-label="Search rounds"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </label>
-            <div className={styles.chips} role="radiogroup" aria-label="Filter by interview type">
-              {TYPE_FILTERS.map(t => (
-                <button key={t} type="button" role="radio" aria-checked={typeFilter === t}
-                  className={styles.chip} onClick={() => setTypeFilter(t)}>
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {filtered.length === 0
-            ? <p className={styles.notice}>No rounds match that search. Clear it or pick another type.</p>
-            : (
-              <div className={styles.rows}>
-                {filtered.map(session => (
-                  <SessionRow
-                    key={session.id}
-                    session={session}
-                    isActive={selectedSession?.id === session.id}
-                    onClick={() => handleRowClick(session)}
-                  />
-                ))}
-              </div>
-            )}
-        </section>
+    <section className={styles.banner} aria-labelledby="avg-label">
+      <div className={styles.bannerMain}>
+        <h2 id="avg-label" className={styles.bannerLabel}>Average score</h2>
+        <p className={styles.bannerFigure}>
+          {stats.avg == null
+            ? '—'
+            : <><span aria-hidden="true">{shown}</span><span className={styles.srOnly}>{stats.avg} out of 100</span></>}
+          <span className={styles.bannerOf} aria-hidden="true">/100</span>
+        </p>
+        <p className={styles.bannerSub}>{sub}</p>
+        {focus && <p className={styles.bannerFocus}><strong>Next focus.</strong> {focus}</p>}
       </div>
 
-      <AnimatePresence>
-        {selectedSession && (
-          <FeedbackModal key={selectedSession.id} session={selectedSession} onClose={() => setSelectedSession(null)} />
-        )}
-      </AnimatePresence>
+      {bars.length > 1 && (
+        <div
+          className={styles.trend}
+          role="img"
+          aria-label={`Scores for your last ${bars.length} graded rounds, oldest to newest: ${bars.map(s => s.score).join(', ')}`}
+        >
+          {bars.map((s, i) => (
+            <span key={s.id} className={styles.trendCol} title={`${s.role}, ${s.date}: ${s.score}`}>
+              <span
+                className={styles.trendBar}
+                data-latest={i === bars.length - 1 || undefined}
+                style={{ height: `${Math.max(6, s.score)}%` }}
+              />
+            </span>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ─── Overview numbers ──────────────────────────────────────
+function StatsStrip({ list, stats }) {
+  const perRound = list.length ? Math.round(stats.minutes / list.length) : 0;
+  return (
+    <dl className={styles.stats}>
+      <div className={styles.stat}>
+        <dt>Rounds</dt>
+        <dd className={styles.statValue}>{list.length}</dd>
+        <dd className={styles.statNote}>{stats.graded.length} graded</dd>
+      </div>
+      <div className={styles.stat}>
+        <dt>Best score</dt>
+        <dd className={styles.statValue}>{stats.best ? stats.best.score : '—'}</dd>
+        <dd className={styles.statNote}>{stats.best ? stats.best.role : 'No graded rounds'}</dd>
+      </div>
+      <div className={styles.stat}>
+        <dt>Practice time</dt>
+        <dd className={styles.statValue}>{formatMinutes(stats.minutes)}</dd>
+        <dd className={styles.statNote}>About {perRound} min a round</dd>
+      </div>
+      <div className={styles.stat}>
+        <dt>Questions</dt>
+        <dd className={styles.statValue}>{stats.questions}</dd>
+        <dd className={styles.statNote}>Asked across all rounds</dd>
+      </div>
+    </dl>
+  );
+}
+
+function SectionHead({ id, title, action }) {
+  return (
+    <div className={styles.sectionHead}>
+      <h2 id={id} className={styles.sectionTitle}>{title}</h2>
+      {action}
     </div>
+  );
+}
+
+// ─── By interview type: each card filters the page ─────────
+function TypeCards({ sessions, onPick }) {
+  return (
+    <div className={styles.typeGrid}>
+      {INTERVIEW_TYPES.map(t => {
+        const rounds = sessions.filter(s => s.type === t);
+        const st = summarize(rounds);
+        return (
+          <button key={t} type="button" className={styles.card} onClick={() => onPick(t)} aria-label={`Show ${t} rounds`}>
+            <span className={styles.cardIcon} style={{ background: typeTag(t).bg, color: typeTag(t).color }}>{TYPE_ICON[t]}</span>
+            <span className={styles.cardBody}>
+              <span className={styles.cardTitle}>{t}</span>
+              <span className={styles.cardMeta}>
+                {rounds.length ? `${plural(rounds.length, 'round')}, ${formatMinutes(st.minutes)}` : 'No rounds yet'}
+              </span>
+              <span className={styles.meter} aria-hidden="true">
+                <span className={styles.meterFill} style={{ width: `${st.avg ?? 0}%` }} />
+              </span>
+            </span>
+            <span className={`${styles.cardScore} ${styles.cardScoreStack}`}>
+              {st.avg ?? '—'}
+              <span className={styles.cardScoreLabel}>avg</span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── One past round ────────────────────────────────────────
+function RoundCard({ session, onOpen }) {
+  const tone = session.scored ? scoreTone(session.score) : null;
+  return (
+    <button type="button" className={styles.card} onClick={onOpen}>
+      <span className={styles.cardIcon}><RoleIcon role={session.role} size={17} /></span>
+      <span className={styles.cardBody}>
+        <span className={styles.cardTitle}>{session.role}</span>
+        <span className={styles.cardTags}>
+          <Tag tone={typeTag(session.type)}>{session.type}</Tag>
+          <Tag tone={diffTag(session.difficulty)}>{session.difficulty}</Tag>
+        </span>
+        <span className={styles.cardMeta}>
+          {session.date} · {plural(session.questions, 'question')} · {session.duration} min
+        </span>
+      </span>
+      <span className={styles.cardScore}>
+        {tone
+          ? <><span className={styles.scoreDot} style={{ background: tone.color }} />{session.score}</>
+          : <span className={styles.cardUngraded}>Not graded</span>}
+      </span>
+    </button>
+  );
+}
+
+// ─── Coaching notes pulled from recent rounds ──────────────
+function NotesList({ id, title, notes, icon, tone }) {
+  return (
+    <section className={styles.notes} aria-labelledby={id}>
+      <h3 id={id} className={styles.notesTitle}>{title}</h3>
+      {notes.length === 0
+        ? <p className={styles.notesEmpty}>Nothing saved yet. Notes appear after a round is graded.</p>
+        : (
+          <ul className={styles.notesList}>
+            {notes.map(n => (
+              <li key={n.id} className={styles.note}>
+                <span className={styles.noteIcon} style={{ color: tone }} aria-hidden="true">{icon}</span>
+                <span className={styles.noteBody}>
+                  <span className={styles.noteText}>{n.text}</span>
+                  <span className={styles.noteSource}>{n.role}, {n.date}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+    </section>
   );
 }
 
@@ -833,7 +680,6 @@ function InterviewOverview({ accessToken, onStart }) {
 // Main page export
 // ═══════════════════════════════════════════════════════════
 export default function MockInterviewPage({ accessToken, onSessionChange }) {
-  const [activeTab, setActiveTab] = useState(0);
   const [form, setForm] = useState({
     jobRole: '', interviewType: 'Mixed', difficulty: 'Entry Level',
     questionCount: 10, jobDescription: '',
@@ -841,18 +687,46 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
   const [resumeFile, setResumeFile]         = useState(null);
   const [session, setSession]               = useState(null);
   const [summarySession, setSummarySession] = useState(null);
+  const [selectedSession, setSelectedSession] = useState(null);
   const [starting, setStarting]             = useState(false);
   const [startError, setStartError]         = useState('');
   const [roleError, setRoleError]           = useState(false);
-  const [setupOpen, setSetupOpen]           = useState(false); // setup panel only after "Get started"
+  const [setupOpen, setSetupOpen]           = useState(false);
+  const [sessions, setSessions]             = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError]     = useState('');
+  const [attempt, setAttempt]               = useState(0);
+  const [typeFilter, setTypeFilter]         = useState('All');
+  const [search, setSearch]                 = useState('');
+  const [sortByScore, setSortByScore]       = useState(false);
+  const [showAll, setShowAll]               = useState(false);
   const fileInputRef = useRef(null);
+  const roleInputRef = useRef(null);
+  const dialogRef    = useRef(null);
 
   // Tell the dashboard when a live round starts/ends so it can hide its chrome
   const live = !!session;
   useEffect(() => { onSessionChange?.(live); }, [live]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => onSessionChange?.(false), []);   // eslint-disable-line react-hooks/exhaustive-deps
 
-  const set    =(field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
+  useEffect(() => {
+    getInterviewHistory({ accessToken })
+      .then(data => { setSessions(data.map(mapApiToSession)); setHistoryError(''); })
+      .catch(() => setHistoryError('We couldn’t load your rounds. Check your connection, then try again.'))
+      .finally(() => setHistoryLoading(false));
+  }, [accessToken, attempt]);
+
+  // The native dialog gives us Esc, focus trapping and an inert page for free
+  useEffect(() => {
+    const d = dialogRef.current;
+    if (!d) return;
+    if (setupOpen && !d.open) { d.showModal(); roleInputRef.current?.focus(); }
+    if (!setupOpen && d.open) d.close();
+  }, [setupOpen]);
+
+  const retryHistory = () => { setHistoryError(''); setHistoryLoading(true); setAttempt(a => a + 1); };
+
+  const set    = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
   const choose = (field) => (v) => setForm(prev => ({ ...prev, [field]: v }));
 
   const handleFileChange = (e) => {
@@ -862,7 +736,7 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
   };
 
   const handleStart = async () => {
-    if (!form.jobRole.trim()) { setRoleError(true); return; }
+    if (!form.jobRole.trim()) { setRoleError(true); roleInputRef.current?.focus(); return; }
     setRoleError(false);
     setStartError('');
     setStarting(true);
@@ -876,6 +750,7 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
         jobDescriptionText: form.jobDescription || null,
         accessToken,
       });
+      setSetupOpen(false);
       setSession({
         interviewId:    res.interviewId,
         questionNumber: res.questionNumber,
@@ -891,21 +766,18 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
     }
   };
 
+  // Round finished: refresh history, then show the summary for that round
   const handleComplete = (completedInterviewId) => {
-    if (!completedInterviewId) { setSession(null); setActiveTab(1); return; }
     getInterviewHistory({ accessToken })
       .then(data => {
-        const match = data.find(i => i.id === completedInterviewId);
+        const mapped = data.map(mapApiToSession);
+        setSessions(mapped);
+        setHistoryError('');
         setSession(null);
-        if (match) setSummarySession(mapApiToSession(match));
-        else        setActiveTab(1);
+        const match = completedInterviewId ? mapped.find(s => s.id === completedInterviewId) : null;
+        if (match) setSummarySession(match);
       })
-      .catch(() => { setSession(null); setActiveTab(1); });
-  };
-
-  const handleSummaryClose = () => {
-    setSummarySession(null);
-    setActiveTab(1);
+      .catch(() => { setSession(null); retryHistory(); });
   };
 
   // Live round — the session owns the screen
@@ -926,147 +798,266 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
     );
   }
 
-  const role    = form.jobRole.trim();
-  const minutes = Math.round(form.questionCount * MINUTES_PER_QUESTION);
+  const minutes   = Math.round(form.questionCount * MINUTES_PER_QUESTION);
+  const hasRounds = !historyLoading && !historyError && sessions.length > 0;
+
+  // Filters apply to every section, so the numbers always describe what's listed
+  const query = search.trim().toLowerCase();
+  const list  = sessions.filter(s =>
+    (typeFilter === 'All' || s.type === typeFilter) &&
+    (!query || s.role.toLowerCase().includes(query) || s.type.toLowerCase().includes(query))
+  );
+  const stats   = summarize(list);
+  const ordered = sortByScore ? [...list].sort((a, b) => b.score - a.score) : list;
+  const shown   = showAll ? ordered : ordered.slice(0, RECENT_LIMIT);
+  const clearFilters = () => { setTypeFilter('All'); setSearch(''); };
+
+  const openSetup = () => { setStartError(''); setSetupOpen(true); };
+
+  let content;
+  if (historyLoading) {
+    content = (
+      <div className={styles.stack} aria-busy="true">
+        <div className={`${styles.skeleton} ${styles.skeletonBanner}`} />
+        <div className={`${styles.skeleton} ${styles.skeletonStats}`} />
+        <div className={`${styles.skeleton} ${styles.skeletonCards}`} />
+      </div>
+    );
+  } else if (historyError) {
+    content = (
+      <div className={`${styles.notice} ${styles.noticeAction}`} role="alert">
+        <AlertCircle size={16} />
+        <span>{historyError}</span>
+        <button type="button" className={styles.btnSecondary} onClick={retryHistory}>Try again</button>
+      </div>
+    );
+  } else if (!hasRounds) {
+    content = (
+      <section className={styles.emptyBanner} aria-labelledby="empty-title">
+        <h2 id="empty-title" className={styles.emptyBannerTitle}>No rounds yet</h2>
+        <p className={styles.emptyBannerText}>
+          Run a practice round and this page fills in with your scores, practice time and notes on what to work on.
+        </p>
+        <button type="button" className={styles.btnLight} onClick={openSetup}>
+          <Play size={15} /> Start your first round
+        </button>
+      </section>
+    );
+  } else if (list.length === 0) {
+    content = (
+      <div className={`${styles.notice} ${styles.noticeAction}`}>
+        <Search size={16} />
+        <span>No rounds match these filters.</span>
+        <button type="button" className={styles.btnSecondary} onClick={clearFilters}>Clear filters</button>
+      </div>
+    );
+  } else {
+    content = (
+      <div className={styles.stack}>
+        <ScoreBanner list={list} stats={stats} />
+
+        <section aria-labelledby="overview-title">
+          <SectionHead id="overview-title" title="Overview" />
+          <StatsStrip list={list} stats={stats} />
+        </section>
+
+        {typeFilter === 'All' && (
+          <section aria-labelledby="types-title">
+            <SectionHead id="types-title" title="By interview type" />
+            <TypeCards sessions={list} onPick={setTypeFilter} />
+          </section>
+        )}
+
+        <section aria-labelledby="rounds-title">
+          <SectionHead
+            id="rounds-title"
+            title={sortByScore ? 'Rounds by score' : 'Recent rounds'}
+            action={ordered.length > RECENT_LIMIT && (
+              <button type="button" className={styles.linkBtn} onClick={() => setShowAll(v => !v)} aria-expanded={showAll}>
+                {showAll ? 'Show fewer' : `Show all ${ordered.length}`}
+              </button>
+            )}
+          />
+          <div className={styles.cardGrid}>
+            {shown.map(s => <RoundCard key={s.id} session={s} onOpen={() => setSelectedSession(s)} />)}
+          </div>
+        </section>
+
+        <section aria-labelledby="notes-title">
+          <SectionHead id="notes-title" title="Coaching notes" />
+          <div className={styles.notesGrid}>
+            <NotesList id="notes-next" title="Work on next" notes={collectNotes(list, 'improvements')}
+              icon={<AlertCircle size={15} />} tone="var(--color-warning)" />
+            <NotesList id="notes-good" title="What’s working" notes={collectNotes(list, 'strengths')}
+              icon={<CheckCircle2 size={15} />} tone="var(--color-success-strong)" />
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <MotionConfig reducedMotion="user">
     <div className={styles.page}>
 
-      <div className={styles.toggleRow}>
-        <GlassBubbleNav
-          items={VIEW_TABS}
-          activeIndex={activeTab}
-          orientation="horizontal"
-          onChange={setActiveTab}
-        />
-      </div>
-
       <AnimatePresence>
         {summarySession && (
-          <SummaryModal key="summary-modal" session={summarySession} onClose={handleSummaryClose} />
+          <SummaryModal key="summary-modal" session={summarySession} onClose={() => setSummarySession(null)} />
         )}
       </AnimatePresence>
 
-      <AnimatePresence mode="wait">
-        {activeTab === 0 && !setupOpen && (
-          <motion.div key="how-it-works" {...fade} className={styles.fill}>
-            <HowItWorks onStart={() => setSetupOpen(true)} />
-          </motion.div>
-        )}
+      <div className={styles.shell}>
+        <h1 className={styles.pageTitle}>Mock interviews</h1>
 
-        {activeTab === 0 && setupOpen && (
-          <motion.div key="new-interview" {...fade} className={styles.cq}>
-          <div className={styles.studio}>
-            <button type="button" className={styles.backLink} onClick={() => setSetupOpen(false)}>
-              <ArrowLeft size={15} /> How it works
+        <div className={styles.toolbar}>
+          {hasRounds && (
+            <div className={styles.tabs} role="radiogroup" aria-label="Filter by interview type">
+              {TYPE_FILTERS.map(t => (
+                <button key={t} type="button" role="radio" aria-checked={typeFilter === t}
+                  className={styles.tab} onClick={() => setTypeFilter(t)}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className={styles.toolbarEnd}>
+            {hasRounds && (
+              <>
+                <label className={styles.search}>
+                  <Search size={15} className={styles.searchIcon} aria-hidden="true" />
+                  <input
+                    className={styles.searchInput}
+                    type="search"
+                    placeholder="Search"
+                    aria-label="Search rounds by role or type"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                </label>
+                <button
+                  type="button"
+                  className={styles.iconBtn}
+                  onClick={() => setSortByScore(v => !v)}
+                  aria-pressed={sortByScore}
+                  aria-label="Sort rounds by score"
+                  title={sortByScore ? 'Sorted by score' : 'Sorted by date'}
+                >
+                  <ArrowDownUp size={15} />
+                </button>
+              </>
+            )}
+            <button type="button" className={styles.btnNew} onClick={openSetup}>
+              <Plus size={15} /> New interview
             </button>
+          </div>
+        </div>
 
-            {/* ── Left half: the setup ── */}
-            <form className={styles.setup} onSubmit={e => { e.preventDefault(); handleStart(); }} noValidate>
-              <div className={styles.setupHead}>
-                <h1 className={styles.title}>Set up your practice round</h1>
-                <p className={styles.subtitle}>Pick what you’re preparing for. You’ll answer out loud, one question at a time.</p>
-              </div>
+        {content}
+      </div>
 
-              <div className={styles.field}>
-                <label htmlFor="iv-role" className={styles.label}>Job role</label>
-                <input
-                  id="iv-role"
-                  type="text"
-                  className={styles.input}
-                  placeholder="Software Engineer"
-                  value={form.jobRole}
-                  onChange={e => { set('jobRole')(e); if (roleError) setRoleError(false); }}
-                  aria-invalid={roleError}
-                  aria-describedby="iv-role-help"
-                />
-                <p id="iv-role-help" className={`${styles.help} ${roleError ? styles.helpError : ''}`}>
-                  {roleError
-                    ? <><AlertCircle size={13} />Add the role you’re interviewing for so the questions fit it.</>
-                    : 'The title on the job you’re going for.'}
+      {/* ── Setup dialog ── */}
+      <dialog
+        ref={dialogRef}
+        className={styles.dialog}
+        aria-labelledby="setup-title"
+        onClose={() => setSetupOpen(false)}
+        onClick={e => { if (e.target === e.currentTarget) setSetupOpen(false); }}
+      >
+        <form className={styles.dialogForm} onSubmit={e => { e.preventDefault(); handleStart(); }} noValidate>
+          <div className={styles.dialogHead}>
+            <h2 id="setup-title" className={styles.dialogTitle}>New interview</h2>
+            <button type="button" className={styles.iconBtn} onClick={() => setSetupOpen(false)} aria-label="Close">
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className={styles.dialogBody}>
+            <div className={styles.field}>
+              <label htmlFor="iv-role" className={styles.label}>Job role</label>
+              <input
+                ref={roleInputRef}
+                id="iv-role"
+                type="text"
+                className={styles.input}
+                placeholder="Software Engineer"
+                value={form.jobRole}
+                onChange={e => { set('jobRole')(e); if (roleError) setRoleError(false); }}
+                aria-invalid={roleError}
+                aria-describedby={roleError ? 'iv-role-help' : undefined}
+              />
+              {roleError && (
+                <p id="iv-role-help" className={`${styles.help} ${styles.helpError}`}>
+                  <AlertCircle size={13} />Add the role you’re interviewing for so the questions fit it.
                 </p>
-              </div>
+              )}
+            </div>
 
+            <div className={styles.field}>
               <OptionGroup label="Interview type" options={INTERVIEW_TYPES}
                 value={form.interviewType} onChange={choose('interviewType')} />
+              <p className={styles.help}>{TYPE_COACHING[form.interviewType]}</p>
+            </div>
 
-              <div className={styles.pair}>
-                <OptionGroup label="Level" options={DIFFICULTIES}
-                  value={form.difficulty} onChange={choose('difficulty')}
-                  format={d => d.replace(' Level', '')} />
-                <OptionGroup label="Questions" options={QUESTION_COUNTS}
-                  value={form.questionCount} onChange={choose('questionCount')} />
-              </div>
+            <div className={styles.pair}>
+              <OptionGroup label="Level" options={DIFFICULTIES}
+                value={form.difficulty} onChange={choose('difficulty')}
+                format={d => d.replace(' Level', '')} />
+              <OptionGroup label="Questions" options={QUESTION_COUNTS}
+                value={form.questionCount} onChange={choose('questionCount')} />
+            </div>
 
-              <div className={styles.field}>
-                <label htmlFor="iv-jd" className={styles.label}>
-                  Job description <span className={styles.optional}>optional</span>
-                </label>
-                <textarea id="iv-jd" className={styles.textarea} rows={4}
-                  placeholder="Paste the posting to tailor the questions"
-                  value={form.jobDescription} onChange={set('jobDescription')} />
-              </div>
+            <div className={styles.field}>
+              <label htmlFor="iv-jd" className={styles.label}>
+                Job description <span className={styles.optional}>optional</span>
+              </label>
+              <textarea id="iv-jd" className={styles.textarea} rows={3}
+                placeholder="Paste the posting to tailor the questions"
+                value={form.jobDescription} onChange={set('jobDescription')} />
+            </div>
 
-              <div className={styles.field}>
-                <span className={styles.label} id="iv-resume-label">
-                  Resume <span className={styles.optional}>optional</span>
-                </span>
-                {resumeFile ? (
-                  <div className={styles.fileChip}>
-                    <FileText size={16} aria-hidden="true" />
-                    <span className={styles.fileName}>{resumeFile.name}</span>
-                    <button type="button" className={styles.iconBtn} onClick={() => setResumeFile(null)} aria-label={`Remove ${resumeFile.name}`}>
-                      <X size={15} />
-                    </button>
-                  </div>
-                ) : (
-                  <button type="button" className={styles.upload} onClick={() => fileInputRef.current?.click()} aria-labelledby="iv-resume-label">
-                    <Upload size={16} aria-hidden="true" /> Choose a PDF or DOCX
+            <div className={styles.field}>
+              <span className={styles.label} id="iv-resume-label">
+                Resume <span className={styles.optional}>optional</span>
+              </span>
+              {resumeFile ? (
+                <div className={styles.fileChip}>
+                  <FileText size={16} aria-hidden="true" />
+                  <span className={styles.fileName}>{resumeFile.name}</span>
+                  <button type="button" className={styles.iconBtn} onClick={() => setResumeFile(null)} aria-label={`Remove ${resumeFile.name}`}>
+                    <X size={15} />
                   </button>
-                )}
-                <input ref={fileInputRef} type="file" accept=".pdf,.docx" hidden onChange={handleFileChange} />
-              </div>
+                </div>
+              ) : (
+                <button type="button" className={styles.upload} onClick={() => fileInputRef.current?.click()} aria-labelledby="iv-resume-label">
+                  <Upload size={16} aria-hidden="true" /> Choose a PDF or DOCX
+                </button>
+              )}
+              <input ref={fileInputRef} type="file" accept=".pdf,.docx" hidden onChange={handleFileChange} />
+            </div>
 
-              {startError && <p className={styles.notice} role="alert"><AlertCircle size={16} />{startError}</p>}
+            {startError && <p className={styles.notice} role="alert"><AlertCircle size={16} />{startError}</p>}
+          </div>
 
+          <div className={styles.dialogFoot}>
+            <p className={styles.dialogSummary}>
+              <Mic size={14} aria-hidden="true" />
+              {form.questionCount} questions, about {minutes} min, answered out loud
+            </p>
+            <div className={styles.dialogActions}>
+              <button type="button" className={styles.btnSecondary} onClick={() => setSetupOpen(false)}>Cancel</button>
               <button type="submit" className={styles.btnPrimary} disabled={starting} aria-busy={starting}>
                 {starting
                   ? <><Loader2 size={16} className={styles.spin} /> Starting…</>
                   : <><Play size={15} /> Start interview</>}
               </button>
-            </form>
-
-            {/* ── Right half: the live brief ── */}
-            <aside className={styles.brief} aria-live="polite">
-              <h2 className={`${styles.briefRole} ${role ? '' : styles.briefRoleEmpty}`}>{role || 'Add a role to begin'}</h2>
-
-              <dl className={styles.briefFacts}>
-                <div><dt>Type</dt><dd style={{ color: typeTag(form.interviewType).color }}>{form.interviewType}</dd></div>
-                <div><dt>Level</dt><dd style={{ color: diffTag(form.difficulty).color }}>{form.difficulty.replace(' Level', '')}</dd></div>
-                <div><dt>Questions</dt><dd>{form.questionCount}</dd></div>
-                <div><dt>Time</dt><dd>~{minutes} min</dd></div>
-              </dl>
-
-              <div className={styles.briefCoach}>
-                <h3 className={styles.briefCoachTitle}>What to expect</h3>
-                <p>{TYPE_COACHING[form.interviewType]}</p>
-                <p>{DIFF_COACHING[form.difficulty]}</p>
-              </div>
-
-              <p className={styles.briefMic}>
-                <Mic size={15} aria-hidden="true" />
-                The interviewer reads each question aloud. Answer with your microphone — voice input works in Chrome and Edge.
-              </p>
-            </aside>
+            </div>
           </div>
-          </motion.div>
-        )}
+        </form>
+      </dialog>
 
-        {activeTab === 1 && (
-          <motion.div key="overview" {...fade} className={styles.fill}>
-            <InterviewOverview accessToken={accessToken} onStart={() => { setSetupOpen(true); setActiveTab(0); }} />
-          </motion.div>
+      <AnimatePresence>
+        {selectedSession && (
+          <FeedbackModal key={selectedSession.id} session={selectedSession} onClose={() => setSelectedSession(null)} />
         )}
       </AnimatePresence>
 

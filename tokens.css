@@ -64,7 +64,9 @@
   --specular-base: #0A2460;  /* = --color-navy-deep edge stroke */
 
   /* ── Type ─────────────────────────────────────────────── */
-  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Typefaces are chosen in app/fonts.js; these only map them to roles */
+  --font-body:    var(--font-primary), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: var(--font-accent), Georgia, serif;
   --text-xs:   0.75rem;
   --text-sm:   0.8125rem;
   --text-base: 0.9375rem;
