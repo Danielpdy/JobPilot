@@ -298,6 +298,21 @@ public class InterviewService : IInterviewService
         return result;
     }
 
+    // Questions go with it: UserInterviewQuestion has a cascade delete on InterviewId
+    public async Task<ErrorOr<Deleted>> DeleteInterviewAsync(Guid interviewId, int userId)
+    {
+        var interview = await _context.UserInterviews
+            .FirstOrDefaultAsync(i => i.Id == interviewId && i.UserId == userId);
+
+        if (interview is null)
+            return InterviewErrors.NotFound;
+
+        _context.UserInterviews.Remove(interview);
+        await _context.SaveChangesAsync();
+
+        return Result.Deleted;
+    }
+
     private async Task<(List<string> Strengths, List<string> Improvements)> GenerateInsightBulletsAsync(List<UserInterviewQuestion> questions)
     {
         var strengthInput    = questions.Where(q => q.QuestionScore >= 6 && !string.IsNullOrWhiteSpace(q.Feedback)).ToList();

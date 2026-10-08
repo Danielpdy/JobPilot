@@ -1,12 +1,15 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, MotionConfig } from 'motion/react';
-import { startInterview, getInterviewHistory } from '@/app/Services/InterviewService';
+import { motion, AnimatePresence, MotionConfig, useReducedMotion } from 'motion/react';
+import { startInterview, getInterviewHistory, deleteInterview } from '@/app/Services/InterviewService';
 import InterviewSession from './InterviewSession';
 import {
   Mic, Code2, Server, Briefcase, BarChart2, Headphones, Layers, Users,
   Calendar, Search, RotateCw, ArrowDownUp, Plus,
   CheckCircle2, AlertCircle, X, Download, Upload, FileText, Play, Loader2,
+  Phone, MessageSquareQuote, Building2, Clock, Trash2,
+  EllipsisVertical, MessageSquareText, RotateCcw, Copy, Check,
+  ArrowUpRight, ArrowDownRight, Minus,
 } from 'lucide-react';
 import FlipCard from '@/components/FlipCard';
 import styles from './page.module.css';
@@ -49,6 +52,17 @@ function questionTone(score) {
   if (score >= 4) return 'var(--color-warning)';
   return 'var(--color-error)';
 }
+
+// ─── Entrance: one short sequence when the rounds arrive ───
+// Sections settle in order; inside them the data itself moves
+// (bars grow, meters fill). MotionConfig below honours reduced motion.
+const EASE_OUT = [0.16, 1, 0.3, 1];
+const stackIn = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
+const riseIn  = {
+  hidden: { opacity: 0, y: 10 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
+};
+const gridIn  = { hidden: {}, show: { transition: { staggerChildren: 0.045, delayChildren: 0.05 } } };
 
 // ─── Count-up for the headline figure ──────────────────────
 function useCountUp(target, duration = 520) {
@@ -371,27 +385,43 @@ function FeedbackModal({ session, onClose }) {
   );
 }
 
-// ─── Summary modal (shown after a round completes) ─────────
-function SummaryModal({ session, onClose }) {
-  const [secs, setSecs] = useState(10);
+// ─── Summary (shown right after a round completes) ─────────
+// One sequence: a check draws itself, its circle becomes the score ring
+// and fills while the number counts up, then each question's score
+// cascades in. Stays open until closed.
+const SM_RING   = 112;
+const SM_STROKE = 6;
+const SM_R      = (SM_RING - SM_STROKE) / 2;
+const CHECK_MS  = 950;                      // how long the check holds before the ring takes over
+const ROWS_AT   = CHECK_MS / 1000 + 0.75;   // rows start once the ring is mostly filled
+
+function SummaryFigure({ score }) {
+  const shown = useCountUp(score, 900);
+  return (
+    <span className={styles.smFigure} aria-hidden="true">{shown}</span>
+  );
+}
+
+function SummaryModal({ session, onClose, onSeeFeedback }) {
+  const reduced = useReducedMotion();
+  const [phase, setPhase] = useState(reduced ? 'score' : 'check');
   const onCloseRef = useRef(onClose);
-  const pausedRef  = useRef(false); // hovering or focus inside → hold the countdown (WCAG 2.2.1)
+  const doneRef    = useRef(null);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      if (pausedRef.current) return;
-      setSecs(s => {
-        if (s <= 1) { clearInterval(id); onCloseRef.current(); return 0; }
-        return s - 1;
-      });
-    }, 1000);
+    doneRef.current?.focus();
     const onKey = (e) => { if (e.key === 'Escape') onCloseRef.current(); };
     window.addEventListener('keydown', onKey);
-    return () => { clearInterval(id); window.removeEventListener('keydown', onKey); };
-  }, []);
+    const id = reduced ? null : setTimeout(() => setPhase('score'), CHECK_MS);
+    return () => { clearTimeout(id); window.removeEventListener('keydown', onKey); };
+  }, [reduced]);
 
-  const tone = session.scored ? scoreTone(session.score) : null;
+  const graded = session.scored;
+  const ringColor = graded ? scoreTone(session.score).color : 'var(--color-success)';
+  const c = SM_RING / 2;
+  // Long rounds keep the whole cascade under about 1.4s
+  const step = Math.min(0.08, 1.4 / Math.max(1, session.breakdown.length));
 
   return (
     <motion.div
@@ -407,57 +437,104 @@ function SummaryModal({ session, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="sm-title"
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.98 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        aria-describedby="sm-result"
+        initial={{ opacity: 0, y: 16, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 8, scale: 0.98 }}
+        transition={{ duration: 0.35, ease: EASE_OUT }}
         onClick={e => e.stopPropagation()}
-        onMouseEnter={() => { pausedRef.current = true; }}
-        onMouseLeave={() => { pausedRef.current = false; }}
-        onFocus={() => { pausedRef.current = true; }}
-        onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) pausedRef.current = false; }}
       >
-        <div className={styles.smCountdown} aria-hidden="true">
-          <div className={styles.smCountdownFill} style={{ transform: `scaleX(${secs / 10})` }} />
-        </div>
+        <button type="button" className={`${styles.iconBtn} ${styles.smClose}`} onClick={onClose} aria-label="Close">
+          <X size={16} />
+        </button>
 
-        <div className={styles.smHeader}>
-          <div>
-            <p className={styles.smDone}><CheckCircle2 size={16} /> Round complete</p>
-            <h2 id="sm-title" className={styles.smTitle}>{session.role}</h2>
-            <div className={styles.rowTags}>
-              <Tag tone={typeTag(session.type)}>{session.type}</Tag>
-              <Tag tone={diffTag(session.difficulty)}>{session.difficulty}</Tag>
-            </div>
-          </div>
-          <button type="button" className={styles.iconBtn} onClick={onClose} aria-label="Close summary"><X size={16} /></button>
-        </div>
+        <div className={styles.smHead}>
+          <div className={styles.smRing} style={{ width: SM_RING, height: SM_RING }}>
+            <svg width={SM_RING} height={SM_RING} viewBox={`0 0 ${SM_RING} ${SM_RING}`} aria-hidden="true">
+              {/* Track appears with the ring */}
+              <motion.circle cx={c} cy={c} r={SM_R} fill="none" strokeWidth={SM_STROKE}
+                style={{ stroke: 'var(--color-paper-3)' }}
+                initial={false}
+                animate={{ opacity: phase === 'score' ? 1 : 0 }}
+                transition={{ duration: 0.3 }} />
+              {/* The check's circle draws closed, empties, then fills to the score */}
+              <motion.circle cx={c} cy={c} r={SM_R} fill="none" strokeWidth={SM_STROKE} strokeLinecap="round"
+                transform={`rotate(-90 ${c} ${c})`}
+                initial={{ pathLength: reduced ? (graded ? session.score / 100 : 1) : 0 }}
+                animate={phase === 'check' || !graded
+                  ? { pathLength: 1, stroke: 'var(--color-success)' }
+                  : { pathLength: reduced ? session.score / 100 : [1, 0, session.score / 100], stroke: ringColor }}
+                transition={phase === 'check' || !graded
+                  ? { duration: 0.45, ease: EASE_OUT }
+                  : {
+                      pathLength: { duration: 1.1, times: [0, 0.2, 1], ease: ['easeIn', EASE_OUT] },
+                      stroke: { duration: 0.25 },
+                    }} />
+            </svg>
 
-        <div className={styles.smBody}>
-          <div className={styles.smScore}>
-            {tone ? <ScoreRing score={session.score} size={112} /> : <span className={styles.panelUngraded}>—</span>}
-            {tone && <span className={styles.scorePill} style={{ background: tone.soft, color: tone.color }}>{tone.label}</span>}
-            <span className={styles.smMeta}>{session.questions} questions · {session.duration} min</span>
+            <AnimatePresence mode="wait" initial={false}>
+              {phase === 'check' || !graded ? (
+                <motion.svg key="check" className={styles.smCheck} viewBox="0 0 24 24" aria-hidden="true"
+                  exit={{ opacity: 0, scale: 0.6, transition: { duration: 0.18 } }}>
+                  <motion.path d="M6 12.5l4 4 8-9" fill="none" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
+                    style={{ stroke: 'var(--color-success)' }}
+                    initial={{ pathLength: reduced ? 1 : 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.35, delay: 0.35, ease: EASE_OUT }} />
+                </motion.svg>
+              ) : (
+                <motion.span key="score" className={styles.smFigureWrap}
+                  initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, ease: EASE_OUT }}>
+                  <SummaryFigure score={session.score} />
+                  <span className={styles.smOf} aria-hidden="true">/100</span>
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
-          <Bullets strengths={session.strengths} improvements={session.improvements} />
+
+          <h2 id="sm-title" className={styles.smTitle}>{session.role}</h2>
+          <p id="sm-result" className={styles.smMeta}>
+            Round complete in {session.duration} min
+            <span className={styles.srOnly}>{graded ? `. Score ${session.score} out of 100.` : '. Not graded yet.'}</span>
+          </p>
         </div>
 
         {session.breakdown.length > 0 && (
-          <div className={styles.smBars}>
-            <h3 className={styles.panelSectionTitle}>Question scores</h3>
-            <div className={styles.smBarRow}>
-              {session.breakdown.map(item => (
-                <div key={item.id} className={styles.smBarCol}>
-                  <div className={styles.smBarTrack}>
-                    <div className={styles.smBarFill} style={{ height: `${Math.max(4, item.score * 10)}%`, background: questionTone(item.score) }} />
-                  </div>
-                  <span className={styles.smBarScore} style={{ color: questionTone(item.score) }}>{item.score}</span>
-                  <span className={styles.smBarName}>Q{item.id}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ol className={styles.smList} aria-label="Score for each question">
+            {session.breakdown.map((item, i) => {
+              const tone  = questionTone(item.score);
+              const delay = (reduced ? 0 : ROWS_AT) + i * step;
+              return (
+                <motion.li key={item.id} className={styles.smItem}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay, ease: EASE_OUT }}>
+                  <span className={styles.smNum}>{i + 1}</span>
+                  <span className={styles.smQ}>
+                    <span className={styles.smQText} title={item.q}>{item.q}</span>
+                    <span className={styles.smTrack} aria-hidden="true">
+                      <motion.span className={styles.smFill}
+                        style={{ background: tone, width: `${Math.max(2, item.score * 10)}%`, originX: 0 }}
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 0.55, delay: delay + 0.1, ease: EASE_OUT }} />
+                    </span>
+                  </span>
+                  <span className={styles.smScore} style={{ color: item.score > 0 ? tone : 'var(--color-neutral)' }}>
+                    {item.score > 0 ? item.score : '—'}
+                    <span className={styles.srOnly}> out of 10</span>
+                  </span>
+                </motion.li>
+              );
+            })}
+          </ol>
         )}
+
+        <div className={styles.smActions}>
+          <button type="button" className={styles.btnSecondary} onClick={onSeeFeedback}>See feedback</button>
+          <button ref={doneRef} type="button" className={styles.btnPrimary} onClick={onClose}>Done</button>
+        </div>
       </motion.div>
     </motion.div>
   );
@@ -467,9 +544,9 @@ function SummaryModal({ session, onClose }) {
 // DASHBOARD — stats first; the setup form lives in a dialog
 // ═══════════════════════════════════════════════════════════
 const TYPE_ICON = {
-  Mixed:      <Layers size={17} />,
-  Technical:  <Code2 size={17} />,
-  Behavioral: <Users size={17} />,
+  Mixed:      <Layers size={18} />,
+  Technical:  <Code2 size={18} />,
+  Behavioral: <Users size={18} />,
 };
 const RECENT_LIMIT = 6;
 const NOTES_LIMIT  = 4;
@@ -525,7 +602,7 @@ function ScoreBanner({ list, stats }) {
   }
 
   return (
-    <section className={styles.banner} aria-labelledby="avg-label">
+    <motion.section variants={riseIn} className={styles.banner} aria-labelledby="avg-label">
       <div className={styles.bannerMain}>
         <h2 id="avg-label" className={styles.bannerLabel}>Average score</h2>
         <p className={styles.bannerFigure}>
@@ -546,16 +623,19 @@ function ScoreBanner({ list, stats }) {
         >
           {bars.map((s, i) => (
             <span key={s.id} className={styles.trendCol} title={`${s.role}, ${s.date}: ${s.score}`}>
-              <span
+              <motion.span
                 className={styles.trendBar}
                 data-latest={i === bars.length - 1 || undefined}
-                style={{ height: `${Math.max(6, s.score)}%` }}
+                style={{ height: `${Math.max(6, s.score)}%`, originY: 1 }}
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 + i * 0.035, ease: EASE_OUT }}
               />
             </span>
           ))}
         </div>
       )}
-    </section>
+    </motion.section>
   );
 }
 
@@ -597,58 +677,264 @@ function SectionHead({ id, title, action }) {
   );
 }
 
-// ─── By interview type: each card filters the page ─────────
-function TypeCards({ sessions, onPick }) {
+// ─── By interview type: square stat tiles, read-only ───────
+// Unlike the round rows these aren't buttons: gray icon, the average
+// large in the middle, and a form tag as the tile's only colour.
+function formTag(avg) {
+  if (avg == null) return { label: 'Not practiced', bg: 'var(--color-paper-3)',     color: 'var(--color-neutral)' };
+  if (avg >= 80)   return { label: 'In good form',  bg: 'var(--color-success-soft)', color: 'var(--color-success-strong)' };
+  if (avg >= 60)   return { label: 'Getting there', bg: 'var(--color-accent-soft)',  color: 'var(--color-accent-strong)' };
+  return               { label: 'Needs work',    bg: 'var(--color-error-soft)',   color: 'var(--color-error)' };
+}
+
+// Latest graded round of the type against the one before it (list is newest first)
+function typeTrend(graded) {
+  if (graded.length < 2) return null;
+  const d = graded[0].score - graded[1].score;
+  if (d > 0) return { icon: <ArrowUpRight size={13} aria-hidden="true" />,   text: `Up ${d}` };
+  if (d < 0) return { icon: <ArrowDownRight size={13} aria-hidden="true" />, text: `Down ${-d}` };
+  return { icon: <Minus size={13} aria-hidden="true" />, text: 'Level' };
+}
+
+function TypeCards({ sessions }) {
   return (
     <div className={styles.typeGrid}>
       {INTERVIEW_TYPES.map(t => {
         const rounds = sessions.filter(s => s.type === t);
-        const st = summarize(rounds);
+        const st     = summarize(rounds);
+        const tag    = formTag(st.avg);
+        const trend  = typeTrend(st.graded);
+        const id     = `type-${t.toLowerCase()}`;
         return (
-          <button key={t} type="button" className={styles.card} onClick={() => onPick(t)} aria-label={`Show ${t} rounds`}>
-            <span className={styles.cardIcon} style={{ background: typeTag(t).bg, color: typeTag(t).color }}>{TYPE_ICON[t]}</span>
-            <span className={styles.cardBody}>
-              <span className={styles.cardTitle}>{t}</span>
-              <span className={styles.cardMeta}>
-                {rounds.length ? `${plural(rounds.length, 'round')}, ${formatMinutes(st.minutes)}` : 'No rounds yet'}
-              </span>
-              <span className={styles.meter} aria-hidden="true">
-                <span className={styles.meterFill} style={{ width: `${st.avg ?? 0}%` }} />
-              </span>
-            </span>
-            <span className={`${styles.cardScore} ${styles.cardScoreStack}`}>
+          <article key={t} className={styles.typeTile} aria-labelledby={id}>
+            <span className={styles.typeIcon} aria-hidden="true">{TYPE_ICON[t]}</span>
+            <h3 id={id} className={styles.typeName}>{t}</h3>
+
+            <p className={styles.typeAvg}>
               {st.avg ?? '—'}
-              <span className={styles.cardScoreLabel}>avg</span>
-            </span>
-          </button>
+              <span className={styles.srOnly}>{st.avg == null ? ' No graded rounds' : ' average out of 100'}</span>
+            </p>
+            <span className={styles.typeTag} style={{ background: tag.bg, color: tag.color }}>{tag.label}</span>
+
+            {(st.best || trend) && (
+              <p className={styles.typeFacts}>
+                {st.best && <span>Best {st.best.score}</span>}
+                {trend && <span className={styles.typeTrend}>{trend.icon}{trend.text}<span className={styles.srOnly}> since the previous round</span></span>}
+              </p>
+            )}
+            <p className={styles.typeMeta}>
+              {rounds.length ? `${plural(rounds.length, 'round')}, ${formatMinutes(st.minutes)}` : 'No rounds yet'}
+            </p>
+          </article>
         );
       })}
     </div>
   );
 }
 
-// ─── One past round ────────────────────────────────────────
-function RoundCard({ session, onOpen }) {
-  const tone = session.scored ? scoreTone(session.score) : null;
+// ─── Round actions menu (⋮) ────────────────────────────────
+// Menu-button pattern: arrows move between items, Esc and outside clicks close
+// it and hand focus back to the trigger. Opens upward near the bottom of the screen.
+const MENU_HEIGHT = 190;
+
+function plainResults(s) {
+  const lines = [`${s.role} mock interview, ${s.date}`, s.scored ? `Score: ${s.score}/100` : 'Not graded'];
+  s.breakdown.forEach((q, i) => lines.push(`${i + 1}. ${q.q} (${q.score > 0 ? `${q.score}/10` : 'not scored'})`));
+  return lines.join('\n');
+}
+
+function RoundMenu({ session, triggerRef, onView, onPractice, onDelete }) {
+  const [open, setOpen]     = useState(false);
+  const [upward, setUpward] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const menuRef = useRef(null);
+  const menuId  = `round-menu-${session.id}`;
+
+  const close = (refocus = true) => {
+    setOpen(false);
+    setCopied(false);
+    if (refocus) triggerRef.current?.focus();
+  };
+  const toggle = () => {
+    if (open) { close(false); return; }
+    const r = triggerRef.current?.getBoundingClientRect();
+    setUpward(!!r && window.innerHeight - r.bottom < MENU_HEIGHT && r.top > MENU_HEIGHT);
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    menuRef.current?.querySelector('[role="menuitem"]')?.focus();
+    const onDown = (e) => {
+      if (!menuRef.current?.contains(e.target) && !triggerRef.current?.contains(e.target)) {
+        setOpen(false);
+        setCopied(false);
+      }
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [open, triggerRef]);
+
+  const onKeyDown = (e) => {
+    const items = [...menuRef.current.querySelectorAll('[role="menuitem"]')];
+    const i = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+    else if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (e.key === 'Escape') { e.preventDefault(); close(); }
+    else if (e.key === 'Tab') close(false);
+  };
+
+  const pick = (fn) => () => { close(false); fn(); };
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(plainResults(session));
+      setCopied(true);
+      setTimeout(() => close(), 900); // leave "Copied" up long enough to read
+    } catch {
+      close();
+    }
+  };
+
   return (
-    <button type="button" className={styles.card} onClick={onOpen}>
-      <span className={styles.cardIcon}><RoleIcon role={session.role} size={17} /></span>
-      <span className={styles.cardBody}>
-        <span className={styles.cardTitle}>{session.role}</span>
-        <span className={styles.cardTags}>
-          <Tag tone={typeTag(session.type)}>{session.type}</Tag>
-          <Tag tone={diffTag(session.difficulty)}>{session.difficulty}</Tag>
-        </span>
-        <span className={styles.cardMeta}>
-          {session.date} · {plural(session.questions, 'question')} · {session.duration} min
-        </span>
-      </span>
-      <span className={styles.cardScore}>
-        {tone
-          ? <><span className={styles.scoreDot} style={{ background: tone.color }} />{session.score}</>
-          : <span className={styles.cardUngraded}>Not graded</span>}
-      </span>
-    </button>
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        className={styles.moreBtn}
+        onClick={toggle}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        aria-label={`Actions for the ${session.role} round from ${session.date}`}
+      >
+        <EllipsisVertical size={16} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            ref={menuRef}
+            id={menuId}
+            role="menu"
+            aria-label={`${session.role} round`}
+            className={styles.menu}
+            data-upward={upward || undefined}
+            onKeyDown={onKeyDown}
+            initial={{ opacity: 0, scale: 0.96, y: upward ? 4 : -4 }}
+            animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.14, ease: EASE_OUT } }}
+            exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.1 } }}
+          >
+            <button type="button" role="menuitem" className={styles.menuItem} onClick={pick(onView)}>
+              <MessageSquareText size={15} aria-hidden="true" /> View feedback
+            </button>
+            <button type="button" role="menuitem" className={styles.menuItem} onClick={pick(onPractice)}>
+              <RotateCcw size={15} aria-hidden="true" /> Practice again
+            </button>
+            <button type="button" role="menuitem" className={styles.menuItem} onClick={copy} aria-live="polite">
+              {copied
+                ? <><Check size={15} aria-hidden="true" /> Copied</>
+                : <><Copy size={15} aria-hidden="true" /> Copy results</>}
+            </button>
+            <button type="button" role="menuitem" className={`${styles.menuItem} ${styles.menuDanger}`} onClick={pick(onDelete)}>
+              <Trash2 size={15} aria-hidden="true" /> Delete
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+// ─── One past round ────────────────────────────────────────
+// Delete asks in place: the card turns into its own confirmation.
+function RoundCard({ session, onOpen, onDelete, onPractice }) {
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting]     = useState(false);
+  const [error, setError]           = useState('');
+  const keepRef = useRef(null);
+  const moreRef = useRef(null);
+  const asked   = useRef(false);
+  const tone = session.scored ? scoreTone(session.score) : null;
+
+  // Focus follows the swap: to "Keep it" when asked, back to the ⋮ button when kept
+  useEffect(() => {
+    if (confirming) { asked.current = true; keepRef.current?.focus(); }
+    else if (asked.current) moreRef.current?.focus();
+  }, [confirming]);
+
+  const keep = () => { setConfirming(false); setError(''); };
+  const confirmDelete = async () => {
+    setDeleting(true);
+    setError('');
+    try {
+      await onDelete(session.id); // parent drops the card on success
+    } catch {
+      setError('The round wasn’t deleted. Check your connection, then try again.');
+      setDeleting(false);
+    }
+  };
+
+  // One persistent wrapper, so the card can animate out and its neighbours slide up
+  return (
+    <motion.div
+      layout
+      variants={riseIn}
+      exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2, ease: [0.7, 0, 0.84, 0] } }}
+      className={styles.roundItem}
+    >
+      {confirming ? (
+        <div
+          className={styles.roundConfirm}
+          role="group"
+          aria-labelledby={`del-${session.id}`}
+          onKeyDown={e => { if (e.key === 'Escape' && !deleting) keep(); }}
+        >
+          <p id={`del-${session.id}`} className={styles.confirmText}>
+            Delete this round and its feedback?
+            <span className={styles.srOnly}> {session.role}, {session.date}.</span>
+          </p>
+          {error && <p className={styles.confirmError} role="alert"><AlertCircle size={14} />{error}</p>}
+          <div className={styles.confirmActions}>
+            <button ref={keepRef} type="button" className={styles.btnSecondary} onClick={keep} disabled={deleting}>
+              Keep it
+            </button>
+            <button type="button" className={styles.btnDanger} onClick={confirmDelete} disabled={deleting} aria-busy={deleting}>
+              {deleting ? <><Loader2 size={15} className={styles.spin} /> Deleting…</> : <><Trash2 size={15} /> Delete</>}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <button type="button" className={styles.card} onClick={onOpen}>
+            <span className={styles.cardIcon}><RoleIcon role={session.role} size={17} /></span>
+            <span className={styles.cardBody}>
+              <span className={styles.cardTitle}>{session.role}</span>
+              <span className={styles.cardTags}>
+                <Tag tone={typeTag(session.type)}>{session.type}</Tag>
+                <Tag tone={diffTag(session.difficulty)}>{session.difficulty}</Tag>
+              </span>
+              <span className={styles.cardMeta}>
+                {session.date} · {plural(session.questions, 'question')} · {session.duration} min
+              </span>
+            </span>
+            <span className={styles.cardScore}>
+              {tone
+                ? <><span className={styles.scoreDot} style={{ background: tone.color }} />{session.score}</>
+                : <span className={styles.cardUngraded}>Not graded</span>}
+            </span>
+          </button>
+          <RoundMenu
+            session={session}
+            triggerRef={moreRef}
+            onView={onOpen}
+            onPractice={() => onPractice(session)}
+            onDelete={() => setConfirming(true)}
+          />
+        </>
+      )}
+    </motion.div>
   );
 }
 
@@ -673,6 +959,53 @@ function NotesList({ id, title, notes, icon, tone }) {
           </ul>
         )}
     </section>
+  );
+}
+
+// ─── Empty state: nothing to show yet, so offer starting points ──
+// Each starter only presets the setup dialog; the user still names the role.
+const STARTERS = [
+  { title: 'First-round screen',  type: 'Mixed',      difficulty: 'Entry Level',  count: 5,  icon: <Phone size={16} />,
+    text: 'A short mix of behavioral and technical questions, like a recruiter’s first call.' },
+  { title: 'Stories from past work', type: 'Behavioral', difficulty: 'Mid Level', count: 5,  icon: <MessageSquareQuote size={16} />,
+    text: 'Talk through situations you’ve handled: what happened, what you did and how it turned out.' },
+  { title: 'Technical deep dive', type: 'Technical',  difficulty: 'Mid Level',    count: 10, icon: <Code2 size={16} />,
+    text: 'Explain how you’d build and debug things, thinking out loud as you go.' },
+  { title: 'Final-round loop',    type: 'Mixed',      difficulty: 'Senior Level', count: 15, icon: <Building2 size={16} />,
+    text: 'A longer round with harder follow-ups, closer to meeting the hiring team.' },
+];
+
+function EmptyState({ onPick }) {
+  return (
+    <div className={styles.empty}>
+      <div className={styles.emptyHero}>
+        <Mic className={styles.emptyArt} strokeWidth={1.5} aria-hidden="true" />
+        <p className={styles.emptyText}>No practice rounds yet. Pick a starting point, or set up your own.</p>
+      </div>
+
+      <div className={styles.emptyRule} aria-hidden="true" />
+
+      <section aria-labelledby="starters-title">
+        <h2 id="starters-title" className={styles.srOnly}>Starting points</h2>
+        <ul className={styles.starters}>
+          {STARTERS.map(s => (
+            <li key={s.title}>
+              <button type="button" className={styles.starter} onClick={() => onPick(s)}>
+                <span className={styles.starterIcon} aria-hidden="true">{s.icon}</span>
+                <span className={styles.starterBody}>
+                  <span className={styles.starterTitle}>{s.title}</span>
+                  <span className={styles.starterText}>{s.text}</span>
+                  <span className={styles.starterMeta}>
+                    <Clock size={13} aria-hidden="true" />
+                    {s.count} questions, about {Math.round(s.count * MINUTES_PER_QUESTION)} min
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   );
 }
 
@@ -780,6 +1113,12 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
       .catch(() => { setSession(null); retryHistory(); });
   };
 
+  // Errors are thrown back to the card so it can say so in place
+  const handleDelete = async (id) => {
+    await deleteInterview({ interviewId: id, accessToken });
+    setSessions(prev => prev.filter(s => s.id !== id));
+  };
+
   // Live round — the session owns the screen
   if (session) {
     return (
@@ -813,6 +1152,23 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
   const clearFilters = () => { setTypeFilter('All'); setSearch(''); };
 
   const openSetup = () => { setStartError(''); setSetupOpen(true); };
+  const startFrom = (s) => {
+    setForm(prev => ({ ...prev, interviewType: s.type, difficulty: s.difficulty, questionCount: s.count }));
+    openSetup();
+  };
+  // Same role and settings as a past round; the description and resume start empty
+  const practiceAgain = (s) => {
+    setForm(prev => ({
+      ...prev,
+      jobRole:       s.role,
+      interviewType: INTERVIEW_TYPES.includes(s.type) ? s.type : prev.interviewType,
+      difficulty:    DIFFICULTIES.includes(s.difficulty) ? s.difficulty : prev.difficulty,
+      questionCount: QUESTION_COUNTS.includes(s.questions) ? s.questions : prev.questionCount,
+      jobDescription: '',
+    }));
+    setRoleError(false);
+    openSetup();
+  };
 
   let content;
   if (historyLoading) {
@@ -832,17 +1188,7 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
       </div>
     );
   } else if (!hasRounds) {
-    content = (
-      <section className={styles.emptyBanner} aria-labelledby="empty-title">
-        <h2 id="empty-title" className={styles.emptyBannerTitle}>No rounds yet</h2>
-        <p className={styles.emptyBannerText}>
-          Run a practice round and this page fills in with your scores, practice time and notes on what to work on.
-        </p>
-        <button type="button" className={styles.btnLight} onClick={openSetup}>
-          <Play size={15} /> Start your first round
-        </button>
-      </section>
-    );
+    content = <EmptyState onPick={startFrom} />;
   } else if (list.length === 0) {
     content = (
       <div className={`${styles.notice} ${styles.noticeAction}`}>
@@ -853,22 +1199,22 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
     );
   } else {
     content = (
-      <div className={styles.stack}>
+      <motion.div className={styles.stack} variants={stackIn} initial="hidden" animate="show">
         <ScoreBanner list={list} stats={stats} />
 
-        <section aria-labelledby="overview-title">
+        <motion.section variants={riseIn} aria-labelledby="overview-title">
           <SectionHead id="overview-title" title="Overview" />
           <StatsStrip list={list} stats={stats} />
-        </section>
+        </motion.section>
 
         {typeFilter === 'All' && (
-          <section aria-labelledby="types-title">
+          <motion.section variants={riseIn} aria-labelledby="types-title">
             <SectionHead id="types-title" title="By interview type" />
-            <TypeCards sessions={list} onPick={setTypeFilter} />
-          </section>
+            <TypeCards sessions={list} />
+          </motion.section>
         )}
 
-        <section aria-labelledby="rounds-title">
+        <motion.section variants={riseIn} aria-labelledby="rounds-title">
           <SectionHead
             id="rounds-title"
             title={sortByScore ? 'Rounds by score' : 'Recent rounds'}
@@ -878,12 +1224,17 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
               </button>
             )}
           />
-          <div className={styles.cardGrid}>
-            {shown.map(s => <RoundCard key={s.id} session={s} onOpen={() => setSelectedSession(s)} />)}
-          </div>
-        </section>
+          <motion.div className={styles.cardGrid} variants={gridIn}>
+            <AnimatePresence>
+              {shown.map(s => (
+                <RoundCard key={s.id} session={s} onOpen={() => setSelectedSession(s)}
+                  onDelete={handleDelete} onPractice={practiceAgain} />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        </motion.section>
 
-        <section aria-labelledby="notes-title">
+        <motion.section variants={riseIn} aria-labelledby="notes-title">
           <SectionHead id="notes-title" title="Coaching notes" />
           <div className={styles.notesGrid}>
             <NotesList id="notes-next" title="Work on next" notes={collectNotes(list, 'improvements')}
@@ -891,8 +1242,8 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
             <NotesList id="notes-good" title="What’s working" notes={collectNotes(list, 'strengths')}
               icon={<CheckCircle2 size={15} />} tone="var(--color-success-strong)" />
           </div>
-        </section>
-      </div>
+        </motion.section>
+      </motion.div>
     );
   }
 
@@ -902,15 +1253,28 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
 
       <AnimatePresence>
         {summarySession && (
-          <SummaryModal key="summary-modal" session={summarySession} onClose={() => setSummarySession(null)} />
+          <SummaryModal
+            key="summary-modal"
+            session={summarySession}
+            onClose={() => setSummarySession(null)}
+            onSeeFeedback={() => { setSelectedSession(summarySession); setSummarySession(null); }}
+          />
         )}
       </AnimatePresence>
 
       <div className={styles.shell}>
-        <h1 className={styles.pageTitle}>Mock interviews</h1>
+        <div className={styles.head}>
+          <h1 className={styles.pageTitle}>Mock interviews</h1>
+          {/* With nothing to filter, the action sits beside the title */}
+          {!hasRounds && (
+            <button type="button" className={styles.btnNew} onClick={openSetup}>
+              <Plus size={15} /> New interview
+            </button>
+          )}
+        </div>
 
-        <div className={styles.toolbar}>
-          {hasRounds && (
+        {hasRounds && (
+          <div className={styles.toolbar}>
             <div className={styles.tabs} role="radiogroup" aria-label="Filter by interview type">
               {TYPE_FILTERS.map(t => (
                 <button key={t} type="button" role="radio" aria-checked={typeFilter === t}
@@ -919,38 +1283,34 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
                 </button>
               ))}
             </div>
-          )}
-          <div className={styles.toolbarEnd}>
-            {hasRounds && (
-              <>
-                <label className={styles.search}>
-                  <Search size={15} className={styles.searchIcon} aria-hidden="true" />
-                  <input
-                    className={styles.searchInput}
-                    type="search"
-                    placeholder="Search"
-                    aria-label="Search rounds by role or type"
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                  />
-                </label>
-                <button
-                  type="button"
-                  className={styles.iconBtn}
-                  onClick={() => setSortByScore(v => !v)}
-                  aria-pressed={sortByScore}
-                  aria-label="Sort rounds by score"
-                  title={sortByScore ? 'Sorted by score' : 'Sorted by date'}
-                >
-                  <ArrowDownUp size={15} />
-                </button>
-              </>
-            )}
-            <button type="button" className={styles.btnNew} onClick={openSetup}>
-              <Plus size={15} /> New interview
-            </button>
+            <div className={styles.toolbarEnd}>
+              <label className={styles.search}>
+                <Search size={15} className={styles.searchIcon} aria-hidden="true" />
+                <input
+                  className={styles.searchInput}
+                  type="search"
+                  placeholder="Search"
+                  aria-label="Search rounds by role or type"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </label>
+              <button
+                type="button"
+                className={styles.iconBtn}
+                onClick={() => setSortByScore(v => !v)}
+                aria-pressed={sortByScore}
+                aria-label="Sort rounds by score"
+                title={sortByScore ? 'Sorted by score' : 'Sorted by date'}
+              >
+                <ArrowDownUp size={15} />
+              </button>
+              <button type="button" className={styles.btnNew} onClick={openSetup}>
+                <Plus size={15} /> New interview
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {content}
       </div>

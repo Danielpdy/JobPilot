@@ -22,13 +22,14 @@ const STATUS = {
   [S.READY]:       'Your turn',
   [S.RECORDING]:   'Listening to your answer',
   [S.RECORDED]:    'Answer captured',
-  [S.PROCESSING]:  'Sending your answer',
+  [S.PROCESSING]:  'Answer captured', // sending shows only in the submit button
   [S.COMPLETED]:   'Round complete',
   [S.ERROR]:       'Paused',
 };
 
 const WAVE_BARS = 28;
 const EASE_OUT  = [0.16, 1, 0.3, 1];
+const SENT_MS   = 700; // how long the submit button holds its check before the next question
 const EASE_IN   = [0.7, 0, 0.84, 0];
 
 // Deck motion: a card rises from the deck, holds, then keeps rising out of view.
@@ -158,6 +159,7 @@ export default function InterviewSession({
   totalQuestions, jobTitle, interviewType, accessToken, onComplete,
 }) {
   const [phase, setPhase]         = useState(S.AI_SPEAKING);
+  const [sent, setSent]           = useState(false);
   const [currentQ, setCurrentQ]   = useState(initialQ);
   const [question, setQuestion]   = useState(initialText);
   const [transcript, setTrans]    = useState('');
@@ -332,15 +334,21 @@ export default function InterviewSession({
   // ── Submit answer → get next ─────────────────────────────
   const handleNext = useCallback(async () => {
     const text = transcriptR.current?.trim();
-    if (!text) return;
+    if (!text || phaseR.current === S.PROCESSING) return;
     stopSpeaking();
     stopRecording();
+    phaseR.current = S.PROCESSING; // set now, so a quick second click can't resend
     setPhase(S.PROCESSING);
 
     const duration = startTime.current ? Math.round((Date.now() - startTime.current) / 1000) : 0;
 
     try {
       const res = await submitAnswer({ interviewId, questionNumber: currentQ, answerText: text, durationSeconds: duration, accessToken });
+
+      // The spinner turns into a check, held briefly before the card moves on
+      setSent(true);
+      await new Promise(r => setTimeout(r, SENT_MS));
+      setSent(false);
 
       if (res.isComplete) {
         setPhase(S.COMPLETED);
@@ -509,9 +517,6 @@ export default function InterviewSession({
                       {transcript
                         ? <LiveTranscript text={transcript} />
                         : <p className={styles.placeholder}><span>Start speaking — we’re listening.</span></p>}
-                      {phase === S.PROCESSING && (
-                        <p className={styles.placeholder}><Loader2 size={16} className={styles.spin} /><span>Sending your answer…</span></p>
-                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -544,17 +549,50 @@ export default function InterviewSession({
                         </button>
                       ) : (
                         <button type="button" className={styles.btnRecord} onClick={startRecording}
-                          disabled={phase !== S.READY || !hasSR} aria-busy={busy}>
-                          {busy
-                            ? <><Loader2 size={15} className={styles.spin} /> {phase === S.PROCESSING ? 'Sending' : 'Listening'}</>
-                            : phase === S.RECORDED
+                          disabled={phase !== S.READY || !hasSR} aria-busy={phase === S.AI_SPEAKING}>
+                          {phase === S.AI_SPEAKING
+                            ? <><Loader2 size={15} className={styles.spin} /> Listening</>
+                            : phase === S.RECORDED || phase === S.PROCESSING
                               ? <><CheckCircle2 size={15} /> Recorded</>
                               : <><Mic size={15} /> Record</>}
                         </button>
                       )}
 
-                      <button type="button" className={styles.btnSubmit} onClick={handleNext} disabled={!canNext}>
-                        {isLast ? 'Finish round' : 'Submit answer'} <ArrowRight size={15} />
+                      {/* Label holds the width; spinner, then a drawn check, sit on top of it */}
+                      <button type="button" className={styles.btnSubmit} onClick={handleNext}
+                        disabled={!canNext && phase !== S.PROCESSING}
+                        aria-disabled={phase === S.PROCESSING || undefined}
+                        aria-busy={(phase === S.PROCESSING && !sent) || undefined}
+                        data-state={phase === S.PROCESSING ? (sent ? 'sent' : 'sending') : undefined}>
+                        <span className={styles.submitLabel}>
+                          {isLast ? 'Finish round' : 'Submit answer'} <ArrowRight size={15} />
+                        </span>
+                        <AnimatePresence>
+                          {phase === S.PROCESSING && (
+                            <motion.span key="state" className={styles.submitState} aria-hidden="true"
+                              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                              transition={{ duration: 0.15 }}>
+                              <AnimatePresence mode="wait" initial={false}>
+                                {sent ? (
+                                  <motion.svg key="sent" viewBox="0 0 24 24" width={18} height={18}>
+                                    <motion.path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor"
+                                      strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
+                                      initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+                                      transition={{ duration: 0.32, ease: EASE_OUT }} />
+                                  </motion.svg>
+                                ) : (
+                                  <motion.span key="sending" className={styles.submitSpin}
+                                    exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.14 } }}>
+                                    <Loader2 size={17} className={styles.spin} />
+                                  </motion.span>
+                                )}
+                              </AnimatePresence>
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                        <span className={styles.srOnly} role="status">
+                          {phase === S.PROCESSING ? (sent ? 'Answer sent' : 'Sending your answer') : ''}
+                        </span>
                       </button>
                     </>
                   )}

@@ -43,4 +43,14 @@ public class InterviewController : BaseApiController
         var result = await _interviewService.GetUserInterviewsAsync(int.Parse(userId));
         return result.Match(Ok, errors => MapErrors(errors));
     }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteInterview(Guid id)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null) return Unauthorized();
+
+        var result = await _interviewService.DeleteInterviewAsync(id, int.Parse(userId));
+        return result.Match(_ => NoContent(), errors => MapErrors(errors));
+    }
 }

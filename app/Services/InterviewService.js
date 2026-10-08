@@ -26,3 +26,9 @@ export const getInterviewHistory = ({ accessToken }) =>
         headers: { "Authorization": `Bearer ${accessToken}` },
         method: "GET",
     });
+
+export const deleteInterview = ({ interviewId, accessToken }) =>
+    apiRequest(`/interview/${interviewId}`, {
+        headers: { "Authorization": `Bearer ${accessToken}` },
+        method: "DELETE",
+    });

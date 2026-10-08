@@ -177,7 +177,8 @@
 .status[data-phase="ready"] .statusDot { background: var(--color-navy); }
 .status[data-phase="recording"] { color: var(--color-error); }
 .status[data-phase="recording"] .statusDot { background: var(--color-error); }
-.status[data-phase="recorded"] .statusDot { background: var(--color-success); }
+.status[data-phase="recorded"] .statusDot,
+.status[data-phase="processing"] .statusDot { background: var(--color-success); }
 .status[data-phase="error"]     { color: var(--color-error); }
 .status[data-phase="error"] .statusDot { background: var(--color-error); }
 @keyframes ripple {
@@ -401,6 +402,21 @@
 .btnSubmit:disabled { opacity: 0.5; cursor: not-allowed; }
 .btnRecord[aria-busy="true"] { opacity: 0.75; cursor: progress; }
 
+/* Submit: the label fades out, a spinner then a drawn check take its place.
+   The label stays in the layout so the button never changes size. */
+.btnSubmit { position: relative; }
+.submitLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  transition: opacity var(--dur-short) var(--ease-out);
+}
+.btnSubmit[data-state] .submitLabel { opacity: 0; }
+.btnSubmit[aria-disabled="true"] { cursor: progress; }
+.btnSubmit[data-state="sent"] { cursor: default; }
+.submitState { position: absolute; inset: 0; display: grid; place-items: center; }
+.submitSpin  { display: inline-flex; }
+
 .controls:has(> :only-child) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "submit"; }
 
 /* ── Container steps (actual content width, not viewport) ── */
@@ -439,6 +455,6 @@
   .word { animation: none; }
   .waveBar { transition: none; }
   .spin { animation-duration: 2s; }
-  .btnGhost, .btnRecord, .btnSubmit, .iconBtn, .endBtn { transition-duration: 0ms; }
+  .btnGhost, .btnRecord, .btnSubmit, .iconBtn, .endBtn, .submitLabel { transition-duration: 0ms; }
   .btnGhost:active:not(:disabled), .btnRecord:active:not(:disabled), .btnSubmit:active:not(:disabled) { transform: none; }
 }
