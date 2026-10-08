@@ -213,6 +213,108 @@ namespace JobPilotBackend.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("UserInterview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CurrentQuestionNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Difficulty")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InterviewSummary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InterviewType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("JobDescriptionText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("JobTitle")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("QuestionCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ResumeText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StrengthBullets")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImprovementBullets")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserInterviews");
+                });
+
+            modelBuilder.Entity("UserInterviewQuestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime?>("AnsweredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DurationSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Feedback")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("InterviewId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("QuestionNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuestionScore")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("QuestionText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserAnswerText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InterviewId");
+
+                    b.ToTable("UserInterviewQuestions");
+                });
+
             modelBuilder.Entity("UserJobSwipe", b =>
                 {
                     b.Property<int>("Id")
@@ -255,6 +357,9 @@ namespace JobPilotBackend.Migrations
                     b.Property<string>("ExperienceLevel")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("InterviewSessions")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsPremium")
                         .HasColumnType("boolean");
@@ -325,6 +430,15 @@ namespace JobPilotBackend.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserInterviewQuestion", b =>
+                {
+                    b.HasOne("UserInterview", null)
+                        .WithMany()
+                        .HasForeignKey("InterviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("UserJobSwipe", b =>

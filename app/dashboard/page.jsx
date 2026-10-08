@@ -7,7 +7,7 @@ import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faLayerGroup, faBriefcase, faFileLines,
-  faUser, faGear, faEnvelopeOpenText,
+  faUser, faGear, faEnvelopeOpenText, faComments,
 } from '@fortawesome/free-solid-svg-icons';
 import { GetNewJobs, GetLikedJobs } from '../Services/JobService';
 import { GetJobRefreshesLeft } from '../Services/UserService';
@@ -20,12 +20,14 @@ import dynamic from 'next/dynamic';
 const CoverLetterPage = dynamic(() => import('./coverLetter/page'), { ssr: false });
 import ProfilePage from './profile/page';
 import SettingsPage from './settings/page';
+import MockInterviewPage from './interview/page';
 
 const sidebarItems = [
   { label: 'Swipe Jobs',      icon: <FontAwesomeIcon icon={faLayerGroup}        style={{ width: 16, height: 16 }} /> },
   { label: 'Job Matches',     icon: <FontAwesomeIcon icon={faBriefcase}         style={{ width: 16, height: 16 }} /> },
   { label: 'Resume Analyzer', icon: <FontAwesomeIcon icon={faFileLines}         style={{ width: 16, height: 16 }} /> },
   { label: 'Cover Letter',    icon: <FontAwesomeIcon icon={faEnvelopeOpenText}  style={{ width: 16, height: 16 }} /> },
+  { label: 'Mock Interview',  icon: <FontAwesomeIcon icon={faComments}          style={{ width: 16, height: 16 }} /> },
 ];
 
 const settingsItems = [
@@ -37,6 +39,7 @@ const settingsItems = [
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [focusMode, setFocusMode]     = useState(false); // a live interview round owns the whole page
   const [activeSection, setActiveSection] = useState('main');
   const [mainIndex, setMainIndex] = useState(0);
   const [settingsIndex, setSettingsIndex] = useState(-1);
@@ -106,12 +109,12 @@ export default function DashboardPage() {
     <div className={styles.page}>
 
       {/* ── Mobile overlay ── */}
-      {sidebarOpen && (
+      {sidebarOpen && !focusMode && (
         <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* ── Sidebar ── */}
-      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
+      {/* ── Sidebar (hidden while an interview round is live) ── */}
+      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''} ${focusMode ? styles.sidebarHidden : ''}`}>
         <a href="/" className={styles.sidebarLogo}>
           <img src="/icons/JobPilot (2).png" alt="JobPilot" className={styles.sidebarLogoImg} />
         </a>
@@ -142,7 +145,7 @@ export default function DashboardPage() {
       <main className={styles.main}>
 
         {/* Top bar */}
-        <div className={styles.topBar}>
+        <div className={`${styles.topBar} ${focusMode ? styles.topBarHidden : ''}`}>
           <div className={styles.topBarLeft}>
             <button
               className={styles.menuBtn}
@@ -180,6 +183,16 @@ export default function DashboardPage() {
         {mainIndex === 3 && (
           <div className={styles.swipeArea}>
             <CoverLetterPage accessToken={session.accessToken} />
+          </div>
+        )}
+
+        {/* Mock Interview section */}
+        {mainIndex === 4 && (
+          <div className={styles.swipeArea}>
+            <MockInterviewPage
+              accessToken={session.accessToken}
+              onSessionChange={(live) => { setFocusMode(live); if (live) setSidebarOpen(false); }}
+            />
           </div>
         )}
 

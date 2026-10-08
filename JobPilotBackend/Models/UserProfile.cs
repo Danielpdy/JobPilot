@@ -14,4 +14,5 @@ public class UserProfile
     public bool IsPremium { get; set; } = false;
     public int ResumeAnalyses { get; set; } = 3;
     public int CoverLetterGenerations { get; set; } = 3;
+    public int InterviewSessions { get; set; } = 3;
 }

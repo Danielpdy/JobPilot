@@ -51,7 +51,7 @@
 /* ── Tab toggle row ──────────────────────────────────────── */
 .tabRow {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 /* ── Two-column workspace ────────────────────────────────── */

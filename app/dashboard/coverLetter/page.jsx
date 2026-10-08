@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   Sparkles, FileText, Building2, Briefcase,
   Upload, ChevronDown,
-  CheckCircle, PenLine,
+  CheckCircle, PenLine, Clock,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import styles from './page.module.css';
@@ -17,7 +17,10 @@ import { CreateCoverLetter, GetCoverLetterHistory, DeleteCoverLetter } from '@/a
 import GlassBubbleNav from '@/app/components/ui/GlassBubbleNav/GlassBubbleNav';
 import { getResumeInfo } from '@/app/Services/ResumeService';
 
-const VIEW_TABS = [{ label: 'New' }, { label: 'History' }];
+const VIEW_TABS = [
+  { label: 'New',     icon: <PenLine size={14} /> },
+  { label: 'History', icon: <Clock   size={14} /> },
+];
 
 const GENERATING_STEPS = [
   {
@@ -90,7 +93,7 @@ export default function CoverLetterPage({ accessToken }) {
     if (!accessToken) return;
     getResumeInfo(accessToken)
       .then(data => setResumeInfo(data))
-      .catch(() => setResumeInfo(null));
+      .catch(err => { console.error('getResumeInfo failed:', err); setResumeInfo(null); });
   }, [accessToken]);
 
   useEffect(() => {

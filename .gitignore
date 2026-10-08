@@ -43,3 +43,13 @@ next-env.d.ts
 # .NET build output
 JobPilotBackend/bin/
 JobPilotBackend/obj/
+
+# Claude Code personal settings
+.claude/settings.local.json
+
+# Editor history and local design tooling
+.history/
+.claude/skills/
+.claude/agents/
+.agents/skills/
+.hallmark/

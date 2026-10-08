@@ -11,8 +11,16 @@ body {
 }
 
 body {
+  font-family: var(--font-body); /* set in tokens.css, chosen in app/fonts/index.js */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings use the accent font (global). Both fonts are chosen in app/fonts/index.js */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
 }
 
 * {
@@ -149,4 +157,11 @@ a {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Hallmark · clip horizontal overflow without creating a scroll container
+   (keeps position: sticky working). Overrides `hidden` above. */
+html,
+body {
+  overflow-x: clip;
 }

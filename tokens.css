@@ -1,0 +1,111 @@
+/* Hallmark · tokens · design-system: design.md · genre: modern-minimal
+ * JobPilot locked palette, converted from design.md hex values to OKLCH.
+ * Every colour/font in Hallmark-managed CSS references these by name.
+ */
+:root {
+  /* ── Surfaces ─────────────────────────────────────────── */
+  --color-canvas:     oklch(95.6% 0.013 265);   /* #EBF0FA dashboard canvas */
+  --color-paper:      oklch(99.4% 0.003 265);   /* card surface (tinted, not #fff) */
+  --color-paper-2:    oklch(97.2% 0.005 265);   /* subtle fills, hover */
+  --color-paper-3:    oklch(94.6% 0.008 265);   /* tracks, pressed */
+  --color-rule:       oklch(92.8% 0.006 265);   /* default borders */
+  --color-rule-2:     oklch(87.2% 0.010 265);   /* input borders, dashed */
+
+  /* ── Ink ──────────────────────────────────────────────── */
+  --color-ink:        oklch(21.0% 0.032 265);   /* headings */
+  --color-ink-2:      oklch(37.3% 0.034 260);   /* body */
+  --color-neutral:    oklch(51.0% 0.025 264);   /* secondary text (≥4.5:1 on paper) */
+  --color-muted:      oklch(62.0% 0.022 262);   /* icons, large captions (≥3:1 on paper) */
+
+  /* ── Brand ────────────────────────────────────────────── */
+  --color-navy:       oklch(31.5% 0.130 264);   /* #0B2D72 primary actions, titles */
+  --color-navy-deep:  oklch(27.5% 0.115 264);   /* #0A2460 pressed */
+  --color-navy-ink:   oklch(98.5% 0.006 265);   /* text on navy */
+  --color-accent:     oklch(61.0% 0.120 232);   /* #0992C2 ocean — accent, links, focus */
+  --color-accent-soft:oklch(95.5% 0.025 230);   /* accent tint */
+  --color-accent-strong: oklch(50.0% 0.115 236);/* accent as small text / text-bearing fill (≥4.5:1) */
+  --color-accent-ink: oklch(99.0% 0.004 230);   /* text on accent-strong fill */
+  --color-cyan:       oklch(76.0% 0.130 210);   /* #0AC4E0 landing CTA only */
+  --color-focus:      oklch(61.0% 0.120 232);
+
+  /* ── Semantic ─────────────────────────────────────────── */
+  --color-success:      oklch(62.7% 0.170 149); /* #16A34A */
+  --color-success-soft: oklch(97.0% 0.030 155);
+  --color-success-strong: oklch(52.0% 0.140 150); /* success as small text (≥4.5:1) */
+  --color-warning:      oklch(55.5% 0.146 49);  /* text-safe amber #B45309 */
+  --color-warning-mark: oklch(76.9% 0.165 70);  /* #F59E0B dots/bars only */
+  --color-warning-soft: oklch(98.4% 0.025 95);
+  --color-error:        oklch(57.7% 0.215 27);  /* #DC2626 */
+  --color-error-soft:   oklch(97.0% 0.014 17);
+  --color-scrim:        oklch(31.5% 0.130 264 / 0.35);
+
+  /* ── Interview categories (design.md § Category tags) ── */
+  --color-type-mixed:         oklch(54.6% 0.215 263);
+  --color-type-mixed-soft:    oklch(97.0% 0.014 255);
+  --color-type-technical:     oklch(50.8% 0.118 165);   /* darkened from #059669 for 4.5:1 on its tint */
+  --color-type-technical-soft:oklch(97.9% 0.021 166);
+  --color-type-behavioral:    oklch(54.1% 0.247 293);
+  --color-type-behavioral-soft:oklch(96.9% 0.016 294);
+  --color-diff-entry:         oklch(52.0% 0.094 223);
+  --color-diff-entry-soft:    oklch(98.4% 0.019 201);
+  --color-diff-mid:           oklch(47.3% 0.137 46);
+  --color-diff-mid-soft:      oklch(98.7% 0.022 95);
+  --color-diff-senior:        oklch(45.5% 0.188 13);
+  --color-diff-senior-soft:   oklch(97.1% 0.013 17);
+
+  /* ── Session wave stage (WebGL inputs need sRGB hex) ──── */
+  /* Light palette: canvas-blue horizon, soft ocean swell, near-white crests */
+  --wave-horizon: #C9D8F2;   /* a step deeper than --color-canvas */
+  --wave-body:    #4FB2E2;   /* softened --color-accent (ocean) */
+  --wave-crest:   #F4FAFE;   /* tinted near-white, not pure #fff */
+
+  /* ── Specular "Get started" button (WebGL inputs need hex) ── */
+  --specular-line: #BFF1FA;  /* pale cyan highlight, from --color-cyan */
+  --specular-base: #0A2460;  /* = --color-navy-deep edge stroke */
+
+  /* ── Type ─────────────────────────────────────────────── */
+  /* Typefaces are chosen in app/fonts/index.js; these only map them to roles */
+  --font-body:    var(--font-primary), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: var(--font-accent), Georgia, serif;
+  --text-xs:   0.75rem;
+  --text-sm:   0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md:   1.125rem;
+  --text-lg:   clamp(1.25rem, 1rem + 1vw, 1.5rem);
+  --text-xl:   clamp(1.375rem, 1rem + 1.6vw, 2rem);
+  --text-figure: clamp(3.5rem, 2rem + 7vw, 6.5rem);
+
+  /* ── Space (4pt) ──────────────────────────────────────── */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs:  0.5rem;
+  --space-sm:  0.75rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2.5rem;
+  --space-2xl: 4rem;
+
+  /* ── Shape ────────────────────────────────────────────── */
+  --radius-input: 10px;
+  --radius-btn:   12px;
+  --radius-card:  16px;
+  --radius-pill:  999px;
+  --control-h:    44px;
+  --shadow-card:  0 4px 24px oklch(31.5% 0.130 264 / 0.08), 0 1px 4px oklch(31.5% 0.130 264 / 0.04);
+  --shadow-lift:  0 4px 14px oklch(31.5% 0.130 264 / 0.28);
+  --shadow-seg:   0 1px 3px oklch(31.5% 0.130 264 / 0.14);
+  --shadow-modal: 0 24px 64px oklch(31.5% 0.130 264 / 0.28);
+
+  /* ── Motion ───────────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 200ms;
+  --dur-long:  420ms;
+
+  /* ── Z ────────────────────────────────────────────────── */
+  --z-raised: 10;
+  --z-sticky: 200;
+  --z-modal:  400;
+}

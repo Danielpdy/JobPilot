@@ -14,4 +14,23 @@ public class JobPilotDbContext : DbContext
     public DbSet<ResumeAnalysisResult> ResumeAnalysisResults { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<CoverLetter> CoverLetters { get; set; }
+    public DbSet<UserInterview> UserInterviews { get; set; }
+    public DbSet<UserInterviewQuestion> UserInterviewQuestions { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserInterview>()
+            .Property(p => p.Id)
+            .HasDefaultValueSql("gen_random_uuid()");
+
+        modelBuilder.Entity<UserInterviewQuestion>()
+            .Property(p => p.Id)
+            .HasDefaultValueSql("gen_random_uuid()");
+
+        modelBuilder.Entity<UserInterviewQuestion>()
+            .HasOne<UserInterview>()
+            .WithMany()
+            .HasForeignKey(q => q.InterviewId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
 }
