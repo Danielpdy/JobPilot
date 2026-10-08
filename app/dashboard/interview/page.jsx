@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, MotionConfig, useReducedMotion } from 'motion/react';
 import { startInterview, getInterviewHistory, deleteInterview } from '@/app/Services/InterviewService';
 import InterviewSession from './InterviewSession';
+import { unlockAudio } from './audioUnlock';
 import {
   Mic, Code2, Server, Briefcase, BarChart2, Headphones, Layers, Users,
   Calendar, Search, RotateCw, ArrowDownUp, Plus,
@@ -1070,6 +1071,9 @@ export default function MockInterviewPage({ accessToken, onSessionChange }) {
 
   const handleStart = async () => {
     if (!form.jobRole.trim()) { setRoleError(true); roleInputRef.current?.focus(); return; }
+    // Must run in the tap itself, before any await: phones block audio started later,
+    // and the first question is spoken only after the round has been created
+    unlockAudio();
     setRoleError(false);
     setStartError('');
     setStarting(true);

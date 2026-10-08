@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, MotionConfig } from 'motion/react';
 import { Mic, Square, Volume2, ArrowRight, RotateCcw, LogOut, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { submitAnswer, synthesizeSpeech } from '@/app/Services/InterviewService';
+import { getAudioContext, unlockAudio } from './audioUnlock';
 import GradientWaves from '@/app/components/ui/GradientWaves/GradientWaves';
 import styles from './InterviewSession.module.css';
 
@@ -30,6 +31,7 @@ const STATUS = {
 const WAVE_BARS = 28;
 const EASE_OUT  = [0.16, 1, 0.3, 1];
 const SENT_MS   = 700; // how long the submit button holds its check before the next question
+const AUDIO_WAIT_MS = 2500; // a phone that still blocks the voice hands over the turn after this
 const EASE_IN   = [0.7, 0, 0.84, 0];
 
 // Deck motion: a card rises from the deck, holds, then keeps rising out of view.
@@ -242,17 +244,39 @@ export default function InterviewSession({
   }, []);
 
   // onStart(durationSeconds) fires the moment audio actually begins, so the question can type in sync.
+  // Audio plays through the context unlocked by the Start tap (audioUnlock.js). If a phone still
+  // won't play within AUDIO_WAIT_MS, give the turn to the user instead of waiting forever:
+  // the question shows in full, and Repeat (a fresh tap) can play it.
   const speak = useCallback(async (text, onDone, onStart) => {
     const callId = ++speakCallRef.current;
     stopSpeaking();
+    let gaveUp = false;
+    const giveUp = () => {
+      if (gaveUp || callId !== speakCallRef.current) return;
+      gaveUp = true;
+      stopSpeaking();
+      window.speechSynthesis?.cancel();
+      onDone?.();
+    };
+
     try {
       const res   = await synthesizeSpeech({ text, accessToken });
       if (callId !== speakCallRef.current) return;
 
-      const bytes       = Uint8Array.from(atob(res.audioContent), c => c.charCodeAt(0));
-      const actx        = new AudioContext();
-      const decoded     = await actx.decodeAudioData(bytes.buffer);
-      if (callId !== speakCallRef.current) { actx.close(); return; }
+      const actx = getAudioContext();
+      if (!actx) throw new Error('No Web Audio');
+      const bytes   = Uint8Array.from(atob(res.audioContent), c => c.charCodeAt(0));
+      const decoded = await actx.decodeAudioData(bytes.buffer);
+      if (callId !== speakCallRef.current) return;
+
+      if (actx.state !== 'running') {
+        const running = await Promise.race([
+          actx.resume().then(() => true, () => false),
+          new Promise(r => setTimeout(() => r(false), AUDIO_WAIT_MS)),
+        ]);
+        if (callId !== speakCallRef.current) return;
+        if (!running || actx.state !== 'running') { giveUp(); return; }
+      }
 
       const source      = actx.createBufferSource();
       const analyser    = actx.createAnalyser();
@@ -261,20 +285,31 @@ export default function InterviewSession({
       source.buffer     = decoded;
       source.connect(analyser);
       analyser.connect(actx.destination);
-      source.onended    = () => { actx.close(); audioRef.current = null; ttsAnalyser.current = null; onDone?.(); };
-      audioRef.current  = { pause: () => { source.stop(); actx.close(); }, src: '' };
+      // The context is shared, so only this source's nodes are released — never the context
+      let stopped = false;
+      source.onended = () => {
+        source.disconnect();
+        analyser.disconnect();
+        if (stopped) return;
+        audioRef.current = null;
+        ttsAnalyser.current = null;
+        onDone?.();
+      };
+      audioRef.current  = { pause: () => { stopped = true; try { source.stop(); } catch { /* not started */ } }, src: '' };
       ttsAnalyser.current = analyser;
-      await actx.resume();
       source.start(0);
       onStart?.(decoded.duration);
     } catch {
-      if (typeof window === 'undefined') return;
-      window.speechSynthesis.cancel();
+      if (typeof window === 'undefined' || callId !== speakCallRef.current) return;
+      const synth = window.speechSynthesis;
+      if (!synth) { giveUp(); return; }
+      synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.92;
-      u.onstart = () => onStart?.(Math.max(1.5, text.length / 14));
-      u.onend = () => onDone?.();
-      window.speechSynthesis.speak(u);
+      const timer = setTimeout(giveUp, AUDIO_WAIT_MS); // blocked browser voice never fires onstart
+      u.onstart = () => { clearTimeout(timer); if (!gaveUp) onStart?.(Math.max(1.5, text.length / 14)); };
+      u.onend   = () => { clearTimeout(timer); if (!gaveUp) onDone?.(); };
+      synth.speak(u);
     }
   }, [accessToken, stopSpeaking]);
 
@@ -335,6 +370,7 @@ export default function InterviewSession({
   const handleNext = useCallback(async () => {
     const text = transcriptR.current?.trim();
     if (!text || phaseR.current === S.PROCESSING) return;
+    unlockAudio(); // keeps the voice allowed for the next question (phones may re-suspend audio)
     stopSpeaking();
     stopRecording();
     phaseR.current = S.PROCESSING; // set now, so a quick second click can't resend
@@ -373,6 +409,7 @@ export default function InterviewSession({
 
   // ── Repeat question ──────────────────────────────────────
   const handleRepeat = useCallback(() => {
+    unlockAudio(); // a fresh tap: lets a phone that blocked the first reading play it now
     stopRecording();
     setTrans('');
     setElapsed(0);
